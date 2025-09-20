@@ -1,4 +1,5 @@
 ﻿using BusinessObject;
+using BusinessObject.Quiz;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using System;
@@ -21,6 +22,11 @@ namespace DAL
         }
         public DbSet<User> Users { get; set; }
         public DbSet<OtpVerify> OtpVerifies { get; set; }
+        public DbSet<Quiz> Quizzes { get; set; }
+        public DbSet<Question> Questions { get; set; }
+        public DbSet<Answer> Answers { get; set; }
+        public DbSet<QuizResult> QuizResults { get; set; }
+        public DbSet<UserAnswer> UserAnswers { get; set; }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
       => optionsBuilder.UseNpgsql(GetConnectionString());
         private string GetConnectionString()
@@ -83,6 +89,40 @@ namespace DAL
 
                 entity.HasIndex(e => e.ExpiredAt)
                     .HasDatabaseName("IX_OtpVerify_ExpiredAt");
+                modelBuilder.Entity<Quiz>()
+                .HasMany(q => q.Questions)
+                .WithOne(q => q.Quiz)
+                .HasForeignKey(q => q.QuizId);
+
+                modelBuilder.Entity<Question>()
+                    .HasMany(q => q.Answers)
+                    .WithOne(a => a.Question)
+                    .HasForeignKey(a => a.QuestionId);
+
+                modelBuilder.Entity<QuizResult>()
+                    .HasOne(qr => qr.User)
+                    .WithMany(u => u.QuizResults)
+                    .HasForeignKey(qr => qr.UserId);
+
+                modelBuilder.Entity<QuizResult>()
+                    .HasOne(qr => qr.Quiz)
+                    .WithMany(q => q.QuizResults)
+                    .HasForeignKey(qr => qr.QuizId);
+
+                modelBuilder.Entity<UserAnswer>()
+                    .HasOne(ua => ua.QuizResult)
+                    .WithMany(qr => qr.UserAnswers)
+                    .HasForeignKey(ua => ua.QuizResultId);
+
+                modelBuilder.Entity<UserAnswer>()
+                    .HasOne(ua => ua.Question)
+                    .WithMany()
+                    .HasForeignKey(ua => ua.QuestionId);
+
+                modelBuilder.Entity<UserAnswer>()
+                    .HasOne(ua => ua.Answer)
+                    .WithMany()
+                    .HasForeignKey(ua => ua.AnswerId);
 
             });
             OnModelCreatingPartial(modelBuilder);
