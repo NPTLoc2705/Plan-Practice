@@ -4,9 +4,13 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Repository;
+using Repository.Interface;
+using Repository.Method;
 using Scalar.AspNetCore;
 using Service;
 using Service.JWT;
+using Service.QuizzInterface;
+using Service.QuizzMethod;
 using System.Text;
 
 namespace PRN232
@@ -44,6 +48,18 @@ namespace PRN232
             builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<IJwtService, JWTService>();
 
+            builder.Services.AddScoped<IQuizRepository, QuizRepository>();
+            builder.Services.AddScoped<IQuestionRepository, QuestionRepository>();
+            builder.Services.AddScoped<IAnswerRepository, AnswerRepository>();
+            builder.Services.AddScoped<IQuizResultRepository, QuizResultRepository>();
+            builder.Services.AddScoped<IUserAnswerRepository, UserAnswerRepository>();
+
+            builder.Services.AddScoped<IQuizManagementService, QuizManagementService>();
+            builder.Services.AddScoped<IQuizService, QuizService>();
+            builder.Services.AddScoped<IQuizResultService, QuizResultService>();
+            builder.Services.AddScoped<IQuestionService, QuestionService>();
+            builder.Services.AddScoped<IAnswerService, AnswerService>();
+            builder.Services.AddScoped<IUserAnswerService, UserAnswerService>();
 
             var jwtKey = builder.Configuration["Jwt:Key"];
             var key = Encoding.ASCII.GetBytes(jwtKey);

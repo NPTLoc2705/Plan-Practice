@@ -1,4 +1,5 @@
-﻿using System;
+﻿using BusinessObject.Quiz;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -19,13 +20,15 @@ namespace BusinessObject
         [StringLength(255)]
         public string? Password { get; set; }
 
-        public UserRole Role { get; set; }　= UserRole.Student;
+        public UserRole Role { get; set; } = UserRole.Student;
 
         public DateTime Createdat { get; set; } = DateTime.UtcNow;
 
         public bool EmailVerified { get; set; } = false;
         public virtual ICollection<OtpVerify> OtpVerifies { get; set; } = new List<OtpVerify>();
-    }
-    }
 
-   
+        public virtual ICollection<QuizResult> QuizResults { get; set; } = new List<QuizResult>();
+    }
+}
+
+
