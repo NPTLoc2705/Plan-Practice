@@ -2,6 +2,7 @@
 using DAL;
 using Microsoft.EntityFrameworkCore;
 using Repository.Interface;
+using DAL.QuizDAO;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,42 +13,35 @@ namespace Repository.Method
 {
     public class QuestionRepository : IQuestionRepository
     {
-        private readonly PlantPraticeDbContext _context;
+        private readonly QuestionDAO _dao;
 
-        public QuestionRepository(PlantPraticeDbContext context)
+        public QuestionRepository(QuestionDAO dao)
         {
-            _context = context;
+            _dao = dao;
         }
         public async Task CreateQuestionAsync(Question question)
         {
-            _context.Questions.Add(question);
-            await _context.SaveChangesAsync();
+            await _dao.CreateQuestionAsync(question);
         }
 
         public async Task DeleteQuestionAsync(int questionId)
         {
-            var question = _context.Questions.FirstOrDefault(q=>q.Id==questionId);
-            if (question != null)
-            {
-                _context.Questions.Remove(question);
-                await _context.SaveChangesAsync();
-            }
+          await _dao.DeleteQuestionAsync(questionId);
         }
 
         public async Task<Question?> GetQuestionByIdAsync(int questionId)
         {
-            return await _context.Questions.FirstOrDefaultAsync(q=>q.Id==questionId);
+           return await _dao.GetQuestionByIdAsync(questionId);
         }
 
         public async Task<IEnumerable<Question>> GetQuestionsAsync()
         {
-            return await _context.Questions.ToListAsync();
+           return await _dao.GetQuestionsAsync();
         }
 
         public async Task UpdateQuestionAsync(Question question)
         {
-            _context.Questions.Update(question);
-            await _context.SaveChangesAsync();
+           await _dao.UpdateQuestionAsync(question);
         }
     }
 }
