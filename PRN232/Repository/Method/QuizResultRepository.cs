@@ -1,5 +1,6 @@
 ﻿using BusinessObject.Quiz;
 using DAL;
+using DAL.QuizDAO;
 using Microsoft.EntityFrameworkCore;
 using Repository.Interface;
 using System;
@@ -12,42 +13,35 @@ namespace Repository.Method
 {
     public class QuizResultRepository : IQuizResultRepository
     {
-        private readonly PlantPraticeDbContext _context;
+        private readonly QuizResultDAO _dao;
 
-        public QuizResultRepository(PlantPraticeDbContext context)
+        public QuizResultRepository(QuizResultDAO dao)
         {
-            _context = context;
+            _dao = dao;
         }
         public async Task CreateQuizResultAsync(QuizResult quizResult)
         {
-            _context.QuizResults.Add(quizResult);
-            await _context.SaveChangesAsync();
+            await _dao.CreateQuizResultAsync(quizResult);
         }
 
         public async Task DeleteQuizResultAsync(int quizResultId)
         {
-            var quizResult = _context.QuizResults.FirstOrDefault(q=>q.Id==quizResultId);
-            if (quizResult!=null)
-            {
-                _context.QuizResults.Remove(quizResult);
-                await _context.SaveChangesAsync();
-            }
+            await _dao.DeleteQuizResultAsync(quizResultId);
         }
 
         public async Task<QuizResult?> GetQuizResultByIdAsync(int quizResultId)
         {
-            return await _context.QuizResults.FirstOrDefaultAsync(q => q.Id == quizResultId);
+           return await _dao.GetQuizResultByIdAsync(quizResultId);
         }
 
         public async Task<IEnumerable<QuizResult>> GetQuizResultsAsync()
         {
-            return await _context.QuizResults.ToListAsync();
+           return await _dao.GetQuizResultsAsync();
         }
 
-        public Task UpdateQuizResultAsync(QuizResult quizResult)
+        public async Task UpdateQuizResultAsync(QuizResult quizResult)
         {
-           _context.QuizResults.Update(quizResult);
-           return _context.SaveChangesAsync();
+           await _dao.UpdateQuizResultAsync(quizResult);
         }
     }
 }

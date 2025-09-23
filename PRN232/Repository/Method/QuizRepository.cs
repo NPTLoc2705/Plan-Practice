@@ -1,5 +1,6 @@
 ﻿using BusinessObject.Quiz;
 using DAL;
+using DAL.QuizDAO;
 using Microsoft.EntityFrameworkCore;
 using Repository.Interface;
 using System;
@@ -12,43 +13,36 @@ namespace Repository.Method
 {
     public class QuizRepository : IQuizRepository
     {
-        private readonly PlantPraticeDbContext _context;
+        private readonly QuizDAO _dao;
 
-        public QuizRepository(PlantPraticeDbContext context)
+        public QuizRepository(QuizDAO dao)
         {
-            _context = context;
+            _dao = dao;
         }
         public async Task CreateQuizAsync(Quiz quiz)
         {
-           _context.Quizzes.Add(quiz);
-            await _context.SaveChangesAsync();
+            await _dao.CreateQuizAsync(quiz);
         }
 
         public async Task DeleteQuizAsync(int quizId)
         {
-            var quiz = _context.Quizzes.FirstOrDefault(q=>q.Id==quizId);   
-            if(quiz != null)
-            {
-                _context.Quizzes.Remove(quiz);
-                await _context.SaveChangesAsync();
-            }
+            await _dao.DeleteQuizAsync(quizId);
         }
 
         public async Task<Quiz?> GetQuizByIdAsync(int quizId)
         {
-           return await _context.Quizzes.FirstOrDefaultAsync(q => q.Id == quizId);
+           return await _dao.GetQuizByIdAsync(quizId);
 
         }
 
         public async Task<IEnumerable<Quiz>> GetTotalQuizzesAsync()
         {
-           return await _context.Quizzes.ToListAsync();
+           return await _dao.GetTotalQuizzesAsync();
         }
 
         public async Task UpdateQuizAsync(Quiz quiz)
         {
-           _context.Update(quiz);
-           await _context.SaveChangesAsync();
+           await _dao.UpdateQuizAsync(quiz);
         }
     }
 }

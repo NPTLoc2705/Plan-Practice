@@ -1,5 +1,6 @@
 
 using DAL;
+using DAL.QuizDAO;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -40,6 +41,15 @@ namespace PRN232
             builder.Services.AddDbContext<PlantPraticeDbContext>(options =>
    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
             builder.Services.AddOpenApi();
+            //Injection of DAO
+            
+            builder.Services.AddScoped<QuizDAO>();
+            builder.Services.AddScoped<QuestionDAO>();
+            builder.Services.AddScoped<AnswerDAO>();
+            builder.Services.AddScoped<QuizResultDAO>();
+            builder.Services.AddScoped<UserAnswerDAO>();
+
+
 
             //Injection of services and repositories
             builder.Services.AddScoped<IUserRepository, UserRepository>();

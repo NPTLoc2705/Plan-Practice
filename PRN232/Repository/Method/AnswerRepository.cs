@@ -1,5 +1,6 @@
 ﻿using BusinessObject.Quiz;
 using DAL;
+using DAL.QuizDAO;
 using Microsoft.EntityFrameworkCore;
 using Repository.Interface;
 using System;
@@ -12,41 +13,34 @@ namespace Repository.Method
 {
     public class AnswerRepository : IAnswerRepository
     {
-        private readonly PlantPraticeDbContext _context;
-        public AnswerRepository(PlantPraticeDbContext context)
+        private readonly AnswerDAO _dao;
+        public AnswerRepository(AnswerDAO dao)
         {
-            _context = context;
+            _dao = dao;
         }
         public async Task CreateAnswerAsync(Answer answer)
         {
-            _context.Answers.Add(answer);
-            await _context.SaveChangesAsync();
+          await _dao.CreateAnswerAsync(answer);
         }
 
         public async Task DeleteAnswerAsync(int answerId)
         {
-            var answer = _context.Answers.FirstOrDefault(a => a.Id == answerId);
-            if (answer != null)
-            {
-                _context.Answers.Remove(answer);
-                await _context.SaveChangesAsync();
-            }
+          await _dao.DeleteAnswerAsync(answerId);
         }
 
         public async Task<Answer> GetAnswerByIdAsync(int answerId)
         {
-            return await _context.Answers.FirstOrDefaultAsync(a => a.Id == answerId);
+            return await _dao.GetAnswerByIdAsync(answerId);
         }
 
         public async Task<IEnumerable<Answer>> GetAnswersAsync()
         {
-            return await _context.Answers.ToListAsync();
+           return await _dao.GetAnswersAsync();
         }
 
         public async Task UpdateAnswerAsync(Answer answer)
         {
-            _context.Update(answer);
-            await _context.SaveChangesAsync();
+            await _dao.UpdateAnswerAsync(answer);
         }
     }
 }
