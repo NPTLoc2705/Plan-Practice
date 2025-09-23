@@ -1,4 +1,5 @@
 ﻿using BusinessObject;
+using BusinessObject.Lesson;
 using BusinessObject.Quiz;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -27,6 +28,7 @@ namespace DAL
         public DbSet<Answer> Answers { get; set; }
         public DbSet<QuizResult> QuizResults { get; set; }
         public DbSet<UserAnswer> UserAnswers { get; set; }
+        public DbSet<Lesson> Lessons { get; set; }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
       => optionsBuilder.UseNpgsql(GetConnectionString());
         private string GetConnectionString()
