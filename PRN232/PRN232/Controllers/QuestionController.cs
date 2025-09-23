@@ -1,18 +1,17 @@
+using BusinessObject.Dtos;
+using BusinessObject.Quiz;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using BusinessObject.Quiz;
+using Service.QuizzInterface;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Service.QuizzInterface;
-
 
 namespace PRN232.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    
     public class QuestionController : ControllerBase
     {
         private readonly IQuestionService _questionService;
@@ -23,12 +22,25 @@ namespace PRN232.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Question>>> GetAllQuestions()
+        public async Task<ActionResult<IEnumerable<QuestionDto>>> GetAllQuestions()
         {
             try
             {
                 var questions = await _questionService.GetAllQuestionsAsync();
-                return Ok(questions);
+                var questionDtos = questions.Select(q => new QuestionDto
+                {
+                    Id = q.Id,
+                    Content = q.Content,
+                    QuizId = q.QuizId,
+                    Answers = q.Answers.Select(a => new AnswerDto
+                    {
+                        Id = a.Id,
+                        Content = a.Content,
+                        IsCorrect = a.IsCorrect,
+                        QuestionId = a.QuestionId
+                    }).ToList()
+                });
+                return Ok(questionDtos);
             }
             catch (Exception ex)
             {
@@ -37,7 +49,7 @@ namespace PRN232.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<Question>> GetQuestion(int id)
+        public async Task<ActionResult<QuestionDto>> GetQuestion(int id)
         {
             try
             {
@@ -45,7 +57,20 @@ namespace PRN232.Controllers
                 if (question == null)
                     return NotFound(new { message = $"Question with ID {id} not found" });
 
-                return Ok(question);
+                var questionDto = new QuestionDto
+                {
+                    Id = question.Id,
+                    Content = question.Content,
+                    QuizId = question.QuizId,
+                    Answers = question.Answers.Select(a => new AnswerDto
+                    {
+                        Id = a.Id,
+                        Content = a.Content,
+                        IsCorrect = a.IsCorrect,
+                        QuestionId = a.QuestionId
+                    }).ToList()
+                };
+                return Ok(questionDto);
             }
             catch (ArgumentException ex)
             {
@@ -58,12 +83,25 @@ namespace PRN232.Controllers
         }
 
         [HttpGet("quiz/{quizId}")]
-        public async Task<ActionResult<IEnumerable<Question>>> GetQuestionsByQuiz(int quizId)
+        public async Task<ActionResult<IEnumerable<QuestionDto>>> GetQuestionsByQuiz(int quizId)
         {
             try
             {
                 var questions = await _questionService.GetQuestionsByQuizIdAsync(quizId);
-                return Ok(questions);
+                var questionDtos = questions.Select(q => new QuestionDto
+                {
+                    Id = q.Id,
+                    Content = q.Content,
+                    QuizId = q.QuizId,
+                    Answers = q.Answers.Select(a => new AnswerDto
+                    {
+                        Id = a.Id,
+                        Content = a.Content,
+                        IsCorrect = a.IsCorrect,
+                        QuestionId = a.QuestionId
+                    }).ToList()
+                });
+                return Ok(questionDtos);
             }
             catch (ArgumentException ex)
             {
@@ -76,15 +114,34 @@ namespace PRN232.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<Question>> CreateQuestion([FromBody] Question question)
+        public async Task<ActionResult<QuestionDto>> CreateQuestion([FromBody] QuestionDto questionDto)
         {
             try
             {
                 if (!ModelState.IsValid)
                     return BadRequest(ModelState);
 
+                var question = new Question
+                {
+                    Content = questionDto.Content,
+                    QuizId = questionDto.QuizId
+                };
+
                 var createdQuestion = await _questionService.CreateQuestionAsync(question);
-                return CreatedAtAction(nameof(GetQuestion), new { id = createdQuestion.Id }, createdQuestion);
+                var createdDto = new QuestionDto
+                {
+                    Id = createdQuestion.Id,
+                    Content = createdQuestion.Content,
+                    QuizId = createdQuestion.QuizId,
+                    Answers = createdQuestion.Answers.Select(a => new AnswerDto
+                    {
+                        Id = a.Id,
+                        Content = a.Content,
+                        IsCorrect = a.IsCorrect,
+                        QuestionId = a.QuestionId
+                    }).ToList()
+                };
+                return CreatedAtAction(nameof(GetQuestion), new { id = createdDto.Id }, createdDto);
             }
             catch (ArgumentException ex)
             {
@@ -97,18 +154,38 @@ namespace PRN232.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult<Question>> UpdateQuestion(int id, [FromBody] Question question)
+        public async Task<ActionResult<QuestionDto>> UpdateQuestion(int id, [FromBody] QuestionDto questionDto)
         {
             try
             {
-                if (id != question.Id)
+                if (id != questionDto.Id)
                     return BadRequest(new { message = "Question ID mismatch" });
 
                 if (!ModelState.IsValid)
                     return BadRequest(ModelState);
 
+                var question = new Question
+                {
+                    Id = questionDto.Id,
+                    Content = questionDto.Content,
+                    QuizId = questionDto.QuizId
+                };
+
                 var updatedQuestion = await _questionService.UpdateQuestionAsync(question);
-                return Ok(updatedQuestion);
+                var updatedDto = new QuestionDto
+                {
+                    Id = updatedQuestion.Id,
+                    Content = updatedQuestion.Content,
+                    QuizId = updatedQuestion.QuizId,
+                    Answers = updatedQuestion.Answers.Select(a => new AnswerDto
+                    {
+                        Id = a.Id,
+                        Content = a.Content,
+                        IsCorrect = a.IsCorrect,
+                        QuestionId = a.QuestionId
+                    }).ToList()
+                };
+                return Ok(updatedDto);
             }
             catch (ArgumentException ex)
             {

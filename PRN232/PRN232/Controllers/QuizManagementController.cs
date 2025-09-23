@@ -1,4 +1,4 @@
-using BusinessObject.Quiz;
+using BusinessObject.Dtos;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Service.QuizzInterface;
@@ -11,7 +11,6 @@ namespace PRN232.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    
     public class QuizManagementController : ControllerBase
     {
         private readonly IQuizManagementService _quizManagementService;
@@ -22,12 +21,33 @@ namespace PRN232.Controllers
         }
 
         [HttpGet("quiz/{quizId}/details")]
-        public async Task<ActionResult<QuizWithDetails>> GetQuizWithDetails(int quizId)
+        public async Task<ActionResult<QuizDto>> GetQuizWithDetails(int quizId)
         {
             try
             {
                 var quizWithDetails = await _quizManagementService.GetQuizWithQuestionsAndAnswersAsync(quizId);
-                return Ok(quizWithDetails);
+                var quiz = quizWithDetails.Quiz;
+                var quizDto = new QuizDto
+                {
+                    Id = quiz.Id,
+                    Title = quiz.Title,
+                    Description = quiz.Description,
+                    CreatedAt = quiz.CreatedAt,
+                    Questions = quizWithDetails.Questions.Select(q => new QuestionDto
+                    {
+                        Id = q.Question.Id, // Fixed: Accessing the 'Id' property of the 'Question' object inside 'QuestionWithAnswers'
+                        Content = q.Question.Content,
+                        QuizId = q.Question.QuizId,
+                        Answers = q.Answers.Select(a => new AnswerDto
+                        {
+                            Id = a.Id,
+                            Content = a.Content,
+                            IsCorrect = a.IsCorrect,
+                            QuestionId = a.QuestionId
+                        }).ToList()
+                    }).ToList()
+                };
+                return Ok(quizDto);
             }
             catch (InvalidOperationException ex)
             {
@@ -44,7 +64,7 @@ namespace PRN232.Controllers
         }
 
         [HttpPost("quiz/create-complete")]
-        public async Task<ActionResult<QuizWithDetails>> CreateCompleteQuiz([FromBody] CreateQuizRequest request)
+        public async Task<ActionResult<QuizDto>> CreateCompleteQuiz([FromBody] CreateQuizRequest request)
         {
             try
             {
@@ -52,7 +72,28 @@ namespace PRN232.Controllers
                     return BadRequest(ModelState);
 
                 var quizWithDetails = await _quizManagementService.CreateCompleteQuizAsync(request);
-                return CreatedAtAction(nameof(GetQuizWithDetails), new { quizId = quizWithDetails.Quiz.Id }, quizWithDetails);
+                var quiz = quizWithDetails.Quiz;
+                var quizDto = new QuizDto
+                {
+                    Id = quiz.Id,
+                    Title = quiz.Title,
+                    Description = quiz.Description,
+                    CreatedAt = quiz.CreatedAt,
+                    Questions = quizWithDetails.Questions.Select(q => new QuestionDto
+                    {
+                        Id = q.Question.Id, // Fixed: Accessing the 'Id' property of the 'Question' object inside 'QuestionWithAnswers'
+                        Content = q.Question.Content,
+                        QuizId = q.Question.QuizId,
+                        Answers = q.Answers.Select(a => new AnswerDto
+                        {
+                            Id = a.Id,
+                            Content = a.Content,
+                            IsCorrect = a.IsCorrect,
+                            QuestionId = a.QuestionId
+                        }).ToList()
+                    }).ToList()
+                };
+                return CreatedAtAction(nameof(GetQuizWithDetails), new { quizId = quizDto.Id }, quizDto);
             }
             catch (ArgumentException ex)
             {
@@ -65,7 +106,7 @@ namespace PRN232.Controllers
         }
 
         [HttpPost("quiz/submit")]
-        public async Task<ActionResult<QuizResult>> SubmitQuizAnswers([FromBody] SubmitQuizRequest request)
+        public async Task<ActionResult<QuizResultDto>> SubmitQuizAnswers([FromBody] SubmitQuizRequest request)
         {
             try
             {
@@ -73,7 +114,22 @@ namespace PRN232.Controllers
                     return BadRequest(ModelState);
 
                 var result = await _quizManagementService.SubmitQuizAnswersAsync(request);
-                return Ok(result);
+                var resultDto = new QuizResultDto
+                {
+                    Id = result.Id,
+                    UserId = result.UserId,
+                    QuizId = result.QuizId,
+                    Score = result.Score,
+                    CompletedAt = result.CompletedAt,
+                    UserAnswers = result.UserAnswers.Select(ua => new UserAnswerDto
+                    {
+                        Id = ua.Id,
+                        QuizResultId = ua.QuizResultId,
+                        QuestionId = ua.QuestionId,
+                        AnswerId = ua.AnswerId
+                    }).ToList()
+                };
+                return Ok(resultDto);
             }
             catch (ArgumentException ex)
             {
@@ -90,12 +146,27 @@ namespace PRN232.Controllers
         }
 
         [HttpGet("user/{userId}/history")]
-        public async Task<ActionResult<IEnumerable<QuizResult>>> GetUserQuizHistory(int userId)
+        public async Task<ActionResult<IEnumerable<QuizResultDto>>> GetUserQuizHistory(int userId)
         {
             try
             {
                 var history = await _quizManagementService.GetUserQuizHistoryAsync(userId);
-                return Ok(history);
+                var historyDtos = history.Select(result => new QuizResultDto
+                {
+                    Id = result.Id,
+                    UserId = result.UserId,
+                    QuizId = result.QuizId,
+                    Score = result.Score,
+                    CompletedAt = result.CompletedAt,
+                    UserAnswers = result.UserAnswers.Select(ua => new UserAnswerDto
+                    {
+                        Id = ua.Id,
+                        QuizResultId = ua.QuizResultId,
+                        QuestionId = ua.QuestionId,
+                        AnswerId = ua.AnswerId
+                    }).ToList()
+                });
+                return Ok(historyDtos);
             }
             catch (ArgumentException ex)
             {
