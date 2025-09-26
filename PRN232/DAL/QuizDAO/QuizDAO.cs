@@ -48,6 +48,23 @@ namespace DAL.QuizDAO
             _context.Update(quiz);
             await _context.SaveChangesAsync();
         }
+
+        public async Task<IEnumerable<Quiz>> GetQuizzesByTeacherAsync(int teacherId)
+        {
+            return await _context.Quizzes
+                .Where(q => q.CreatedBy == teacherId)
+                .Include(q => q.QuizResults)
+                .OrderByDescending(q => q.CreatedAt)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<QuizResult>> GetQuizResultsByQuizIdAsync(int quizId)
+        {
+            return await _context.QuizResults
+                .Where(qr => qr.QuizId == quizId)
+                .Include(qr => qr.User)
+                .ToListAsync();
+        }
     }
 
 }
