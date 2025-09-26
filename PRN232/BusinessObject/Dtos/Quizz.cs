@@ -22,7 +22,7 @@ namespace BusinessObject.Dtos
         public int Id { get; set; }
         public string Content { get; set; }
         public int QuizId { get; set; }
-        public List<AnswerDto> Answers { get; set; } = new List<AnswerDto>();
+       
     }
 
     public class QuizDto
@@ -31,8 +31,7 @@ namespace BusinessObject.Dtos
         public string Title { get; set; }
         public string Description { get; set; }
         public DateTime CreatedAt { get; set; }
-        public List<QuestionDto> Questions { get; set; } = new List<QuestionDto>();
-        public List<QuizResultDto> QuizResults { get; set; } = new List<QuizResultDto>();
+
     }
 
     public class QuizResultDto
@@ -42,7 +41,7 @@ namespace BusinessObject.Dtos
         public int QuizId { get; set; }
         public int Score { get; set; }
         public DateTime CompletedAt { get; set; }
-        public List<UserAnswerDto> UserAnswers { get; set; } = new List<UserAnswerDto>();
+        
     }
 
     public class UserAnswerDto

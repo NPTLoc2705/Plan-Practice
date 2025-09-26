@@ -49,7 +49,7 @@ namespace Service.QuizzMethod
             return allUserAnswers.Where(ua => ua.QuestionId == questionId);
         }
 
-        public async Task<UserAnswer> CreateUserAnswerAsync(UserAnswer userAnswer)
+        public async Task CreateUserAnswerAsync(UserAnswer userAnswer)
         {
             if (userAnswer == null)
                 throw new ArgumentNullException(nameof(userAnswer));
@@ -64,36 +64,25 @@ namespace Service.QuizzMethod
                 throw new ArgumentException("Answer ID must be greater than 0", nameof(userAnswer));
 
             await _userAnswerRepository.CreateUserAnswerAsync(userAnswer);
-            return userAnswer;
+            
         }
 
-        public async Task<UserAnswer> UpdateUserAnswerAsync(UserAnswer userAnswer)
+        public async Task UpdateUserAnswerAsync(UserAnswer userAnswer)
         {
-            if (userAnswer == null)
-                throw new ArgumentNullException(nameof(userAnswer));
-
-            if (userAnswer.Id <= 0)
-                throw new ArgumentException("User Answer ID must be greater than 0", nameof(userAnswer));
-
-            var existingUserAnswer = await _userAnswerRepository.GetUserAnswerByIdAsync(userAnswer.Id);
-            if (existingUserAnswer == null)
-                throw new InvalidOperationException($"User Answer with ID {userAnswer.Id} not found");
+        
 
             await _userAnswerRepository.UpdateUserAnswerAsync(userAnswer);
-            return userAnswer;
+            
         }
 
-        public async Task<bool> DeleteUserAnswerAsync(int userAnswerId)
+        public async Task DeleteUserAnswerAsync(int userAnswerId)
         {
             if (userAnswerId <= 0)
                 throw new ArgumentException("User Answer ID must be greater than 0", nameof(userAnswerId));
 
-            var existingUserAnswer = await _userAnswerRepository.GetUserAnswerByIdAsync(userAnswerId);
-            if (existingUserAnswer == null)
-                return false;
 
             await _userAnswerRepository.DeleteUserAnswerAsync(userAnswerId);
-            return true;
+            
         }
     }
 }

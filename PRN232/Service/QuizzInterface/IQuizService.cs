@@ -11,8 +11,8 @@ namespace Service.QuizzInterface
     {
         Task<IEnumerable<Quiz>> GetAllQuizzesAsync();
         Task<Quiz?> GetQuizByIdAsync(int quizId);
-        Task<Quiz> CreateQuizAsync(Quiz quiz);
-        Task<Quiz> UpdateQuizAsync(Quiz quiz);
-        Task<bool> DeleteQuizAsync(int quizId);
+        Task CreateQuizAsync(Quiz quiz);
+        Task UpdateQuizAsync(Quiz quiz);
+        Task DeleteQuizAsync(int quizId);
     }
 }

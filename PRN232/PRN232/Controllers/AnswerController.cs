@@ -111,15 +111,9 @@ namespace PRN232.Controllers
                     QuestionId = answerDto.QuestionId
                 };
 
-                var createdAnswer = await _answerService.CreateAnswerAsync(answer);
-                var createdDto = new AnswerDto
-                {
-                    Id = createdAnswer.Id,
-                    Content = createdAnswer.Content,
-                    IsCorrect = createdAnswer.IsCorrect,
-                    QuestionId = createdAnswer.QuestionId
-                };
-                return CreatedAtAction(nameof(GetAnswer), new { id = createdDto.Id }, createdDto);
+                await _answerService.CreateAnswerAsync(answer);
+              
+                return CreatedAtAction(nameof(GetAnswer), new { id = answer.Id }, answer);
             }
             catch (ArgumentException ex)
             {
@@ -150,15 +144,9 @@ namespace PRN232.Controllers
                     QuestionId = answerDto.QuestionId
                 };
 
-                var updatedAnswer = await _answerService.UpdateAnswerAsync(answer);
-                var updatedDto = new AnswerDto
-                {
-                    Id = updatedAnswer.Id,
-                    Content = updatedAnswer.Content,
-                    IsCorrect = updatedAnswer.IsCorrect,
-                    QuestionId = updatedAnswer.QuestionId
-                };
-                return Ok(updatedDto);
+                 await _answerService.UpdateAnswerAsync(answer);
+                
+                return Ok();
             }
             catch (ArgumentException ex)
             {
@@ -179,11 +167,10 @@ namespace PRN232.Controllers
         {
             try
             {
-                var result = await _answerService.DeleteAnswerAsync(id);
-                if (!result)
-                    return NotFound(new { message = $"Answer with ID {id} not found" });
+                await _answerService.DeleteAnswerAsync(id);
+              
 
-                return NoContent();
+                return Ok();
             }
             catch (ArgumentException ex)
             {

@@ -31,7 +31,7 @@ namespace Service.QuizzMethod
             return await _quizRepository.GetQuizByIdAsync(quizId);
         }
 
-        public async Task<Quiz> CreateQuizAsync(Quiz quiz)
+        public async Task CreateQuizAsync(Quiz quiz)
         {
             if (quiz == null)
                 throw new ArgumentNullException(nameof(quiz));
@@ -40,39 +40,20 @@ namespace Service.QuizzMethod
                 throw new ArgumentException("Quiz title is required", nameof(quiz));
 
             await _quizRepository.CreateQuizAsync(quiz);
-            return quiz;
+           
         }
 
-        public async Task<Quiz> UpdateQuizAsync(Quiz quiz)
-        {
-            if (quiz == null)
-                throw new ArgumentNullException(nameof(quiz));
-
-            if (quiz.Id <= 0)
-                throw new ArgumentException("Quiz ID must be greater than 0", nameof(quiz));
-
-            if (string.IsNullOrWhiteSpace(quiz.Title))
-                throw new ArgumentException("Quiz title is required", nameof(quiz));
-
-            var existingQuiz = await _quizRepository.GetQuizByIdAsync(quiz.Id);
-            if (existingQuiz == null)
-                throw new InvalidOperationException($"Quiz with ID {quiz.Id} not found");
-
-            await _quizRepository.UpdateQuizAsync(quiz);
-            return quiz;
+        public async Task UpdateQuizAsync(Quiz quiz)
+        {  
+            await _quizRepository.UpdateQuizAsync(quiz);           
         }
 
-        public async Task<bool> DeleteQuizAsync(int quizId)
+        public async Task DeleteQuizAsync(int quizId)
         {
             if (quizId <= 0)
                 throw new ArgumentException("Quiz ID must be greater than 0", nameof(quizId));
-
-            var existingQuiz = await _quizRepository.GetQuizByIdAsync(quizId);
-            if (existingQuiz == null)
-                return false;
-
             await _quizRepository.DeleteQuizAsync(quizId);
-            return true;
+
         }
     }
 }

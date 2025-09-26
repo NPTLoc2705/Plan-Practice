@@ -32,13 +32,7 @@ namespace PRN232.Controllers
                     Id = q.Id,
                     Content = q.Content,
                     QuizId = q.QuizId,
-                    Answers = q.Answers.Select(a => new AnswerDto
-                    {
-                        Id = a.Id,
-                        Content = a.Content,
-                        IsCorrect = a.IsCorrect,
-                        QuestionId = a.QuestionId
-                    }).ToList()
+
                 });
                 return Ok(questionDtos);
             }
@@ -62,13 +56,7 @@ namespace PRN232.Controllers
                     Id = question.Id,
                     Content = question.Content,
                     QuizId = question.QuizId,
-                    Answers = question.Answers.Select(a => new AnswerDto
-                    {
-                        Id = a.Id,
-                        Content = a.Content,
-                        IsCorrect = a.IsCorrect,
-                        QuestionId = a.QuestionId
-                    }).ToList()
+                
                 };
                 return Ok(questionDto);
             }
@@ -93,13 +81,7 @@ namespace PRN232.Controllers
                     Id = q.Id,
                     Content = q.Content,
                     QuizId = q.QuizId,
-                    Answers = q.Answers.Select(a => new AnswerDto
-                    {
-                        Id = a.Id,
-                        Content = a.Content,
-                        IsCorrect = a.IsCorrect,
-                        QuestionId = a.QuestionId
-                    }).ToList()
+                   
                 });
                 return Ok(questionDtos);
             }
@@ -127,21 +109,9 @@ namespace PRN232.Controllers
                     QuizId = questionDto.QuizId
                 };
 
-                var createdQuestion = await _questionService.CreateQuestionAsync(question);
-                var createdDto = new QuestionDto
-                {
-                    Id = createdQuestion.Id,
-                    Content = createdQuestion.Content,
-                    QuizId = createdQuestion.QuizId,
-                    Answers = createdQuestion.Answers.Select(a => new AnswerDto
-                    {
-                        Id = a.Id,
-                        Content = a.Content,
-                        IsCorrect = a.IsCorrect,
-                        QuestionId = a.QuestionId
-                    }).ToList()
-                };
-                return CreatedAtAction(nameof(GetQuestion), new { id = createdDto.Id }, createdDto);
+                await _questionService.CreateQuestionAsync(question);
+                
+                return CreatedAtAction(nameof(GetQuestion), new { id = question.Id }, question);
             }
             catch (ArgumentException ex)
             {
@@ -171,21 +141,9 @@ namespace PRN232.Controllers
                     QuizId = questionDto.QuizId
                 };
 
-                var updatedQuestion = await _questionService.UpdateQuestionAsync(question);
-                var updatedDto = new QuestionDto
-                {
-                    Id = updatedQuestion.Id,
-                    Content = updatedQuestion.Content,
-                    QuizId = updatedQuestion.QuizId,
-                    Answers = updatedQuestion.Answers.Select(a => new AnswerDto
-                    {
-                        Id = a.Id,
-                        Content = a.Content,
-                        IsCorrect = a.IsCorrect,
-                        QuestionId = a.QuestionId
-                    }).ToList()
-                };
-                return Ok(updatedDto);
+                await _questionService.UpdateQuestionAsync(question);
+              
+                return Ok();
             }
             catch (ArgumentException ex)
             {
@@ -206,11 +164,8 @@ namespace PRN232.Controllers
         {
             try
             {
-                var result = await _questionService.DeleteQuestionAsync(id);
-                if (!result)
-                    return NotFound(new { message = $"Question with ID {id} not found" });
-
-                return NoContent();
+                await _questionService.DeleteQuestionAsync(id);
+                return Ok();
             }
             catch (ArgumentException ex)
             {

@@ -40,7 +40,7 @@ namespace Service.QuizzMethod
             return allAnswers.Where(a => a.QuestionId == questionId);
         }
 
-        public async Task<Answer> CreateAnswerAsync(Answer answer)
+        public async Task CreateAnswerAsync(Answer answer)
         {
             if (answer == null)
                 throw new ArgumentNullException(nameof(answer));
@@ -52,39 +52,20 @@ namespace Service.QuizzMethod
                 throw new ArgumentException("Question ID must be greater than 0", nameof(answer));
 
             await _answerRepository.CreateAnswerAsync(answer);
-            return answer;
+            
         }
 
-        public async Task<Answer> UpdateAnswerAsync(Answer answer)
+        public async Task UpdateAnswerAsync(Answer answer)
         {
-            if (answer == null)
-                throw new ArgumentNullException(nameof(answer));
-
-            if (answer.Id <= 0)
-                throw new ArgumentException("Answer ID must be greater than 0", nameof(answer));
-
-            if (string.IsNullOrWhiteSpace(answer.Content))
-                throw new ArgumentException("Answer content is required", nameof(answer));
-
-            var existingAnswer = await _answerRepository.GetAnswerByIdAsync(answer.Id);
-            if (existingAnswer == null)
-                throw new InvalidOperationException($"Answer with ID {answer.Id} not found");
+      
 
             await _answerRepository.UpdateAnswerAsync(answer);
-            return answer;
+            
         }
 
-        public async Task<bool> DeleteAnswerAsync(int answerId)
-        {
-            if (answerId <= 0)
-                throw new ArgumentException("Answer ID must be greater than 0", nameof(answerId));
-
-            var existingAnswer = await _answerRepository.GetAnswerByIdAsync(answerId);
-            if (existingAnswer == null)
-                return false;
-
-            await _answerRepository.DeleteAnswerAsync(answerId);
-            return true;
+        public async Task DeleteAnswerAsync(int answerId)
+        {          
+            await _answerRepository.DeleteAnswerAsync(answerId);         
         }
     }
 }
