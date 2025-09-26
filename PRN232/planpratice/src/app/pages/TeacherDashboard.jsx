@@ -34,7 +34,12 @@ const TeacherDashboard = () => {
 
   return (
     <div className={styles.teacherDashboard}>
-      <h1>Teacher Dashboard</h1>
+      <div className={styles.pageHeader}>
+        <h1 className={styles.pageTitle}>Teacher Dashboard</h1>
+        <p className={styles.pageSubtitle}>
+          Track performance, stay on top of recently published quizzes, and keep your classes engaged.
+        </p>
+      </div>
       
       {/* Statistics Cards */}
       <div className={styles.statsGrid}>
