@@ -153,5 +153,48 @@ namespace PRN232.Controllers
                 return StatusCode(500, new { message = "An error occurred while deleting the quiz", error = ex.Message });
             }
         }
+
+        [HttpGet("teacher-dashboard/{teacherId}")]
+        public async Task<ActionResult<BusinessObject.Dtos.TeacherDashboardDto>> GetTeacherDashboard(int teacherId)
+        {
+            try
+            {
+                var dashboard = await _quizService.GetTeacherDashboardStatsAsync(teacherId);
+                return Ok(dashboard);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "An error occurred while retrieving teacher dashboard", error = ex.Message });
+            }
+        }
+
+        [HttpGet("teacher/{teacherId}")]
+        public async Task<ActionResult<IEnumerable<QuizDto>>> GetQuizzesByTeacher(int teacherId)
+        {
+            try
+            {
+                var quizzes = await _quizService.GetQuizzesByTeacherAsync(teacherId);
+                var quizDtos = quizzes.Select(q => new QuizDto
+                {
+                    Id = q.Id,
+                    Title = q.Title,
+                    Description = q.Description,
+                    CreatedAt = q.CreatedAt,
+                });
+                return Ok(quizDtos);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "An error occurred while retrieving teacher quizzes", error = ex.Message });
+            }
+        }
     }
 }

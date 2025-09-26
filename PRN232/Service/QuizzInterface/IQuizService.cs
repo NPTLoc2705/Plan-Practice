@@ -1,3 +1,4 @@
+using BusinessObject.Dtos;
 using BusinessObject.Quiz;
 using System;
 using System.Collections.Generic;
@@ -14,5 +15,7 @@ namespace Service.QuizzInterface
         Task CreateQuizAsync(Quiz quiz);
         Task UpdateQuizAsync(Quiz quiz);
         Task DeleteQuizAsync(int quizId);
+        Task<TeacherDashboardDto> GetTeacherDashboardStatsAsync(int teacherId);
+        Task<IEnumerable<Quiz>> GetQuizzesByTeacherAsync(int teacherId);
     }
 }

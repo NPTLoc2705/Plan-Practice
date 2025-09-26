@@ -4,6 +4,7 @@ import QuizManagement from './app/pages/QuizManagement.jsx'
 import Login from './app/pages/Login';
 import Register from './app/pages/Register';
 import Profile from './app/pages/Profile';
+import TeacherDashboard from './app/pages/TeacherDashboard';
 import { AuthAPI } from './app/components/APIService/AuthAPI';
 
 // Protect routes
@@ -21,6 +22,7 @@ function App() {
       <nav style={{ display: 'flex', gap: 12, padding: 12 }}>
         <Link to="/">Home</Link>
         <Link to="/quiz">Quiz Management</Link>
+        <Link to="/teacher/">Teacher Dashboard</Link>
         <Link to="/profile">Profile</Link>
       </nav>
 
@@ -50,6 +52,14 @@ function App() {
             <ProtectedRoute>
               <Profile />
             </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/teacher" 
+          element={
+            // <ProtectedRoute>
+              <TeacherDashboard />
+            // </ProtectedRoute>
           } 
         />
 
