@@ -51,6 +51,19 @@ namespace PRN232
 
 
 
+            builder.Services.AddScoped<UserDAO>();
+            builder.Services.AddScoped<OtpVerifyDAO>();
+            //builder.Services.AddScoped<AnswerStudentDAO>();
+            //builder.Services.AddScoped<QuestionStudentDAO>();
+            //builder.Services.AddScoped<QuizResultStudentDAO>();
+            //builder.Services.AddScoped<QuizStatisticsStudentDAO>();
+            //builder.Services.AddScoped<QuizStudentDAO>();
+            //builder.Services.AddScoped<UserAnswerStudentDAO>();
+
+
+
+
+
             //Injection of services and repositories
             builder.Services.AddScoped<IUserRepository, UserRepository>();
             builder.Services.AddScoped<IOtpVerifyRepository, OtpVerifyRepository>();
@@ -63,6 +76,13 @@ namespace PRN232
             builder.Services.AddScoped<IAnswerRepository, AnswerRepository>();
             builder.Services.AddScoped<IQuizResultRepository, QuizResultRepository>();
             builder.Services.AddScoped<IUserAnswerRepository, UserAnswerRepository>();
+            //Student
+            //builder.Services.AddScoped<IQuizStudentRepository, QuizStudentRepository>();
+            //builder.Services.AddScoped<IQuestionStudentRepository, QuestionStudentRepository>();
+            //builder.Services.AddScoped<IAnswerStudentRepository, AnswerStudentRepository>();
+            //builder.Services.AddScoped<IQuizResultStudentRepository, QuizResultStudentRepository>();
+            //builder.Services.AddScoped<IUserAnswerStudentRepository, UserAnswerStudentRepository>();
+            //builder.Services.AddScoped<IQuizStatisticsStudentRepository, QuizStatisticsStudentRepository>();
 
             builder.Services.AddScoped<IQuizManagementService, QuizManagementService>();
             builder.Services.AddScoped<IQuizService, QuizService>();
@@ -71,6 +91,7 @@ namespace PRN232
             builder.Services.AddScoped<IAnswerService, AnswerService>();
             builder.Services.AddScoped<IUserAnswerService, UserAnswerService>();
 
+          //  builder.Services.AddScoped<IStudentQuizService, StudentQuizService>();
             var jwtKey = builder.Configuration["Jwt:Key"];
             var key = Encoding.ASCII.GetBytes(jwtKey);
 
@@ -102,9 +123,8 @@ namespace PRN232
 
             // Add Swagger services
             builder.Services.AddEndpointsApiExplorer();
-           
 
-
+        
                 var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -116,6 +136,8 @@ namespace PRN232
             app.UseHttpsRedirection();
 
             app.UseCors("AllowFrontend");
+
+          
 
 
             app.UseAuthentication();
