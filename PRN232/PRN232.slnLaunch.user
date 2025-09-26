@@ -5,6 +5,10 @@
       {
         "Path": "PRN232\\PRN232.csproj",
         "Action": "StartWithoutDebugging"
+      },
+      {
+        "Path": "PlanPratice\\planpratice.esproj",
+        "Action": "StartWithoutDebugging"
       }
     ]
   }
