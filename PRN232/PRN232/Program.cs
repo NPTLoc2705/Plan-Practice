@@ -84,7 +84,7 @@ namespace PRN232
             //builder.Services.AddScoped<IUserAnswerStudentRepository, UserAnswerStudentRepository>();
             //builder.Services.AddScoped<IQuizStatisticsStudentRepository, QuizStatisticsStudentRepository>();
 
-            builder.Services.AddScoped<IQuizManagementService, QuizManagementService>();
+            
             builder.Services.AddScoped<IQuizService, QuizService>();
             builder.Services.AddScoped<IQuizResultService, QuizResultService>();
             builder.Services.AddScoped<IQuestionService, QuestionService>();

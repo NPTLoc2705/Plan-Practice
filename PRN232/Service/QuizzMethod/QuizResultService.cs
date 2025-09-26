@@ -49,7 +49,7 @@ namespace Service.QuizzMethod
             return allResults.Where(r => r.QuizId == quizId);
         }
 
-        public async Task<QuizResult> CreateQuizResultAsync(QuizResult quizResult)
+        public async Task CreateQuizResultAsync(QuizResult quizResult)
         {
             if (quizResult == null)
                 throw new ArgumentNullException(nameof(quizResult));
@@ -64,36 +64,26 @@ namespace Service.QuizzMethod
                 throw new ArgumentException("Score cannot be negative", nameof(quizResult));
 
             await _quizResultRepository.CreateQuizResultAsync(quizResult);
-            return quizResult;
+            
         }
 
-        public async Task<QuizResult> UpdateQuizResultAsync(QuizResult quizResult)
+        public async Task UpdateQuizResultAsync(QuizResult quizResult)
         {
-            if (quizResult == null)
-                throw new ArgumentNullException(nameof(quizResult));
 
-            if (quizResult.Id <= 0)
-                throw new ArgumentException("Quiz Result ID must be greater than 0", nameof(quizResult));
-
-            var existingResult = await _quizResultRepository.GetQuizResultByIdAsync(quizResult.Id);
-            if (existingResult == null)
-                throw new InvalidOperationException($"Quiz Result with ID {quizResult.Id} not found");
 
             await _quizResultRepository.UpdateQuizResultAsync(quizResult);
-            return quizResult;
+            
         }
 
-        public async Task<bool> DeleteQuizResultAsync(int quizResultId)
+        public async Task DeleteQuizResultAsync(int quizResultId)
         {
             if (quizResultId <= 0)
                 throw new ArgumentException("Quiz Result ID must be greater than 0", nameof(quizResultId));
 
-            var existingResult = await _quizResultRepository.GetQuizResultByIdAsync(quizResultId);
-            if (existingResult == null)
-                return false;
+       
 
             await _quizResultRepository.DeleteQuizResultAsync(quizResultId);
-            return true;
+            
         }
     }
 }
