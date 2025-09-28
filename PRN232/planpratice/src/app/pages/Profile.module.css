@@ -1,0 +1,125 @@
+.container {
+  min-height: 100vh;
+  background: #f9fafb;
+}
+
+.navbar {
+  background: #fff;
+  box-shadow: 0 1px 4px 0 rgba(0,0,0,0.04);
+  border-bottom: 1px solid #e5e7eb;
+  padding: 0 1rem;
+}
+
+.navContent {
+  max-width: 1120px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 4rem;
+}
+
+.brand {
+  font-size: 1.25rem;
+  font-weight: bold;
+  color: #1e293b;
+}
+
+.userInfo {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.userWelcome {
+  font-size: 1rem;
+  color: #64748b;
+}
+
+.userName {
+  font-weight: 500;
+  color: #1e293b;
+}
+
+.logoutBtn {
+  padding: 0.5rem 1.25rem;
+  font-size: 0.95rem;
+  background: #ef4444;
+  color: #fff;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.logoutBtn:hover {
+  background: #dc2626;
+}
+
+.main {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+
+.dashboardCard {
+  background: #fff;
+  border-radius: 1rem;
+  box-shadow: 0 4px 24px 0 rgba(0,0,0,0.06);
+  padding: 2rem;
+}
+
+.section {
+  margin-bottom: 2rem;
+}
+
+.sectionTitle {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1e40af;
+  margin-bottom: 0.75rem;
+}
+
+.infoList {
+  font-size: 1rem;
+  color: #2563eb;
+  margin-left: 1rem;
+}
+
+.infoItem {
+  margin-bottom: 0.25rem;
+}
+
+.infoLabel {
+  font-weight: 500;
+  color: #1e293b;
+}
+
+.quickActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.actionBtn {
+  padding: 0.5rem 1.25rem;
+  border-radius: 0.5rem;
+  font-size: 0.95rem;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s;
+  background: #22c55e;
+}
+
+.actionBtn.blue {
+  background: #2563eb;
+}
+
+.actionBtn.purple {
+  background: #a21caf;
+}
+
+.actionBtn:hover {
+  filter: brightness(0.95);
+}

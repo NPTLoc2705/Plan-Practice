@@ -4,6 +4,7 @@ import { Eye, EyeOff, Mail, Lock, LogIn, Loader2, AlertCircle, CheckCircle } fro
 import { Link, useNavigate } from 'react-router-dom';
 import { AuthAPI } from '../components/APIService/AuthAPI';
 import GoogleSignIn from '../components/Google/GoogleSignIn';
+import styles from './Login.module.css';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -22,7 +23,6 @@ const Login = () => {
     e.preventDefault();
     setLoading(true);
     setError('');
-    
     try {
       const result = await AuthAPI.login(formData);
       setSuccess('Login successful! Redirecting...');
@@ -44,77 +44,77 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        <div className="bg-white rounded-2xl shadow-xl p-8 space-y-6">
-          <div className="text-center space-y-2">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-2">
-              <LogIn className="w-8 h-8 text-blue-600" />
+    <div className={styles.container}>
+      <div className={styles.wrapper}>
+        <div className={styles.card}>
+          <div className={styles.header}>
+            <div className={styles.iconCircle}>
+              <LogIn className={styles.icon} />
             </div>
-            <h2 className="text-3xl font-bold text-gray-800">Welcome Back</h2>
-            <p className="text-gray-500">Sign in to your IELTS learning platform</p>
+            <h2 className={styles.title}>Welcome Back</h2>
+            <p className={styles.subtitle}>Sign in to your IELTS learning platform</p>
           </div>
 
           {error && (
-            <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
-              <AlertCircle className="w-4 h-4 flex-shrink-0" />
+            <div className={styles.errorMsg}>
+              <AlertCircle className={styles.msgIcon} />
               <span>{error}</span>
             </div>
           )}
 
           {success && (
-            <div className="flex items-center gap-2 p-3 bg-green-50 border border-green-200 rounded-lg text-green-700 text-sm">
-              <CheckCircle className="w-4 h-4 flex-shrink-0" />
+            <div className={styles.successMsg}>
+              <CheckCircle className={styles.msgIcon} />
               <span>{success}</span>
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-1">
-              <label className="text-sm font-medium text-gray-700">Email</label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+          <form onSubmit={handleSubmit} className={styles.form}>
+            <div className={styles.formGroup}>
+              <label className={styles.label}>Email</label>
+              <div className={styles.inputWrapper}>
+                <Mail className={styles.inputIcon} />
                 <input
                   type="email"
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
-                  className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                  className={styles.input}
                   placeholder="Enter your email"
                   required
                 />
               </div>
             </div>
 
-            <div className="space-y-1">
-              <label className="text-sm font-medium text-gray-700">Password</label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <div className={styles.formGroup}>
+              <label className={styles.label}>Password</label>
+              <div className={styles.inputWrapper}>
+                <Lock className={styles.inputIcon} />
                 <input
                   type={showPassword ? 'text' : 'password'}
                   name="password"
                   value={formData.password}
                   onChange={handleChange}
-                  className="w-full pl-10 pr-10 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                  className={styles.input}
                   placeholder="Enter your password"
                   required
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  className={styles.togglePassword}
                 >
-                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  {showPassword ? <EyeOff className={styles.eyeIcon} /> : <Eye className={styles.eyeIcon} />}
                 </button>
               </div>
             </div>
 
-            <div className="flex items-center justify-between">
-              <label className="flex items-center gap-2 text-sm">
-                <input type="checkbox" className="rounded border-gray-300" />
-                <span className="text-gray-600">Remember me</span>
+            <div className={styles.options}>
+              <label className={styles.checkboxLabel}>
+                <input type="checkbox" className={styles.checkbox} />
+                <span>Remember me</span>
               </label>
-              <button className="text-sm text-blue-600 hover:text-blue-700 font-medium">
+              <button className={styles.forgotBtn}>
                 Forgot password?
               </button>
             </div>
@@ -122,11 +122,11 @@ const Login = () => {
             <button
               type="submit"
               disabled={loading || !formData.email || !formData.password}
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className={styles.submitBtn}
             >
               {loading ? (
                 <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <Loader2 className={styles.loader} />
                   Signing in...
                 </>
               ) : (
@@ -135,20 +135,18 @@ const Login = () => {
             </button>
           </form>
 
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-300"></div>
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-white text-gray-500">Or continue with</span>
+          <div className={styles.dividerWrapper}>
+            <div className={styles.divider}></div>
+            <div className={styles.dividerText}>
+              <span>Or continue with</span>
             </div>
           </div>
 
           <GoogleSignIn onSuccess={handleGoogleSuccess} onError={handleGoogleError} />
 
-          <p className="text-center text-sm text-gray-600">
+          <p className={styles.signupText}>
             Don't have an account?{' '}
-            <Link to="/register" className="text-blue-600 hover:text-blue-700 font-medium">
+            <Link to="/register" className={styles.signupLink}>
               Sign up
             </Link>
           </p>

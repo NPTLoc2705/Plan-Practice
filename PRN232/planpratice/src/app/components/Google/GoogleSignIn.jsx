@@ -1,62 +1,90 @@
-// src/components/GoogleSignIn.jsx
-import { useEffect } from 'react';
-import { Eye, EyeOff, Mail, Lock, User, LogIn, UserPlus, Loader2, AlertCircle, CheckCircle, ArrowLeft } from 'lucide-react';
-import { GOOGLE_CLIENT_ID } from '../APIService/AuthAPI';
+// src/components/Google/GoogleSignIn.jsx
+import { useEffect, useRef } from 'react';
+import { AuthAPI, GOOGLE_CLIENT_ID } from '../APIService/AuthAPI';
 
 const GoogleSignIn = ({ onSuccess, onError }) => {
+  const googleButtonRef = useRef(null);
+
   useEffect(() => {
-    if (GOOGLE_CLIENT_ID === 'YOUR_GOOGLE_CLIENT_ID') return;
-
-    const script = document.createElement('script');
-    script.src = 'https://accounts.google.com/gsi/client';
-    script.async = true;
-    script.defer = true;
-    document.body.appendChild(script);
-
-    script.onload = () => {
+    // Load Google Identity Services
+    const loadGoogleScript = () => {
       if (window.google) {
+        initializeGoogleSignIn();
+        return;
+      }
+
+      const script = document.createElement('script');
+      script.src = 'https://accounts.google.com/gsi/client';
+      script.async = true;
+      script.defer = true;
+      script.onload = initializeGoogleSignIn;
+      script.onerror = () => onError('Failed to load Google Sign-In');
+      document.head.appendChild(script);
+    };
+
+    const initializeGoogleSignIn = () => {
+      if (!window.google || !GOOGLE_CLIENT_ID) {
+        onError('Google configuration not found');
+        return;
+      }
+
+      try {
         window.google.accounts.id.initialize({
           client_id: GOOGLE_CLIENT_ID,
-          callback: handleCredentialResponse,
+          callback: handleGoogleResponse,
+          auto_select: false,
+          cancel_on_tap_outside: true
         });
-        
+
+        // Render the button
         window.google.accounts.id.renderButton(
-          document.getElementById('googleSignInDiv'),
-          { 
-            theme: 'filled_blue',
+          googleButtonRef.current,
+          {
+            theme: 'outline',
             size: 'large',
             width: '100%',
-            text: 'continue_with'
+            text: 'continue_with',
+            shape: 'rectangular',
+            logo_alignment: 'left'
           }
         );
+      } catch (error) {
+        console.error('Google Sign-In initialization error:', error);
+        onError('Failed to initialize Google Sign-In');
       }
     };
 
+    const handleGoogleResponse = async (response) => {
+      try {
+        if (!response.credential) {
+          throw new Error('No credential received from Google');
+        }
+
+        // Call your backend API
+        const result = await AuthAPI.googleLogin(response.credential);
+        onSuccess(result);
+      } catch (error) {
+        console.error('Google Sign-In error:', error);
+        onError(error.message || 'Google Sign-In failed');
+      }
+    };
+
+    loadGoogleScript();
+
+    // Cleanup
     return () => {
-      if (document.body.contains(script)) {
-        document.body.removeChild(script);
+      const script = document.querySelector('script[src="https://accounts.google.com/gsi/client"]');
+      if (script) {
+        script.remove();
       }
     };
-  }, []);
+  }, [onSuccess, onError]);
 
-  const handleCredentialResponse = async (response) => {
-    try {
-      const result = await AuthAPI.googleLogin(response.credential);
-      onSuccess(result);
-    } catch (error) {
-      onError(error.message);
-    }
-  };
-
-  if (GOOGLE_CLIENT_ID === 'YOUR_GOOGLE_CLIENT_ID') {
-    return (
-      <div className="p-3 bg-gray-100 rounded-lg text-center text-sm text-gray-600">
-        Google Sign-In requires configuration
-      </div>
-    );
-  }
-
-  return <div id="googleSignInDiv" className="w-full"></div>;
+  return (
+    <div style={{ width: '100%' }}>
+      <div ref={googleButtonRef} style={{ width: '100%' }}></div>
+    </div>
+  );
 };
 
 export default GoogleSignIn;
