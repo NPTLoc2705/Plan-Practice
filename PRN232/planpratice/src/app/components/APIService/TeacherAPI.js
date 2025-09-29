@@ -3,7 +3,7 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 class TeacherAPI {
   static async getTeacherDashboard(teacherId) {
-    const response = await fetch(`${API_BASE_URL}/quiz/teacher-dashboard/${teacherId}`, {
+    const response = await fetch(`${API_BASE_URL}/quiz/teacher/me/dashboard`, {
       method: 'GET',
       headers: { 
         'Content-Type': 'application/json',
@@ -18,7 +18,7 @@ class TeacherAPI {
   }
 
   static async getTeacherQuizzes(teacherId) {
-    const response = await fetch(`${API_BASE_URL}/quiz/teacher/${teacherId}`, {
+    const response = await fetch(`${API_BASE_URL}/quiz/teacher/me`, {
       method: 'GET',
       headers: { 
         'Content-Type': 'application/json',

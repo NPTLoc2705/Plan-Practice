@@ -6,6 +6,7 @@ using Service.QuizzInterface;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace PRN232.Controllers
@@ -33,7 +34,7 @@ namespace PRN232.Controllers
                     Title = q.Title,
                     Description = q.Description,
                     CreatedAt = q.CreatedAt,
-                  
+
                 });
                 return Ok(quizDtos);
             }
@@ -87,7 +88,7 @@ namespace PRN232.Controllers
                 };
 
                 await _quizService.CreateQuizAsync(quiz);
-               
+
                 return CreatedAtAction(nameof(GetQuiz), new { id = quiz.Id }, quiz);
             }
             catch (ArgumentException ex)
@@ -154,14 +155,23 @@ namespace PRN232.Controllers
             }
         }
 
-        [HttpGet("teacher-dashboard/{teacherId}")]
-        public async Task<ActionResult<BusinessObject.Dtos.TeacherDashboardDto>> GetTeacherDashboard(int teacherId)
+        [HttpGet("teacher/me/dashboard")]
+        [Authorize(Roles = "1")]
+        public async Task<ActionResult<BusinessObject.Dtos.TeacherDashboardDto>> GetTeacherDashboard()
         {
             try
             {
+                var idClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (int.TryParse(idClaim, out var teacherId))
+                {
+                    return BadRequest(StatusCode(401, "gays"));
+
+                }
+
                 var dashboard = await _quizService.GetTeacherDashboardStatsAsync(teacherId);
                 return Ok(dashboard);
             }
+
             catch (ArgumentException ex)
             {
                 return BadRequest(new { message = ex.Message });
@@ -172,11 +182,19 @@ namespace PRN232.Controllers
             }
         }
 
-        [HttpGet("teacher/{teacherId}")]
-        public async Task<ActionResult<IEnumerable<QuizDto>>> GetQuizzesByTeacher(int teacherId)
+        [HttpGet("teacher/me")]
+        [Authorize(Roles = "1")]
+        public async Task<ActionResult<IEnumerable<QuizDto>>> GetQuizzesByTeacher()
         {
             try
             {
+                var idClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (int.TryParse(idClaim, out var teacherId))
+                {
+                    return BadRequest(StatusCode(401, "gays"));
+
+                }
+
                 var quizzes = await _quizService.GetQuizzesByTeacherAsync(teacherId);
                 var quizDtos = quizzes.Select(q => new QuizDto
                 {
