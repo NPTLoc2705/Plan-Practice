@@ -14,5 +14,7 @@ namespace Repository.Interface
          Task CreateQuizAsync(Quiz quiz);
          Task UpdateQuizAsync(Quiz quiz);
          Task DeleteQuizAsync(int quizId);
+         Task<IEnumerable<Quiz>> GetQuizzesByTeacherAsync(int teacherId);
+         Task<IEnumerable<QuizResult>> GetQuizResultsByQuizIdAsync(int quizId);
     }
 }

@@ -40,7 +40,7 @@ namespace Service.QuizzMethod
             return allQuestions.Where(q => q.QuizId == quizId);
         }
 
-        public async Task<Question> CreateQuestionAsync(Question question)
+        public async Task CreateQuestionAsync(Question question)
         {
             if (question == null)
                 throw new ArgumentNullException(nameof(question));
@@ -52,39 +52,25 @@ namespace Service.QuizzMethod
                 throw new ArgumentException("Quiz ID must be greater than 0", nameof(question));
 
             await _questionRepository.CreateQuestionAsync(question);
-            return question;
+           
         }
 
-        public async Task<Question> UpdateQuestionAsync(Question question)
+        public async Task UpdateQuestionAsync(Question question)
         {
-            if (question == null)
-                throw new ArgumentNullException(nameof(question));
-
-            if (question.Id <= 0)
-                throw new ArgumentException("Question ID must be greater than 0", nameof(question));
-
-            if (string.IsNullOrWhiteSpace(question.Content))
-                throw new ArgumentException("Question content is required", nameof(question));
-
-            var existingQuestion = await _questionRepository.GetQuestionByIdAsync(question.Id);
-            if (existingQuestion == null)
-                throw new InvalidOperationException($"Question with ID {question.Id} not found");
+    
 
             await _questionRepository.UpdateQuestionAsync(question);
-            return question;
+            
         }
 
-        public async Task<bool> DeleteQuestionAsync(int questionId)
+        public async Task DeleteQuestionAsync(int questionId)
         {
             if (questionId <= 0)
                 throw new ArgumentException("Question ID must be greater than 0", nameof(questionId));
 
-            var existingQuestion = await _questionRepository.GetQuestionByIdAsync(questionId);
-            if (existingQuestion == null)
-                return false;
 
             await _questionRepository.DeleteQuestionAsync(questionId);
-            return true;
+           
         }
     }
 }

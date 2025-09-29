@@ -1,26 +1,33 @@
-
 import './App.css'
+import { BrowserRouter, Routes, Route, Link, Navigate } from 'react-router-dom'
+import QuizManagement from './app/pages/QuizManagement.jsx'
 import Login from './app/pages/Login';
 import Register from './app/pages/Register';
 import Profile from './app/pages/Profile';
-import { Routes, Route, Navigate } from 'react-router';
+import TeacherDashboard from './app/pages/TeacherDashboard';
 import { AuthAPI } from './app/components/APIService/AuthAPI';
 
-
+// Protect routes
 const ProtectedRoute = ({ children }) => {
   return AuthAPI.isAuthenticated() ? children : <Navigate to="/login" replace />;
 };
 
 const PublicRoute = ({ children }) => {
-  return !AuthAPI.isAuthenticated() ? children : <Navigate to="/dashboard" replace />;
+  return !AuthAPI.isAuthenticated() ? children : <Navigate to="/profile" replace />;
 };
-
-
 
 function App() {
   return (
-    <div className="App">
+    <BrowserRouter>
+      <nav style={{ display: 'flex', gap: 12, padding: 12 }}>
+        <Link to="/">Home</Link>
+        <Link to="/quiz">Quiz Management</Link>
+        <Link to="/teacher/">Teacher Dashboard</Link>
+        <Link to="/profile">Profile</Link>
+      </nav>
+
       <Routes>
+        {/* Public pages */}
         <Route 
           path="/login" 
           element={
@@ -37,6 +44,8 @@ function App() {
             </PublicRoute>
           } 
         />
+
+        {/* Protected pages */}
         <Route 
           path="/profile" 
           element={
@@ -45,11 +54,22 @@ function App() {
             </ProtectedRoute>
           } 
         />
-        <Route path="/" element={<Navigate to="/" replace />} />
-        <Route path="*" element={<Navigate to="/profile" replace />} />
+        <Route 
+          path="/teacher" 
+          element={
+            // <ProtectedRoute>
+              <TeacherDashboard />
+            // </ProtectedRoute>
+          } 
+        />
+
+        {/* Other routes */}
+        <Route path="/" element={<div style={{ padding: 16 }}><h1>Home</h1><p>Welcome.</p></div>} />
+        <Route path="/quiz/*" element={<QuizManagement />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
-    </div>
+    </BrowserRouter>
   );
 }
 
-export default App
+export default App;

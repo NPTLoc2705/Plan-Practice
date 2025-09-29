@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace BusinessObject.Quiz
@@ -22,6 +23,8 @@ namespace BusinessObject.Quiz
         public int QuestionId { get; set; }
 
         [ForeignKey("QuestionId")]
+
+        //[JsonIgnore]
         public virtual Question Question { get; set; }
     }
 }

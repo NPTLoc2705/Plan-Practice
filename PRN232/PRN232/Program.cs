@@ -32,7 +32,7 @@ namespace PRN232
             {
                 options.AddPolicy("AllowFrontend", policy =>
                 {
-                    policy.WithOrigins("http://localhost:4000", "https://writingaibeta002.aihubproduction.com")
+                    policy.WithOrigins("http://localhost:4000", "https://localhost:4000")
                           .AllowAnyHeader()
                           .AllowAnyMethod()
                           .AllowCredentials();
@@ -87,7 +87,7 @@ namespace PRN232
             builder.Services.AddScoped<IUserAnswerStudentRepository, UserAnswerStudentRepository>();
             builder.Services.AddScoped<IQuizStatisticsStudentRepository, QuizStatisticsStudentRepository>();
 
-            builder.Services.AddScoped<IQuizManagementService, QuizManagementService>();
+            
             builder.Services.AddScoped<IQuizService, QuizService>();
             builder.Services.AddScoped<IQuizResultService, QuizResultService>();
             builder.Services.AddScoped<IQuestionService, QuestionService>();
