@@ -1,10 +1,10 @@
 // src/services/authAPI.js
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+const API_BASE_URL = `${import.meta.env.VITE_API_BASE_URL}/api/Auth`;
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
 class AuthAPI {
   static async register(data) {
-    const response = await fetch(`${API_BASE_URL}/auth/register`, {
+    const response = await fetch(`${API_BASE_URL}/register`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data)
@@ -16,7 +16,7 @@ class AuthAPI {
   }
 
   static async verifyRegistration(data) {
-    const response = await fetch(`${API_BASE_URL}/auth/verify-registration`, {
+    const response = await fetch(`${API_BASE_URL}/verify-registration`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data)
@@ -28,7 +28,7 @@ class AuthAPI {
   }
 
   static async resendOTP(email) {
-    const response = await fetch(`${API_BASE_URL}/auth/resend-registration-otp`, {
+    const response = await fetch(`${API_BASE_URL}/resend-registration-otp`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email })
@@ -40,7 +40,7 @@ class AuthAPI {
   }
 
   static async login(credentials) {
-    const response = await fetch(`${API_BASE_URL}/auth/login`, {
+    const response = await fetch(`${API_BASE_URL}/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(credentials)
@@ -58,10 +58,12 @@ class AuthAPI {
   }
 
   static async googleLogin(idToken) {
-    const response = await fetch(`${API_BASE_URL}/auth/google-login`, {
+    const response = await fetch(`${API_BASE_URL}/google-login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ idToken })
+      body: JSON.stringify({ 
+        idToken: idToken  
+      })
     });
     
     const result = await response.json();

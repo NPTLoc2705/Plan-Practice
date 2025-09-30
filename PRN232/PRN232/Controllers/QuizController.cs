@@ -189,7 +189,11 @@ namespace PRN232.Controllers
                     Id = q.Id,
                     Title = q.Title,
                     Description = q.Description,
+
                     CreatedBy = q.CreatedBy
+
+                    CreatedAt = q.CreatedAt,
+
                 });
                 return Ok(quizDtos);
             }

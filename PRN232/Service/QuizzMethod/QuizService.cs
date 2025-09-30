@@ -1,3 +1,4 @@
+using BusinessObject.Dtos;
 using BusinessObject.Quiz;
 using Repository.Interface;
 using Service.QuizzInterface;
@@ -53,7 +54,53 @@ namespace Service.QuizzMethod
             if (quizId <= 0)
                 throw new ArgumentException("Quiz ID must be greater than 0", nameof(quizId));
             await _quizRepository.DeleteQuizAsync(quizId);
+        }
 
+        public async Task<TeacherDashboardDto> GetTeacherDashboardStatsAsync(int teacherId)
+        {
+            if (teacherId <= 0)
+                throw new ArgumentException("Teacher ID must be greater than 0", nameof(teacherId));
+
+            var teacherQuizzes = await _quizRepository.GetQuizzesByTeacherAsync(teacherId);
+            var allQuizResults = new List<QuizResult>();
+            
+            foreach (var quiz in teacherQuizzes)
+            {
+                var results = await _quizRepository.GetQuizResultsByQuizIdAsync(quiz.Id);
+                allQuizResults.AddRange(results);
+            }
+
+            var totalTestsCreated = teacherQuizzes.Count();
+            var totalTestsTaken = allQuizResults.Count();
+            var averageScore = allQuizResults.Any() ? allQuizResults.Average(r => r.Score) : 0;
+
+            var recentQuizzes = teacherQuizzes
+                .OrderByDescending(q => q.CreatedAt)
+                .Take(5)
+                .Select(q => new QuizStatDto
+                {
+                    Id = q.Id,
+                    Title = q.Title,
+                    CreatedAt = q.CreatedAt,
+                    TimesTaken = q.QuizResults?.Count ?? 0,
+                    AverageScore = q.QuizResults?.Any() == true ? q.QuizResults.Average(r => r.Score) : 0
+                }).ToList();
+
+            return new TeacherDashboardDto
+            {
+                TotalTestsCreated = totalTestsCreated,
+                TotalTestsTaken = totalTestsTaken,
+                AverageScore = averageScore,
+                RecentQuizzes = recentQuizzes
+            };
+        }
+
+        public async Task<IEnumerable<Quiz>> GetQuizzesByTeacherAsync(int teacherId)
+        {
+            if (teacherId <= 0)
+                throw new ArgumentException("Teacher ID must be greater than 0", nameof(teacherId));
+
+            return await _quizRepository.GetQuizzesByTeacherAsync(teacherId);
         }
     }
 }

@@ -29,7 +29,7 @@ namespace PRN232
             {
                 options.AddPolicy("AllowFrontend", policy =>
                 {
-                    policy.WithOrigins("http://localhost:4000", "https://writingaibeta002.aihubproduction.com")
+                    policy.WithOrigins("http://localhost:4000", "https://localhost:4000")
                           .AllowAnyHeader()
                           .AllowAnyMethod()
                           .AllowCredentials();
