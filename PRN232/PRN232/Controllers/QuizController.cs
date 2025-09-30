@@ -2,10 +2,12 @@ using BusinessObject.Dtos;
 using BusinessObject.Quiz;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using MimeKit;
 using Service.QuizzInterface;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace PRN232.Controllers
@@ -26,14 +28,14 @@ namespace PRN232.Controllers
         {
             try
             {
+                
                 var quizzes = await _quizService.GetAllQuizzesAsync();
                 var quizDtos = quizzes.Select(q => new QuizDto
                 {
                     Id = q.Id,
                     Title = q.Title,
                     Description = q.Description,
-                    CreatedAt = q.CreatedAt,
-                  
+                    CreatedBy = q.CreatedBy
                 });
                 return Ok(quizDtos);
             }
@@ -57,7 +59,7 @@ namespace PRN232.Controllers
                     Id = quiz.Id,
                     Title = quiz.Title,
                     Description = quiz.Description,
-                    CreatedAt = quiz.CreatedAt,
+                   CreatedBy = quiz.CreatedBy
                 };
                 return Ok(quizDto);
             }
@@ -70,7 +72,7 @@ namespace PRN232.Controllers
                 return StatusCode(500, new { message = "An error occurred while retrieving the quiz", error = ex.Message });
             }
         }
-
+        [Authorize]
         [HttpPost]
         public async Task<ActionResult<QuizDto>> CreateQuiz([FromBody] QuizDto quizDto)
         {
@@ -78,12 +80,14 @@ namespace PRN232.Controllers
             {
                 if (!ModelState.IsValid)
                     return BadRequest(ModelState);
-
+                var createdBy = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
                 var quiz = new Quiz
                 {
                     Title = quizDto.Title,
                     Description = quizDto.Description,
-                    CreatedAt = quizDto.CreatedAt
+                    CreatedAt = DateTime.UtcNow,
+                    CreatedBy = createdBy
+
                 };
 
                 await _quizService.CreateQuizAsync(quiz);
@@ -110,13 +114,14 @@ namespace PRN232.Controllers
 
                 if (!ModelState.IsValid)
                     return BadRequest(ModelState);
-
+                var createdBy = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
                 var quiz = new Quiz
                 {
                     Id = quizDto.Id,
                     Title = quizDto.Title,
                     Description = quizDto.Description,
-                    CreatedAt = quizDto.CreatedAt
+                    CreatedBy = createdBy
+
                 };
 
                 await _quizService.UpdateQuizAsync(quiz);
@@ -151,6 +156,50 @@ namespace PRN232.Controllers
             catch (Exception ex)
             {
                 return StatusCode(500, new { message = "An error occurred while deleting the quiz", error = ex.Message });
+            }
+        }
+
+        [HttpGet("teacher-dashboard/{teacherId}")]
+        public async Task<ActionResult<BusinessObject.Dtos.TeacherDashboardDto>> GetTeacherDashboard(int teacherId)
+        {
+            try
+            {
+                var dashboard = await _quizService.GetTeacherDashboardStatsAsync(teacherId);
+                return Ok(dashboard);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "An error occurred while retrieving teacher dashboard", error = ex.Message });
+            }
+        }
+
+        [HttpGet("teacher/{teacherId}")]
+        public async Task<ActionResult<IEnumerable<QuizDto>>> GetQuizzesByTeacher(int teacherId)
+        {
+            try
+            {
+
+                var quizzes = await _quizService.GetQuizzesByTeacherAsync(teacherId);
+                var quizDtos = quizzes.Select(q => new QuizDto
+                {
+                    Id = q.Id,
+                    Title = q.Title,
+                    Description = q.Description,
+                    CreatedBy = q.CreatedBy
+                });
+                return Ok(quizDtos);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "An error occurred while retrieving teacher quizzes", error = ex.Message });
             }
         }
     }
