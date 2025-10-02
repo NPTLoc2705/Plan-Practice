@@ -1,5 +1,4 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import styles from './Landing.module.css';
 
 const Landing = () => {
@@ -8,14 +7,8 @@ const Landing = () => {
       {/* Header */}
       <header className={styles.landingHeader}>
         <div className={styles.container}>
-          <div className={styles.logoSection}>
-            <h1 className={styles.logoText}>PlanPractice</h1>
-            <span className={styles.logoSubtitle}>Learn • Teach • Excel</span>
-          </div>
-          <nav className={styles.navigation}>
-            <Link to="/login" className={styles.navLink}>Login</Link>
-            <Link to="/register" className={`${styles.navLink} ${styles.navLinkPrimary}`}>Sign Up</Link>
-          </nav>
+      
+         
         </div>
       </header>
 
@@ -31,8 +24,8 @@ const Landing = () => {
               Enable students to learn, practice, and excel in their studies.
             </p>
             <div className={styles.heroButtons}>
-              <Link to="/register" className={`${styles.btn} ${styles.btnPrimary}`}>Get Started Free</Link>
-              <Link to="#features" className={`${styles.btn} ${styles.btnSecondary}`}>Learn More</Link>
+              <a href="#register" className={`${styles.btn} ${styles.btnPrimary}`}>Get Started Free</a>
+              <a href="#features" className={`${styles.btn} ${styles.btnSecondary}`}>Learn More</a>
             </div>
           </div>
           <div className={styles.heroImage}>
@@ -189,12 +182,12 @@ const Landing = () => {
               Join thousands of teachers and students already using PlanPractice
             </p>
             <div className={styles.ctaButtons}>
-              <Link to="/register" className={`${styles.btn} ${styles.btnPrimary} ${styles.btnLarge}`}>
+              <a href="#register" className={`${styles.btn} ${styles.btnPrimary} ${styles.btnLarge}`}>
                 Start Learning Today
-              </Link>
-              <Link to="/login" className={`${styles.btn} ${styles.btnOutline} ${styles.btnLarge}`}>
+              </a>
+              <a href="#login" className={`${styles.btn} ${styles.btnOutline} ${styles.btnLarge}`}>
                 Already have an account?
-              </Link>
+              </a>
             </div>
           </div>
         </div>
@@ -214,18 +207,18 @@ const Landing = () => {
             <div className={styles.footerSection}>
               <h4 className={styles.footerHeading}>Platform</h4>
               <ul className={styles.footerLinks}>
-                <li><Link to="/features">Features</Link></li>
-                <li><Link to="/pricing">Pricing</Link></li>
-                <li><Link to="/support">Support</Link></li>
+                <li><a href="#features">Features</a></li>
+                <li><a href="#pricing">Pricing</a></li>
+                <li><a href="#support">Support</a></li>
               </ul>
             </div>
-            
+
             <div className={styles.footerSection}>
               <h4 className={styles.footerHeading}>Account</h4>
               <ul className={styles.footerLinks}>
-                <li><Link to="/login">Login</Link></li>
-                <li><Link to="/register">Sign Up</Link></li>
-                <li><Link to="/profile">Profile</Link></li>
+                <li><a href="#login">Login</a></li>
+                <li><a href="#register">Sign Up</a></li>
+                <li><a href="#profile">Profile</a></li>
               </ul>
             </div>
           </div>
