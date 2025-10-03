@@ -1,5 +1,6 @@
 
 using DAL;
+using DAL.LessonDAO;
 using DAL.QuizDAO;
 using DAL.Student;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -14,7 +15,9 @@ using Repository.Method;
 using Repository.Method.Student;
 using Scalar.AspNetCore;
 using Service;
+using Service.Interface;
 using Service.JWT;
+using Service.Method;
 using Service.QuizzInterface;
 using Service.QuizzMethod;
 using System.Text;
@@ -56,9 +59,9 @@ namespace PRN232
             builder.Services.AddScoped<AnswerDAO>();
             builder.Services.AddScoped<QuizResultDAO>();
             builder.Services.AddScoped<UserAnswerDAO>();
-
-
-
+            builder.Services.AddScoped<LessonDAO>();
+            builder.Services.AddScoped<ILessonRepository, LessonRepository>();
+            builder.Services.AddScoped<ILessonService, LessonService>();
             builder.Services.AddScoped<UserDAO>();
             builder.Services.AddScoped<OtpVerifyDAO>();
             builder.Services.AddScoped<AnswerStudentDAO>();
