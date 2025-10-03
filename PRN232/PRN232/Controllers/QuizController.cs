@@ -192,7 +192,6 @@ namespace PRN232.Controllers
 
                     CreatedBy = q.CreatedBy
 
-                    CreatedAt = q.CreatedAt,
 
                 });
                 return Ok(quizDtos);
