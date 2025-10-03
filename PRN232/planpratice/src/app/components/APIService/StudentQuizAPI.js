@@ -1,4 +1,4 @@
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5236/api';
+const API_BASE_URL = `${import.meta.env.VITE_API_BASE_URL}/api`;
 
 class QuizAPI {
     static getAuthHeaders() {
@@ -15,16 +15,46 @@ class QuizAPI {
             headers: this.getAuthHeaders()
         });
 
-        const result = await response.json();
-
         if (!response.ok) {
             if (response.status === 401) {
                 this.handleUnauthorized();
             }
-            throw new Error(result.message || 'Failed to fetch available quizzes');
+            const text = await response.text();
+            let errorMessage;
+            try {
+                const result = JSON.parse(text);
+                errorMessage = result.message;
+            } catch (e) {
+                errorMessage = text || 'Failed to fetch available quizzes';
+            }
+            throw new Error(errorMessage);
         }
 
-        return result;
+        try {
+            const text = await response.text();
+            if (!text) {
+                return { success: false, data: [], message: 'Empty response received' };
+            }
+            const result = JSON.parse(text);
+            return result;
+        } catch (e) {
+            console.error('JSON Parse Error:', e);
+            throw new Error('Invalid response format from server');
+        }
+    }
+
+    // Update other API methods with similar error handling
+    static async parseResponse(response) {
+        try {
+            const text = await response.text();
+            if (!text) {
+                return { success: false, data: null, message: 'Empty response received' };
+            }
+            return JSON.parse(text);
+        } catch (e) {
+            console.error('JSON Parse Error:', e);
+            throw new Error('Invalid response format from server');
+        }
     }
 
     static async getQuizForTaking(quizId) {

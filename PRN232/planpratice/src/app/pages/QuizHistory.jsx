@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import QuizAPI from '../services/quizAPI'
+import QuizAPI from '../components/APIService/StudentQuizAPI'  
 
 function QuizHistory() {
   const [history, setHistory] = useState([])

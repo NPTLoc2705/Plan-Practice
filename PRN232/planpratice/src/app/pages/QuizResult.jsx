@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import QuizAPI from '../services/quizAPI'
+import QuizAPI from '../components/APIService/StudentQuizAPI'  
 
 function QuizResult() {
   const { id } = useParams()
