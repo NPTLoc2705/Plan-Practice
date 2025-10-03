@@ -220,7 +220,7 @@ namespace Service
                 Otp = otpCode,
                 Purpose = OptPurpose.Register,
                 CreatedAt = DateTime.UtcNow,
-                ExpiredAt = DateTime.UtcNow.AddMinutes(1), // 3 minutes expiry
+                ExpiredAt = DateTime.UtcNow.AddMinutes(3), // 3 minutes expiry
                 IsUsed = false
             };
 
