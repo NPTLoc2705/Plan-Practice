@@ -1,11 +1,11 @@
-// src/routes/Dashboard.jsx
+import styles from './Profile.module.css';
 import { useNavigate } from 'react-router-dom';
 import { AuthAPI } from '../components/APIService/AuthAPI';
-import styles from './Profile.module.css';
-
 const Profile = () => {
-  const navigate = useNavigate();
+  // Mock user data - replace with actual auth implementation
+   const navigate = useNavigate();
   const user = AuthAPI.getUser();
+ 
 
   const handleLogout = () => {
     AuthAPI.logout();
@@ -16,7 +16,7 @@ const Profile = () => {
     <div className={styles.container}>
       <nav className={styles.navbar}>
         <div className={styles.navContent}>
-          <h1 className={styles.brand}>IELTS Learning Platform</h1>
+          <h1 className={styles.brand}>PlanPractice</h1>
           <div className={styles.userInfo}>
             <div className={styles.userWelcome}>
               Welcome, <span className={styles.userName}>{user?.username || 'User'}</span>
@@ -63,7 +63,7 @@ const Profile = () => {
               <button className={`${styles.actionBtn} ${styles.blue}`}>
                 Browse Lessons
               </button>
-              <button className={`${styles.actionBtn} ${styles.purple}`}>
+              <button className={`${styles.actionBtn} ${styles.cyan}`}>
                 Take Quiz
               </button>
             </div>

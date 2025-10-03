@@ -6,7 +6,8 @@ import Register from './app/pages/Register';
 import Profile from './app/pages/Profile';
 import TeacherDashboard from './app/pages/TeacherDashboard';
 import { AuthAPI } from './app/components/APIService/AuthAPI';
-
+import Landing from './app/pages/Landing.jsx';
+import HeaderBar from './app/components/HeaderBar.jsx';
 // Protect routes
 const ProtectedRoute = ({ children }) => {
   return AuthAPI.isAuthenticated() ? children : <Navigate to="/login" replace />;
@@ -19,12 +20,8 @@ const PublicRoute = ({ children }) => {
 function App() {
   return (
     <BrowserRouter>
-      <nav style={{ display: 'flex', gap: 12, padding: 12 }}>
-        <Link to="/">Home</Link>
-        <Link to="/quiz">Quiz Management</Link>
-        <Link to="/teacher/">Teacher Dashboard</Link>
-        <Link to="/profile">Profile</Link>
-      </nav>
+     <HeaderBar/>
+     
 
       <Routes>
         {/* Public pages */}
@@ -61,7 +58,16 @@ function App() {
               <TeacherDashboard />
             // </ProtectedRoute>
           } 
+        />  
+        <Route 
+          path="/" 
+          element={
+            // <ProtectedRoute>
+              <Landing />
+            // </ProtectedRoute>
+          } 
         />
+
 
         {/* Other routes */}
         <Route path="/" element={<div style={{ padding: 16 }}><h1>Home</h1><p>Welcome.</p></div>} />
