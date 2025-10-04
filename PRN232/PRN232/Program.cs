@@ -1,15 +1,20 @@
 
 using DAL;
+using DAL.LessonDAO;
 using DAL.QuizDAO;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.OpenApi;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using Repository;
 using Repository.Interface;
 using Repository.Method;
 using Scalar.AspNetCore;
 using Service;
+using Service.Interface;
 using Service.JWT;
+using Service.Method;
 using Service.QuizzInterface;
 using Service.QuizzMethod;
 using System.Text;
@@ -40,17 +45,20 @@ namespace PRN232
             builder.Services.AddControllers();
             builder.Services.AddDbContext<PlantPraticeDbContext>(options =>
    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
-            builder.Services.AddOpenApi();
+            builder.Services.AddOpenApi("v1", options =>
+            {
+                options.AddDocumentTransformer<BearerSecuritySchemeTransformer>();
+            });
             //Injection of DAO
-            
+
             builder.Services.AddScoped<QuizDAO>();
             builder.Services.AddScoped<QuestionDAO>();
             builder.Services.AddScoped<AnswerDAO>();
             builder.Services.AddScoped<QuizResultDAO>();
             builder.Services.AddScoped<UserAnswerDAO>();
-
-
-
+            builder.Services.AddScoped<LessonDAO>();
+            builder.Services.AddScoped<ILessonRepository, LessonRepository>();
+            builder.Services.AddScoped<ILessonService, LessonService>();
             builder.Services.AddScoped<UserDAO>();
             builder.Services.AddScoped<OtpVerifyDAO>();
             //builder.Services.AddScoped<AnswerStudentDAO>();
@@ -149,6 +157,57 @@ namespace PRN232
             app.MapControllers();
 
             app.Run();
+        }
+    }
+    internal sealed class BearerSecuritySchemeTransformer : IOpenApiDocumentTransformer
+    {
+        private readonly Microsoft.AspNetCore.Authentication.IAuthenticationSchemeProvider _authenticationSchemeProvider;
+
+        public BearerSecuritySchemeTransformer(Microsoft.AspNetCore.Authentication.IAuthenticationSchemeProvider authenticationSchemeProvider)
+        {
+            _authenticationSchemeProvider = authenticationSchemeProvider;
+        }
+
+        public async Task TransformAsync(OpenApiDocument document, OpenApiDocumentTransformerContext context, CancellationToken cancellationToken)
+        {
+            var authenticationSchemes = await _authenticationSchemeProvider.GetAllSchemesAsync();
+            if (authenticationSchemes.Any(authScheme => authScheme.Name == JwtBearerDefaults.AuthenticationScheme))
+            {
+                var securityScheme = new OpenApiSecurityScheme
+                {
+                    Type = SecuritySchemeType.Http,
+                    Scheme = "bearer",
+                    In = ParameterLocation.Header,
+                    BearerFormat = "JWT",
+                    Reference = new OpenApiReference
+                    {
+                        Id = "Bearer",
+                        Type = ReferenceType.SecurityScheme
+                    }
+                };
+
+                document.Components ??= new OpenApiComponents();
+                document.Components.SecuritySchemes ??= new Dictionary<string, OpenApiSecurityScheme>();
+                document.Components.SecuritySchemes["Bearer"] = securityScheme;
+
+                // Modify to only apply security to endpoints with [Authorize]
+                foreach (var path in document.Paths)
+                {
+                    foreach (var operation in path.Value.Operations)
+                    {
+                        // Check if the operation has an Authorize attribute (simplified check)
+                        // You may need to customize this logic based on your needs
+                        if (operation.Value.Extensions.TryGetValue("x-require-auth", out var auth) && auth.ToString() == "true")
+                        {
+                            operation.Value.Security ??= new List<OpenApiSecurityRequirement>();
+                            operation.Value.Security.Add(new OpenApiSecurityRequirement
+                            {
+                                [securityScheme] = Array.Empty<string>()
+                            });
+                        }
+                    }
+                }
+            }
         }
     }
 }
