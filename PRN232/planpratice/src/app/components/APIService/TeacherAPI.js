@@ -26,8 +26,9 @@ class TeacherAPI {
       }
     });
     
-    const result = await response.json();
     if (!response.ok) throw new Error(result.message || 'Failed to fetch teacher quizzes');
+    
+    const result = await response.json();
     return result;
   }
 }

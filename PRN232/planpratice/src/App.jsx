@@ -54,9 +54,9 @@ function App() {
         <Route 
           path="/teacher" 
           element={
-            // <ProtectedRoute>
+            <ProtectedRoute>
               <TeacherDashboard />
-            // </ProtectedRoute>
+            </ProtectedRoute>
           } 
         />  
         <Route 
