@@ -34,7 +34,7 @@ namespace PRN232
             {
                 options.AddPolicy("AllowFrontend", policy =>
                 {
-                    policy.WithOrigins("http://localhost:4000", "https://writingaibeta002.aihubproduction.com")
+                    policy.WithOrigins("http://localhost:4000", "https://localhost:4000")
                           .AllowAnyHeader()
                           .AllowAnyMethod()
                           .AllowCredentials();
@@ -45,17 +45,20 @@ namespace PRN232
             builder.Services.AddControllers();
             builder.Services.AddDbContext<PlantPraticeDbContext>(options =>
    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
-            builder.Services.AddOpenApi();
+            builder.Services.AddOpenApi("v1", options =>
+            {
+                options.AddDocumentTransformer<BearerSecuritySchemeTransformer>();
+            });
             //Injection of DAO
-            
+
             builder.Services.AddScoped<QuizDAO>();
             builder.Services.AddScoped<QuestionDAO>();
             builder.Services.AddScoped<AnswerDAO>();
             builder.Services.AddScoped<QuizResultDAO>();
             builder.Services.AddScoped<UserAnswerDAO>();
             builder.Services.AddScoped<LessonDAO>();
-
-
+            builder.Services.AddScoped<ILessonRepository, LessonRepository>();
+            builder.Services.AddScoped<ILessonService, LessonService>();
             builder.Services.AddScoped<UserDAO>();
             builder.Services.AddScoped<OtpVerifyDAO>();
             //builder.Services.AddScoped<AnswerStudentDAO>();
@@ -75,7 +78,7 @@ namespace PRN232
             builder.Services.AddScoped<IEmailSender, EmailSender>();
             builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<IJwtService, JWTService>();
-            builder.Services.AddScoped<ILessonRepo, LessonRepo>();
+            builder.Services.AddScoped<ILessonRepository, LessonRepository>();
             builder.Services.AddScoped<IQuizRepository, QuizRepository>();
             builder.Services.AddScoped<IQuestionRepository, QuestionRepository>();
             builder.Services.AddScoped<IAnswerRepository, AnswerRepository>();
@@ -89,7 +92,7 @@ namespace PRN232
             //builder.Services.AddScoped<IUserAnswerStudentRepository, UserAnswerStudentRepository>();
             //builder.Services.AddScoped<IQuizStatisticsStudentRepository, QuizStatisticsStudentRepository>();
 
-            builder.Services.AddScoped<IQuizManagementService, QuizManagementService>();
+            
             builder.Services.AddScoped<IQuizService, QuizService>();
             builder.Services.AddScoped<IQuizResultService, QuizResultService>();
             builder.Services.AddScoped<IQuestionService, QuestionService>();
@@ -210,6 +213,5 @@ namespace PRN232
                 }
             }
         }
-
     }
 }

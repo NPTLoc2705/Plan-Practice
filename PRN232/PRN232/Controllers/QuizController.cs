@@ -1,17 +1,19 @@
+using BusinessObject.Dtos;
+using BusinessObject.Quiz;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using BusinessObject.Quiz;
+using MimeKit;
+using Service.QuizzInterface;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
-using Service.QuizzInterface;
 
 namespace PRN232.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    
     public class QuizController : ControllerBase
     {
         private readonly IQuizService _quizService;
@@ -22,12 +24,20 @@ namespace PRN232.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Quiz>>> GetAllQuizzes()
+        public async Task<ActionResult<IEnumerable<QuizDto>>> GetAllQuizzes()
         {
             try
             {
+                
                 var quizzes = await _quizService.GetAllQuizzesAsync();
-                return Ok(quizzes);
+                var quizDtos = quizzes.Select(q => new QuizDto
+                {
+                    Id = q.Id,
+                    Title = q.Title,
+                    Description = q.Description,
+                    CreatedBy = q.CreatedBy
+                });
+                return Ok(quizDtos);
             }
             catch (Exception ex)
             {
@@ -36,7 +46,7 @@ namespace PRN232.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<Quiz>> GetQuiz(int id)
+        public async Task<ActionResult<QuizDto>> GetQuiz(int id)
         {
             try
             {
@@ -44,7 +54,14 @@ namespace PRN232.Controllers
                 if (quiz == null)
                     return NotFound(new { message = $"Quiz with ID {id} not found" });
 
-                return Ok(quiz);
+                var quizDto = new QuizDto
+                {
+                    Id = quiz.Id,
+                    Title = quiz.Title,
+                    Description = quiz.Description,
+                    CreatedBy = quiz.CreatedBy
+                };
+                return Ok(quizDto);
             }
             catch (ArgumentException ex)
             {
@@ -55,17 +72,26 @@ namespace PRN232.Controllers
                 return StatusCode(500, new { message = "An error occurred while retrieving the quiz", error = ex.Message });
             }
         }
-
+        [Authorize]
         [HttpPost]
-        public async Task<ActionResult<Quiz>> CreateQuiz([FromBody] Quiz quiz)
+        public async Task<ActionResult<QuizDto>> CreateQuiz([FromBody] QuizDto quizDto)
         {
             try
             {
                 if (!ModelState.IsValid)
                     return BadRequest(ModelState);
+                var createdBy = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+                var quiz = new Quiz
+                {
+                    Title = quizDto.Title,
+                    Description = quizDto.Description,
+                    CreatedAt = DateTime.UtcNow,
+                    CreatedBy = createdBy
+                };
 
-                var createdQuiz = await _quizService.CreateQuizAsync(quiz);
-                return CreatedAtAction(nameof(GetQuiz), new { id = createdQuiz.Id }, createdQuiz);
+                await _quizService.CreateQuizAsync(quiz);
+
+                return CreatedAtAction(nameof(GetQuiz), new { id = quiz.Id }, quiz);
             }
             catch (ArgumentException ex)
             {
@@ -78,18 +104,26 @@ namespace PRN232.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult<Quiz>> UpdateQuiz(int id, [FromBody] Quiz quiz)
+        public async Task<ActionResult<QuizDto>> UpdateQuiz(QuizDto quizDto)
         {
             try
             {
-                if (id != quiz.Id)
+                if (quizDto.Id != quizDto.Id)
                     return BadRequest(new { message = "Quiz ID mismatch" });
 
                 if (!ModelState.IsValid)
                     return BadRequest(ModelState);
+                var createdBy = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+                var quiz = new Quiz
+                {
+                    Id = quizDto.Id,
+                    Title = quizDto.Title,
+                    Description = quizDto.Description,
+                    CreatedBy = createdBy
+                };
 
-                var updatedQuiz = await _quizService.UpdateQuizAsync(quiz);
-                return Ok(updatedQuiz);
+                await _quizService.UpdateQuizAsync(quiz);
+                return Ok(quiz);
             }
             catch (ArgumentException ex)
             {
@@ -110,11 +144,8 @@ namespace PRN232.Controllers
         {
             try
             {
-                var result = await _quizService.DeleteQuizAsync(id);
-                if (!result)
-                    return NotFound(new { message = $"Quiz with ID {id} not found" });
-
-                return NoContent();
+                await _quizService.DeleteQuizAsync(id);
+                return Ok();
             }
             catch (ArgumentException ex)
             {
@@ -123,6 +154,63 @@ namespace PRN232.Controllers
             catch (Exception ex)
             {
                 return StatusCode(500, new { message = "An error occurred while deleting the quiz", error = ex.Message });
+            }
+        }
+
+        [HttpGet("teacher/me/dashboard")]
+        [Authorize(Roles = "Teacher")]
+        public async Task<ActionResult<BusinessObject.Dtos.TeacherDashboardDto>> GetTeacherDashboard()
+        {
+            try
+            {
+                var idClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (!int.TryParse(idClaim, out var teacherId))
+                {
+                    return Unauthorized(new { message = "gays" });
+                }
+
+                var dashboard = await _quizService.GetTeacherDashboardStatsAsync(teacherId);
+                return Ok(dashboard);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "An error occurred while retrieving teacher dashboard", error = ex.Message });
+            }
+        }
+
+        [HttpGet("teacher/me")]
+        [Authorize(Roles = "Teacher")]
+        public async Task<ActionResult<IEnumerable<QuizDto>>> GetQuizzesByTeacher()
+        {
+            try
+            {
+                var idClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (!int.TryParse(idClaim, out var teacherId))
+                {
+                    return Unauthorized(new { message = "gays" });
+                }
+
+                var quizzes = await _quizService.GetQuizzesByTeacherAsync(teacherId);
+                var quizDtos = quizzes.Select(q => new QuizDto
+                {
+                    Id = q.Id,
+                    Title = q.Title,
+                    Description = q.Description,
+                    CreatedBy = q.CreatedBy
+                });
+                return Ok(quizDtos);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "An error occurred while retrieving teacher quizzes", error = ex.Message });
             }
         }
     }

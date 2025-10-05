@@ -4,8 +4,8 @@
     "Projects": [
       {
         "Path": "PRN232\\PRN232.csproj",
-        "Action": "StartWithoutDebugging"
+        "Action": "Start"
       }
-    ]
+    ] 
   }
 ]

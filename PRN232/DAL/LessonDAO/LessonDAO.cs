@@ -1,105 +1,63 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using BusinessObject;
-using BusinessObject.Dtos.LessonDTO;
 using BusinessObject.Lesson;
 using Microsoft.EntityFrameworkCore;
+
 namespace DAL.LessonDAO
 {
     public class LessonDAO
     {
         private readonly PlantPraticeDbContext _context;
-        public LessonDAO(PlantPraticeDbContext content)
+
+        public LessonDAO(PlantPraticeDbContext context)
         {
-            _context = content;
+            _context = context;
         }
-        public async Task<LessonResponse> CreateLesson(LessonRequest lesson)
+
+        public async Task<Lesson> CreateLessonAsync(Lesson lesson)
         {
-            var entity = MapToEntity(lesson);
-            _context.Add(entity);
+            _context.Lessons.Add(lesson);
             await _context.SaveChangesAsync();
-
-            return MapToEntityResponse(entity);
+            return lesson;
         }
 
-        public async Task<LessonResponse> UpdateLesson(LessonRequest lesson)
+        public async Task<Lesson> GetLessonByIdAsync(int id)
         {
-            var exist = await _context.Lessons.FindAsync(lesson.Id);
-            if (exist == null)
-            {
-                throw new Exception($"Lesson with ID {lesson.Id} not found.");
-            }
-            exist.Title = lesson.Title;
-            exist.Content = lesson.Content;
-            exist.GradeLevel = lesson.GradeLevel;
-            exist.Description = lesson.Description;
-            exist.UserId = lesson.UserId;
-
-            await _context.SaveChangesAsync();
-            return MapToEntityResponse(exist);
-
+            return await _context.Lessons.FindAsync(id);
         }
 
-        public async Task<List<LessonResponse>> ViewLesson(int UserId)
+        public async Task<List<Lesson>> GetAllLessonsAsync()
         {
-            var lessons = await _context.Lessons
-                .Where(l => l.UserId == UserId)
+            return await _context.Lessons.ToListAsync();
+        }
+
+        public async Task<List<Lesson>> GetLessonsByUserIdAsync(int userId)
+        {
+            return await _context.Lessons
+                .Where(l => l.UserId == userId)
                 .ToListAsync();
-
-            if (!lessons.Any())
-            {
-                throw new Exception($"{UserId} doesn't have any lesson bro");
-            }
-
-            return lessons.Select(MapToEntityResponse).ToList();
         }
 
-        public async Task<bool> DeleteLesson(int Id)
+        public async Task<Lesson> UpdateLessonAsync(Lesson lesson)
         {
-            var exist = await _context.Lessons.FindAsync(Id);
-            if(exist == null)
+            _context.Lessons.Update(lesson);
+            await _context.SaveChangesAsync();
+            return lesson;
+        }
+
+        public async Task<bool> DeleteLessonAsync(int id)
+        {
+            var lesson = await _context.Lessons.FindAsync(id);
+            if (lesson == null)
             {
-               return false;
+                return false;
             }
-            _context.Lessons.Remove(exist);
+            _context.Lessons.Remove(lesson);
             await _context.SaveChangesAsync();
             return true;
-
         }
-
-        public async Task<List<LessonResponse>> ViewAllLesson()
-        {
-            var lessons = await _context.Lessons.ToListAsync();
-            return lessons.Select(MapToEntityResponse).ToList();
-        }
-
-        private Lesson MapToEntity(LessonRequest request)
-        {
-            return new Lesson
-            {
-                Id = request.Id,
-                Title = request.Title,
-                Content = request.Content,
-                GradeLevel = request.GradeLevel,
-                Description = request.Description,
-                UserId = request.UserId
-            };
-        }
-        private LessonResponse MapToEntityResponse(Lesson request)
-        {
-            return new LessonResponse
-            {
-                Id = request.Id,
-                Title = request.Title,
-                Content = request.Content,
-                GradeLevel = request.GradeLevel,
-                Description = request.Description,
-            };
-
-        }
-
     }
 }

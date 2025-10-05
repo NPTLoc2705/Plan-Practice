@@ -13,8 +13,8 @@ namespace Service.QuizzInterface
         Task<UserAnswer?> GetUserAnswerByIdAsync(int userAnswerId);
         Task<IEnumerable<UserAnswer>> GetUserAnswersByQuizResultIdAsync(int quizResultId);
         Task<IEnumerable<UserAnswer>> GetUserAnswersByQuestionIdAsync(int questionId);
-        Task<UserAnswer> CreateUserAnswerAsync(UserAnswer userAnswer);
-        Task<UserAnswer> UpdateUserAnswerAsync(UserAnswer userAnswer);
-        Task<bool> DeleteUserAnswerAsync(int userAnswerId);
+        Task CreateUserAnswerAsync(UserAnswer userAnswer);
+        Task UpdateUserAnswerAsync(UserAnswer userAnswer);
+        Task DeleteUserAnswerAsync(int userAnswerId);
     }
 }

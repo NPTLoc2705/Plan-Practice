@@ -166,8 +166,10 @@ namespace DAL.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<int>("CreatedBy")
+                        .HasColumnType("integer");
+
                     b.Property<string>("Description")
-                        .IsRequired()
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)");
 
@@ -177,6 +179,8 @@ namespace DAL.Migrations
                         .HasColumnType("character varying(200)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CreatedBy");
 
                     b.ToTable("Quizzes");
                 });
@@ -332,6 +336,17 @@ namespace DAL.Migrations
                     b.Navigation("Quiz");
                 });
 
+            modelBuilder.Entity("BusinessObject.Quiz.Quiz", b =>
+                {
+                    b.HasOne("BusinessObject.User", "Creator")
+                        .WithMany("CreatedQuizzes")
+                        .HasForeignKey("CreatedBy")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Creator");
+                });
+
             modelBuilder.Entity("BusinessObject.Quiz.QuizResult", b =>
                 {
                     b.HasOne("BusinessObject.Quiz.Quiz", "Quiz")
@@ -397,6 +412,8 @@ namespace DAL.Migrations
 
             modelBuilder.Entity("BusinessObject.User", b =>
                 {
+                    b.Navigation("CreatedQuizzes");
+
                     b.Navigation("OtpVerifies");
 
                     b.Navigation("QuizResults");

@@ -5,7 +5,6 @@ using BusinessObject.Dtos.LessonDTO;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Service.Interface;
-using Services;
 
 namespace API.Controllers
 {
@@ -24,11 +23,15 @@ namespace API.Controllers
         [Authorize]
         public async Task<IActionResult> Get()
         {
-            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (!int.TryParse(userIdClaim, out var userId))
+            {
+                return Unauthorized(new { Message = "Invalid user ID." });
+            }
+
             var lessons = await _lessonService.GetLessonsByUserIdAsync(userId);
             return Ok(lessons);
         }
-
 
         [HttpPost]
         [Authorize]
@@ -37,7 +40,12 @@ namespace API.Controllers
             if (lesson == null)
                 return BadRequest(new { Message = "Lesson cannot be null" });
 
-            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (!int.TryParse(userIdClaim, out var userId))
+            {
+                return Unauthorized(new { Message = "Invalid user ID." });
+            }
+
             if (lesson.UserId != userId)
                 return Unauthorized(new { Message = "Cannot create lesson for another user" });
 
@@ -52,7 +60,15 @@ namespace API.Controllers
             if (lesson == null)
                 return BadRequest(new { Message = "Invalid lesson data" });
 
-            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            if (lesson.Id != id)
+                return BadRequest(new { Message = "Lesson ID mismatch" });
+
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (!int.TryParse(userIdClaim, out var userId))
+            {
+                return Unauthorized(new { Message = "Invalid user ID." });
+            }
+
             if (lesson.UserId != userId)
                 return Unauthorized(new { Message = "Cannot update lesson for another user" });
 
@@ -64,7 +80,12 @@ namespace API.Controllers
         [Authorize]
         public async Task<IActionResult> Delete(int id)
         {
-            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (!int.TryParse(userIdClaim, out var userId))
+            {
+                return Unauthorized(new { Message = "Invalid user ID." });
+            }
+
             var success = await _lessonService.DeleteLessonAsync(id, userId);
             if (!success)
                 return NotFound(new { Message = "Lesson not found" });
@@ -73,7 +94,7 @@ namespace API.Controllers
         }
 
         [HttpGet("all")]
-        [Authorize] 
+        [Authorize]
         public async Task<IActionResult> GetAllLessons()
         {
             var lessons = await _lessonService.GetAllLessonsAsync();
