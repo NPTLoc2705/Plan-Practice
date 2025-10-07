@@ -1,81 +1,92 @@
-import './App.css'
-import { BrowserRouter, Routes, Route, Link, Navigate } from 'react-router-dom'
+﻿import './App.css'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import QuizManagement from './app/pages/QuizManagement.jsx'
 import Login from './app/pages/Login';
 import Register from './app/pages/Register';
 import Profile from './app/pages/Profile';
 import TeacherDashboard from './app/pages/TeacherDashboard';
+import CreateQuiz from './app/pages/CreateQuiz.jsx'; // ✅ New page
+import EditQuiz from './app/pages/EditQuiz.jsx'; // ✅ New page
 import { AuthAPI } from './app/components/APIService/AuthAPI';
 import Landing from './app/pages/Landing.jsx';
 import HeaderBar from './app/components/HeaderBar.jsx';
+
 // Protect routes
 const ProtectedRoute = ({ children }) => {
-  return AuthAPI.isAuthenticated() ? children : <Navigate to="/login" replace />;
+    return AuthAPI.isAuthenticated() ? children : <Navigate to="/login" replace />;
 };
 
 const PublicRoute = ({ children }) => {
-  return !AuthAPI.isAuthenticated() ? children : <Navigate to="/profile" replace />;
+    return !AuthAPI.isAuthenticated() ? children : <Navigate to="/profile" replace />;
 };
 
 function App() {
-  return (
-    <BrowserRouter>
-     <HeaderBar/>
-     
+    return (
+        <BrowserRouter>
+            <HeaderBar />
 
-      <Routes>
-        {/* Public pages */}
-        <Route 
-          path="/login" 
-          element={
-            <PublicRoute>
-              <Login />
-            </PublicRoute>
-          } 
-        />
-        <Route 
-          path="/register" 
-          element={
-            <PublicRoute>
-              <Register />
-            </PublicRoute>
-          } 
-        />
+            <Routes>
+                {/* Public pages */}
+                <Route
+                    path="/login"
+                    element={
+                        <PublicRoute>
+                            <Login />
+                        </PublicRoute>
+                    }
+                />
+                <Route
+                    path="/register"
+                    element={
+                        <PublicRoute>
+                            <Register />
+                        </PublicRoute>
+                    }
+                />
 
-        {/* Protected pages */}
-        <Route 
-          path="/profile" 
-          element={
-            <ProtectedRoute>
-              <Profile />
-            </ProtectedRoute>
-          } 
-        />
-        <Route 
-          path="/teacher" 
-          element={
-            <ProtectedRoute>
-              <TeacherDashboard />
-            </ProtectedRoute>
-          } 
-        />  
-        <Route 
-          path="/" 
-          element={
-            // <ProtectedRoute>
-              <Landing />
-            // </ProtectedRoute>
-          } 
-        />
+                {/* Protected pages */}
+                <Route
+                    path="/profile"
+                    element={
+                        <ProtectedRoute>
+                            <Profile />
+                        </ProtectedRoute>
+                    }
+                />
 
+                <Route
+                    path="/quizmanagement"
+                    element={
+                        <ProtectedRoute>
+                            <QuizManagement /> {/* ✅ Dashboard for Teacher */}
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/quizmanagement/edit-quiz/:quizId"
+                    element={
+                        <ProtectedRoute>
+                            <EditQuiz />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/quizmanagement/create-quiz"
+                    element={
+                        <ProtectedRoute>
+                            <CreateQuiz /> {/* ✅ Separate Create Quiz page */}
+                        </ProtectedRoute>
+                    }
+                />
 
-        {/* Other routes */}
-        <Route path="/" element={<div style={{ padding: 16 }}><h1>Home</h1><p>Welcome.</p></div>} />
-        <Route path="/quiz/*" element={<QuizManagement />} />
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </BrowserRouter>
-  );
+                {/* Landing (public) */}
+                <Route path="/" element={<Landing />} />
+
+                {/* Fallback */}
+                <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+        </BrowserRouter>
+    );
 }
 
 export default App;

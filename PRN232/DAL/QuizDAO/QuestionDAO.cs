@@ -47,6 +47,10 @@ namespace DAL.QuizDAO
             _context.Questions.Update(question);
             await _context.SaveChangesAsync();
         }
+        public async Task<IEnumerable<Question>> GetQuestionsByQuizIdAsync(int quizId)
+        {
+            return await _context.Questions.Where(q => q.QuizId == quizId).ToListAsync();
+        }
     }
 
 }

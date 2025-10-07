@@ -36,8 +36,7 @@ namespace Service.QuizzMethod
             if (quizId <= 0)
                 throw new ArgumentException("Quiz ID must be greater than 0", nameof(quizId));
 
-            var allQuestions = await _questionRepository.GetQuestionsAsync();
-            return allQuestions.Where(q => q.QuizId == quizId);
+            return await _questionRepository.GetQuestionsByQuizIdAsync(quizId);
         }
 
         public async Task CreateQuestionAsync(Question question)
