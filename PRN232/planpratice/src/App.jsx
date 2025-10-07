@@ -10,7 +10,7 @@ import EditQuiz from './app/pages/EditQuiz.jsx'; // ✅ New page
 import { AuthAPI } from './app/components/APIService/AuthAPI';
 import Landing from './app/pages/Landing.jsx';
 import HeaderBar from './app/components/HeaderBar.jsx';
-
+import LessonPlanGenerator from './app/pages/LessonPlanner/Lesson.jsx';
 // Protect routes
 const ProtectedRoute = ({ children }) => {
     return AuthAPI.isAuthenticated() ? children : <Navigate to="/login" replace />;
@@ -44,15 +44,39 @@ function App() {
                     }
                 />
 
-                {/* Protected pages */}
-                <Route
-                    path="/profile"
-                    element={
-                        <ProtectedRoute>
-                            <Profile />
-                        </ProtectedRoute>
-                    }
-                />
+        {/* Protected pages */}
+        <Route 
+          path="/profile" 
+          element={
+            <ProtectedRoute>
+              <Profile />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/teacher" 
+          element={
+            <ProtectedRoute>
+              <TeacherDashboard />
+            </ProtectedRoute>
+          } 
+        /> 
+        <Route
+          path="/LessonPlanner"
+          element = {
+            <ProtectedRoute>
+              <LessonPlanGenerator/>
+            </ProtectedRoute>
+          }
+          ></Route>
+        <Route 
+          path="/" 
+          element={
+            // <ProtectedRoute>
+              <Landing />
+            // </ProtectedRoute>
+          } 
+        />
 
                 <Route
                     path="/quizmanagement"

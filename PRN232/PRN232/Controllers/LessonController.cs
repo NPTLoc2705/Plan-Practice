@@ -9,7 +9,8 @@ using Service.Interface;
 namespace API.Controllers
 {
     [ApiController]
-    [Route("api/lesson")]
+    [Route("api/[controller]")]
+    [Authorize]
     public class LessonController : ControllerBase
     {
         private readonly ILessonService _lessonService;
@@ -19,86 +20,179 @@ namespace API.Controllers
             _lessonService = lessonService;
         }
 
+        private int GetCurrentUserId()
+        {
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (!int.TryParse(userIdClaim, out var userId))
+            {
+                throw new UnauthorizedAccessException("Invalid user ID in token.");
+            }
+            return userId;
+        }
+
+        /// <summary>
+        /// Get all lessons for the current user
+        /// </summary>
         [HttpGet]
-        [Authorize]
-        public async Task<IActionResult> Get()
+        public async Task<IActionResult> GetMyLessons()
         {
-            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (!int.TryParse(userIdClaim, out var userId))
+            try
             {
-                return Unauthorized(new { Message = "Invalid user ID." });
+                var userId = GetCurrentUserId();
+                var lessons = await _lessonService.GetLessonsByUserIdAsync(userId);
+                return Ok(new { success = true, data = lessons });
             }
-
-            var lessons = await _lessonService.GetLessonsByUserIdAsync(userId);
-            return Ok(lessons);
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(new { success = false, message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { success = false, message = "An error occurred while retrieving lessons.", error = ex.Message });
+            }
         }
 
+        /// <summary>
+        /// Get a specific lesson by ID
+        /// </summary>
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(int id)
+        {
+            try
+            {
+                var userId = GetCurrentUserId();
+                var lesson = await _lessonService.GetLessonByIdAsync(id, userId);
+                return Ok(new { success = true, data = lesson });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { success = false, message = ex.Message });
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(new { success = false, message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { success = false, message = "An error occurred.", error = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Create a new lesson (UserId is automatically taken from JWT)
+        /// </summary>
         [HttpPost]
-        [Authorize]
-        public async Task<IActionResult> Create([FromBody] LessonRequest lesson)
+        public async Task<IActionResult> Create([FromBody] LessonRequest request)
         {
-            if (lesson == null)
-                return BadRequest(new { Message = "Lesson cannot be null" });
-
-            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (!int.TryParse(userIdClaim, out var userId))
+            try
             {
-                return Unauthorized(new { Message = "Invalid user ID." });
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(new { success = false, message = "Invalid data.", errors = ModelState });
+                }
+
+                var userId = GetCurrentUserId();
+                var created = await _lessonService.CreateLessonAsync(request, userId);
+
+                return CreatedAtAction(
+                    nameof(GetById),
+                    new { id = created.Id },
+                    new { success = true, data = created, message = "Lesson created successfully." }
+                );
             }
-
-            if (lesson.UserId != userId)
-                return Unauthorized(new { Message = "Cannot create lesson for another user" });
-
-            var created = await _lessonService.CreateLessonAsync(lesson, userId);
-            return CreatedAtAction(nameof(Get), new { id = created.Id }, created);
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { success = false, message = ex.Message });
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(new { success = false, message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { success = false, message = "An error occurred while creating the lesson.", error = ex.Message });
+            }
         }
 
+        /// <summary>
+        /// Update an existing lesson
+        /// </summary>
         [HttpPut("{id}")]
-        [Authorize]
-        public async Task<IActionResult> Update(int id, [FromBody] LessonRequest lesson)
+        public async Task<IActionResult> Update(int id, [FromBody] LessonRequest request)
         {
-            if (lesson == null)
-                return BadRequest(new { Message = "Invalid lesson data" });
-
-            if (lesson.Id != id)
-                return BadRequest(new { Message = "Lesson ID mismatch" });
-
-            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (!int.TryParse(userIdClaim, out var userId))
+            try
             {
-                return Unauthorized(new { Message = "Invalid user ID." });
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(new { success = false, message = "Invalid data.", errors = ModelState });
+                }
+
+                var userId = GetCurrentUserId();
+                var updated = await _lessonService.UpdateLessonAsync(id, request, userId);
+
+                return Ok(new { success = true, data = updated, message = "Lesson updated successfully." });
             }
-
-            if (lesson.UserId != userId)
-                return Unauthorized(new { Message = "Cannot update lesson for another user" });
-
-            var updated = await _lessonService.UpdateLessonAsync(lesson, userId);
-            return Ok(updated);
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { success = false, message = ex.Message });
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { success = false, message = ex.Message });
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(new { success = false, message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { success = false, message = "An error occurred while updating the lesson.", error = ex.Message });
+            }
         }
 
+        /// <summary>
+        /// Delete a lesson
+        /// </summary>
         [HttpDelete("{id}")]
-        [Authorize]
         public async Task<IActionResult> Delete(int id)
         {
-            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (!int.TryParse(userIdClaim, out var userId))
+            try
             {
-                return Unauthorized(new { Message = "Invalid user ID." });
+                var userId = GetCurrentUserId();
+                var success = await _lessonService.DeleteLessonAsync(id, userId);
+
+                if (!success)
+                {
+                    return NotFound(new { success = false, message = "Lesson not found." });
+                }
+
+                return Ok(new { success = true, message = "Lesson deleted successfully." });
             }
-
-            var success = await _lessonService.DeleteLessonAsync(id, userId);
-            if (!success)
-                return NotFound(new { Message = "Lesson not found" });
-
-            return Ok(new { Message = "Lesson deleted successfully" });
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(new { success = false, message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { success = false, message = "An error occurred while deleting the lesson.", error = ex.Message });
+            }
         }
 
+        /// <summary>
+        /// Get all lessons (Admin or public access)
+        /// </summary>
         [HttpGet("all")]
-        [Authorize]
         public async Task<IActionResult> GetAllLessons()
         {
-            var lessons = await _lessonService.GetAllLessonsAsync();
-            return Ok(lessons);
+            try
+            {
+                var lessons = await _lessonService.GetAllLessonsAsync();
+                return Ok(new { success = true, data = lessons });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { success = false, message = "An error occurred while retrieving lessons.", error = ex.Message });
+            }
         }
     }
 }
