@@ -1,18 +1,24 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.ComponentModel.DataAnnotations;
 
 namespace BusinessObject.Dtos.LessonDTO
 {
     public class LessonRequest
     {
-        public int Id { get; set; }
+        [Required(ErrorMessage = "Title is required")]
+        [StringLength(200, ErrorMessage = "Title cannot exceed 200 characters")]
         public string Title { get; set; }
+
+        [Required(ErrorMessage = "Content is required")]
         public string Content { get; set; }
-        public string GradeLevel { get; set; }
+
+        [Required(ErrorMessage = "Grade level is required")]
+        [Range(1, 12, ErrorMessage = "Grade level must be between 1 and 12")]
+        public int GradeLevel { get; set; }
+
+        [StringLength(500, ErrorMessage = "Description cannot exceed 500 characters")]
         public string Description { get; set; }
-        public int UserId { get; set; }
+
+        // UserId is removed - will be set from JWT token automatically
     }
 }
