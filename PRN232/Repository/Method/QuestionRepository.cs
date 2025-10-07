@@ -39,9 +39,16 @@ namespace Repository.Method
            return await _dao.GetQuestionsAsync();
         }
 
+        public async Task<IEnumerable<Question>> GetQuestionsByQuizIdAsync(int quizId)
+        {
+            return await _dao.GetQuestionsByQuizIdAsync(quizId);
+        }
+
         public async Task UpdateQuestionAsync(Question question)
         {
            await _dao.UpdateQuestionAsync(question);
         }
+
+        
     }
 }

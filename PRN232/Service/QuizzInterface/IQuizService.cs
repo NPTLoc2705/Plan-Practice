@@ -17,5 +17,7 @@ namespace Service.QuizzInterface
         Task DeleteQuizAsync(int quizId);
         Task<TeacherDashboardDto> GetTeacherDashboardStatsAsync(int teacherId);
         Task<IEnumerable<Quiz>> GetQuizzesByTeacherAsync(int teacherId);
+
+
     }
 }

@@ -69,7 +69,7 @@ namespace PRN232.Controllers
                 return StatusCode(500, new { message = "An error occurred while retrieving the question", error = ex.Message });
             }
         }
-
+        
         [HttpGet("quiz/{quizId}")]
         public async Task<ActionResult<IEnumerable<QuestionDto>>> GetQuestionsByQuiz(int quizId)
         {
@@ -81,7 +81,7 @@ namespace PRN232.Controllers
                     Id = q.Id,
                     Content = q.Content,
                     QuizId = q.QuizId,
-                   
+                    
                 });
                 return Ok(questionDtos);
             }

@@ -15,5 +15,6 @@ namespace Service.QuizzInterface
         Task CreateQuestionAsync(Question question);
         Task UpdateQuestionAsync(Question question);
         Task DeleteQuestionAsync(int questionId);
+
     }
 }
