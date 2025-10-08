@@ -25,50 +25,63 @@ namespace Services
                 Id = lesson.Id,
                 Title = lesson.Title,
                 Content = lesson.Content,
-                UserId = lesson.UserId,
-
+                GradeLevel = int.TryParse(lesson.GradeLevel, out var grade) ? grade : 0,
+                Description = lesson.Description,
+                UserId = lesson.UserId
             };
         }
 
-        private Lesson MapToEntity(LessonRequest lesson)
+        private Lesson MapToEntity(LessonRequest request, int userId, int? existingId = null)
         {
             return new Lesson
             {
-                Id = lesson.Id,
-                Title = lesson.Title,
-                Content = lesson.Content,
-                UserId = lesson.UserId,
+                Id = existingId ?? 0, // 0 for new entities
+                Title = request.Title?.Trim(),
+                Content = request.Content?.Trim(),
+                GradeLevel = request.GradeLevel.ToString(),
+                Description = request.Description?.Trim(),
+                UserId = userId
             };
         }
 
-        public async Task<LessonResponse> CreateLessonAsync(LessonRequest lesson, int currentUserId)
+        public async Task<LessonResponse> CreateLessonAsync(LessonRequest request, int currentUserId)
         {
-            if (string.IsNullOrWhiteSpace(lesson.Title))
+            if (string.IsNullOrWhiteSpace(request.Title))
             {
                 throw new ArgumentException("Lesson title cannot be empty.");
             }
 
-            if (lesson.UserId != currentUserId)
+            if (string.IsNullOrWhiteSpace(request.Content))
             {
-                throw new UnauthorizedAccessException("You can only create lessons for yourself.");
+                throw new ArgumentException("Lesson content cannot be empty.");
             }
 
-            var lessonEntity = MapToEntity(lesson);
+            if (request.GradeLevel < 1 || request.GradeLevel > 12)
+            {
+                throw new ArgumentException("Grade level must be between 1 and 12.");
+            }
+
+            var lessonEntity = MapToEntity(request, currentUserId);
             var createdLesson = await _lessonRepo.CreateLessonAsync(lessonEntity);
             return MapToResponse(createdLesson);
         }
 
-        public async Task<LessonResponse> UpdateLessonAsync(LessonRequest lesson, int currentUserId)
+        public async Task<LessonResponse> UpdateLessonAsync(int lessonId, LessonRequest request, int currentUserId)
         {
-            if (string.IsNullOrWhiteSpace(lesson.Title))
+            if (string.IsNullOrWhiteSpace(request.Title))
             {
                 throw new ArgumentException("Lesson title cannot be empty.");
             }
 
-            var existingLesson = await _lessonRepo.GetLessonByIdAsync(lesson.Id);
+            if (string.IsNullOrWhiteSpace(request.Content))
+            {
+                throw new ArgumentException("Lesson content cannot be empty.");
+            }
+
+            var existingLesson = await _lessonRepo.GetLessonByIdAsync(lessonId);
             if (existingLesson == null)
             {
-                throw new KeyNotFoundException($"Lesson with ID {lesson.Id} not found.");
+                throw new KeyNotFoundException($"Lesson with ID {lessonId} not found.");
             }
 
             if (existingLesson.UserId != currentUserId)
@@ -76,9 +89,26 @@ namespace Services
                 throw new UnauthorizedAccessException("You can only update your own lessons.");
             }
 
-            var lessonEntity = MapToEntity(lesson);
+            var lessonEntity = MapToEntity(request, currentUserId, lessonId);
             var updatedLesson = await _lessonRepo.UpdateLessonAsync(lessonEntity);
             return MapToResponse(updatedLesson);
+        }
+
+        public async Task<LessonResponse> GetLessonByIdAsync(int id, int currentUserId)
+        {
+            var lesson = await _lessonRepo.GetLessonByIdAsync(id);
+            if (lesson == null)
+            {
+                throw new KeyNotFoundException($"Lesson with ID {id} not found.");
+            }
+
+            // Optional: Restrict access to own lessons only
+            // if (lesson.UserId != currentUserId)
+            // {
+            //     throw new UnauthorizedAccessException("You can only view your own lessons.");
+            // }
+
+            return MapToResponse(lesson);
         }
 
         public async Task<List<LessonResponse>> GetLessonsByUserIdAsync(int userId)
