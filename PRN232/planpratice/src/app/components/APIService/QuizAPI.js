@@ -118,6 +118,18 @@ export class QuizAPI {
         if (!res.ok) throw new Error('Failed to fetch questions');
         return res.json();
     }
+    static async updateQuestion(id, question) {
+        const res = await fetch(`${API_BASE_URL}/Question/${id}`, {
+            method: 'PUT',
+            headers: headers(),
+            body: JSON.stringify(question),
+        });
+        if (!res.ok) throw new Error('Failed to update question');
+
+        // only parse JSON if response body exists
+        const text = await res.text();
+        return text ? JSON.parse(text) : null;
+    }
 
     static async createQuestion(question) {
         const res = await fetch(`${API_BASE_URL}/question`, {
@@ -156,6 +168,7 @@ export class QuizAPI {
         return res.json();
     }
 
+
     static async updateAnswer(id, answer) {
         const res = await fetch(`${API_BASE_URL}/Answer/${id}`, {
             method: 'PUT',
@@ -163,6 +176,9 @@ export class QuizAPI {
             body: JSON.stringify(answer),
         });
         if (!res.ok) throw new Error('Failed to update answer');
+
+        const text = await res.text();
+        return text ? JSON.parse(text) : null;
     }
 
     static async deleteAnswer(id) {
