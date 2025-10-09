@@ -5,37 +5,36 @@
 namespace DAL.Migrations
 {
     /// <inheritdoc />
-    public partial class FixRoleUser : Migration
+    public partial class AdjustPhone : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AlterColumn<string>(
-                name: "Role",
+                name: "Phone",
                 table: "Users",
-                type: "character varying(20)",
-                maxLength: 20,
-                nullable: false,
-                defaultValue: "Student",
+                type: "character varying(15)",
+                maxLength: 15,
+                nullable: true,
                 oldClrType: typeof(string),
-                oldType: "text",
-                oldNullable: true,
-                oldDefaultValue: "User");
+                oldType: "character varying(15)",
+                oldMaxLength: 15);
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AlterColumn<string>(
-                name: "Role",
+                name: "Phone",
                 table: "Users",
-                type: "text",
-                nullable: true,
-                defaultValue: "User",
+                type: "character varying(15)",
+                maxLength: 15,
+                nullable: false,
+                defaultValue: "",
                 oldClrType: typeof(string),
-                oldType: "character varying(20)",
-                oldMaxLength: 20,
-                oldDefaultValue: "Student");
+                oldType: "character varying(15)",
+                oldMaxLength: 15,
+                oldNullable: true);
         }
     }
 }

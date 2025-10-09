@@ -77,5 +77,11 @@ namespace DAL
 
             return user;
         }
+
+        public async Task<User> GetUserById(int userId)
+        {
+            return await _context.Users.FirstOrDefaultAsync(x => x.Id == userId);
+        }
+
     }
 }

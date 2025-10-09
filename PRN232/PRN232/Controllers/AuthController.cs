@@ -2,7 +2,7 @@
 using Google.Apis.Auth;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Service;
+using Service.Interface;
 using System.Security.Claims;
 
 namespace PRN232.Controllers
@@ -167,6 +167,42 @@ namespace PRN232.Controllers
                     email = User.FindFirst(ClaimTypes.Email)?.Value,
                     role = User.FindFirst(ClaimTypes.Role)?.Value,
                     createdAt = User.FindFirst("Createdat")?.Value
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+        [HttpPut("update-profile")]
+        [Authorize] // Assuming you have JWT authentication
+        public async Task<IActionResult> UpdateProfile([FromBody] UpdateUserProfileDto updateDto)
+        {
+            try
+            {
+                // Get userId from JWT token claims
+                var userIdClaim = User.FindFirst("userId")?.Value
+                                  ?? User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+                if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
+                {
+                    return Unauthorized(new { message = "Invalid user token" });
+                }
+
+                var updatedUser = await _userService.UpdateUserProfile(userId, updateDto);
+
+                // Return user without password
+                return Ok(new
+                {
+                    message = "Profile updated successfully",
+                    user = new
+                    {
+                        updatedUser.Id,
+                        updatedUser.Username,
+                        updatedUser.Email,
+                        updatedUser.Phone,
+                        updatedUser.EmailVerified
+                    }
                 });
             }
             catch (Exception ex)

@@ -5,7 +5,8 @@ using Google.Apis.Auth;
 using Microsoft.Extensions.Configuration;
 using Org.BouncyCastle.Asn1.Ocsp;
 using Org.BouncyCastle.Utilities.Collections;
-using Repository;
+using Repository.Interface;
+using Service.Interface;
 using Service.JWT;
 using System;
 using System.Collections.Generic;
@@ -19,8 +20,8 @@ using static Org.BouncyCastle.Crypto.Engines.SM2Engine;
 using static System.Net.WebRequestMethods;
 
 
-namespace Service
-{       
+namespace Service.Method
+{
     // Business logic:
     public class UserService : IUserService
     {
@@ -44,7 +45,10 @@ namespace Service
             var user = await _userRepository.GetByEmailAsync(loginDto.Email);
             if (user == null || !BCrypt.Net.BCrypt.Verify(loginDto.Password, user.Password))
                 throw new Exception("Invalid credentials");
-
+            if (user.IsBanned)
+            {
+                throw new Exception("Your account has been banned. Please contact support.");
+            }
             var token = _jwtService.GenerateToken(user);
             return (token, user);
         }
@@ -116,7 +120,7 @@ namespace Service
             await _emailSender.SendEmailAsync(registerDto.Email, subject, body);
             // TODO: Send email with OTP code here
             // For now, we'll just return a message
-            
+
             return $"OTP sent to {registerDto.Email}. Please check your email and verify within 3 minutes.";
         }
         public async Task<string> VerifyRegistrationAsync(VerifyRegistrationRequest request)
@@ -149,14 +153,14 @@ namespace Service
             };
 
             await _userRepository.CreateAsync(user);
-            
 
-            
+
+
 
 
             // Mark OTP as used
             await _otpRepository.MarkOtpAsUsedAsync(validOtp.Id);
-            
+
 
             await _otpRepository.DeleteUsedOtpAsync(request.Email, request.Otp);
 
@@ -177,7 +181,10 @@ namespace Service
 
                 // Find or create user
                 var user = await _userRepository.FindOrCreateUserFromGoogleAsync(payload);
-
+                if (user.IsBanned)
+                {
+                    throw new Exception("Your account has been banned. Please contact support.");
+                }
                 // Generate JWT token
                 var token = _jwtService.GenerateToken(user);
 
@@ -275,6 +282,60 @@ namespace Service
         {
             var random = new Random();
             return random.Next(100000, 999999).ToString(); // 6-digit OTP
+        }
+
+        public async Task<User> UpdateUserProfile(int userId, UpdateUserProfileDto updateDto)
+        {
+            // Get existing user
+            var user = await _userRepository.GetUserById(userId);
+            if (user == null)
+            {
+                throw new Exception("User not found");
+            }
+
+            // Update username if provided
+            if (!string.IsNullOrWhiteSpace(updateDto.UserName))
+            {
+                user.Username = updateDto.UserName;
+            }
+
+
+            // Update phone if provided
+            if (!string.IsNullOrWhiteSpace(updateDto.Phone))
+            {
+                user.Phone = updateDto.Phone;
+            }
+
+            // Handle password change
+            if (!string.IsNullOrWhiteSpace(updateDto.NewPassword))
+            {
+                // Old password is required to change password
+                if (string.IsNullOrWhiteSpace(updateDto.OldPassword))
+                {
+                    throw new Exception("Old password is required to set a new password");
+                }
+
+                // Verify old password
+                if (!BCrypt.Net.BCrypt.Verify(updateDto.OldPassword, user.Password))
+                {
+                    throw new Exception("Old password is incorrect");
+                }
+
+                // Validate new password (add your validation rules)
+                if (updateDto.NewPassword.Length < 1)
+                {
+                    throw new Exception("New password must be at least 6 characters long");
+                }
+
+                // Hash and update new password
+                user.Password = BCrypt.Net.BCrypt.HashPassword(updateDto.NewPassword);
+            }
+
+            // Save changes
+            await _userRepository.UpdateAsync(user);
+
+            // Return updated user (without password)
+            return user;
         }
     }
 }

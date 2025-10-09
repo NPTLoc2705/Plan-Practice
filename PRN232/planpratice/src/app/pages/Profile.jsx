@@ -1,69 +1,43 @@
-import styles from './Profile.module.css';
 import { useNavigate } from 'react-router-dom';
 import { AuthAPI } from '../components/APIService/AuthAPI';
+
 const Profile = () => {
-  // Mock user data - replace with actual auth implementation
-   const navigate = useNavigate();
+  const navigate = useNavigate();
   const user = AuthAPI.getUser();
+
  
 
-  const handleLogout = () => {
-    AuthAPI.logout();
-    navigate('/login');
-  };
-
   return (
-    <div className={styles.container}>
-      <nav className={styles.navbar}>
-        <div className={styles.navContent}>
-          <h1 className={styles.brand}>PlanPractice</h1>
-          <div className={styles.userInfo}>
-            <div className={styles.userWelcome}>
-              Welcome, <span className={styles.userName}>{user?.username || 'User'}</span>
-            </div>
-            <button
-              onClick={handleLogout}
-              className={styles.logoutBtn}
-            >
-              Logout
-            </button>
-          </div>
-        </div>
-      </nav>
-      
-      <main className={styles.main}>
-        <div className={styles.dashboardCard}>
-          <h2 className={styles.sectionTitle}>Welcome to your Dashboard</h2>
-          <div className={styles.section}>
-            <div className={styles.infoList}>
-              <div className={styles.infoItem}>
-                <span className={styles.infoLabel}>ID:</span> {user?.id}
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-cyan-50 to-white flex flex-col">
+      <main className="flex-1 flex items-center justify-center px-4">
+        <div className="w-full max-w-2xl bg-white rounded-2xl shadow-xl p-8">
+          <div className="mb-8">
+            <h2 className="text-xl font-bold text-gray-900 mb-4">Your Info</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            
+              <div className="bg-blue-50 rounded-lg p-4">
+                <span className="font-semibold text-gray-700">Username:</span> {user?.username}
               </div>
-              <div className={styles.infoItem}>
-                <span className={styles.infoLabel}>Username:</span> {user?.username}
+              <div className="bg-blue-50 rounded-lg p-4">
+                <span className="font-semibold text-gray-700">Email:</span> {user?.email}
               </div>
-              <div className={styles.infoItem}>
-                <span className={styles.infoLabel}>Email:</span> {user?.email}
-              </div>
-              <div className={styles.infoItem}>
-                <span className={styles.infoLabel}>Role:</span> {user?.role}
-              </div>
-              <div className={styles.infoItem}>
-                <span className={styles.infoLabel}>Created:</span> {user?.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A'}
+              
+              <div className="bg-blue-50 rounded-lg p-4 md:col-span-2">
+                <span className="font-semibold text-gray-700">Created:</span> {user?.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A'}
               </div>
             </div>
           </div>
-          
-          <div className={styles.section}>
-            <h3 className={styles.sectionTitle}>Quick Actions</h3>
-            <div className={styles.quickActions}>
-              <button className={styles.actionBtn}>
+
+          <div>
+            <h3 className="text-lg font-bold text-gray-900 mb-4">Quick Actions</h3>
+            <div className="flex flex-wrap gap-4">
+              <button className="px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition">
                 Create Study Plan
               </button>
-              <button className={`${styles.actionBtn} ${styles.blue}`}>
+              <button className="px-6 py-3 bg-cyan-600 text-white rounded-lg font-semibold hover:bg-cyan-700 transition">
                 Browse Lessons
               </button>
-              <button className={`${styles.actionBtn} ${styles.cyan}`}>
+              <button className="px-6 py-3 bg-purple-600 text-white rounded-lg font-semibold hover:bg-purple-700 transition">
                 Take Quiz
               </button>
             </div>

@@ -7,13 +7,12 @@ using Microsoft.AspNetCore.OpenApi;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using Repository;
 using Repository.Interface;
 using Repository.Method;
 using Scalar.AspNetCore;
-using Service;
 using Service.Interface;
 using Service.JWT;
+using Service.Method;
 using Service.QuizzInterface;
 using Service.QuizzMethod;
 using Services;
@@ -61,6 +60,7 @@ namespace PRN232
             builder.Services.AddScoped<ILessonService, LessonService>();
             builder.Services.AddScoped<UserDAO>();
             builder.Services.AddScoped<OtpVerifyDAO>();
+            builder.Services.AddScoped<AdminDAO>();
             //builder.Services.AddScoped<AnswerStudentDAO>();
             //builder.Services.AddScoped<QuestionStudentDAO>();
             //builder.Services.AddScoped<QuizResultStudentDAO>();
@@ -84,6 +84,7 @@ namespace PRN232
             builder.Services.AddScoped<IAnswerRepository, AnswerRepository>();
             builder.Services.AddScoped<IQuizResultRepository, QuizResultRepository>();
             builder.Services.AddScoped<IUserAnswerRepository, UserAnswerRepository>();
+            builder.Services.AddScoped<IAdminRepository, AdminRepository>();
             //Student
             //builder.Services.AddScoped<IQuizStudentRepository, QuizStudentRepository>();
             //builder.Services.AddScoped<IQuestionStudentRepository, QuestionStudentRepository>();
@@ -92,14 +93,15 @@ namespace PRN232
             //builder.Services.AddScoped<IUserAnswerStudentRepository, UserAnswerStudentRepository>();
             //builder.Services.AddScoped<IQuizStatisticsStudentRepository, QuizStatisticsStudentRepository>();
 
-            
+
             builder.Services.AddScoped<IQuizService, QuizService>();
             builder.Services.AddScoped<IQuizResultService, QuizResultService>();
             builder.Services.AddScoped<IQuestionService, QuestionService>();
             builder.Services.AddScoped<IAnswerService, AnswerService>();
             builder.Services.AddScoped<IUserAnswerService, UserAnswerService>();
             builder.Services.AddScoped<ILessonService,LessonService>();
-          //  builder.Services.AddScoped<IStudentQuizService, StudentQuizService>();
+            builder.Services.AddScoped<IAdminService, AdminService>();
+            //  builder.Services.AddScoped<IStudentQuizService, StudentQuizService>();
             var jwtKey = builder.Configuration["Jwt:Key"];
             var key = Encoding.ASCII.GetBytes(jwtKey);
 

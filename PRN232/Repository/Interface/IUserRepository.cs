@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Repository
+namespace Repository.Interface
 {
     public interface IUserRepository
     {
@@ -17,5 +17,7 @@ namespace Repository
         Task<bool> EmailExistsAsync(string email);
         Task<bool> UsernameExistsAsync(string username);
         Task<User> FindOrCreateUserFromGoogleAsync(GoogleJsonWebSignature.Payload payload);
+
+        Task<User> GetUserById(int userId);
     }
 }

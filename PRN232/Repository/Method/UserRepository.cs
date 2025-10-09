@@ -7,8 +7,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Repository.Interface;
 
-namespace Repository
+namespace Repository.Method
 {
     public class UserRepository : IUserRepository
     {
@@ -17,12 +18,12 @@ namespace Repository
         {
             this.userDAO = userDAO;
         }
-        public Task<User> CreateAsync(User user)=> userDAO.CreateAsync(user);
+        public Task<User> CreateAsync(User user) => userDAO.CreateAsync(user);
 
 
 
         public Task<bool> EmailExistsAsync(string email) => userDAO.EmailExistsAsync(email);
-        
+
 
         public Task<User> FindOrCreateUserFromGoogleAsync(GoogleJsonWebSignature.Payload payload) => userDAO.FindOrCreateUserFromGoogleAsync(payload);
 
@@ -41,6 +42,9 @@ namespace Repository
 
         public Task<bool> UsernameExistsAsync(string username)
         => userDAO.UsernameExistsAsync(username);
+
+        public async Task<User> GetUserById(int userId)
+       => await userDAO.GetUserById(userId);
     }
 
 }

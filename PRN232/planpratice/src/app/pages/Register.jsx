@@ -4,7 +4,6 @@ import { Eye, EyeOff, Mail, Lock, User, UserPlus, Loader2, AlertCircle, CheckCir
 import { Link, useNavigate } from 'react-router-dom';
 import { AuthAPI } from '../components/APIService/AuthAPI';
 import GoogleSignIn from '../components/Google/GoogleSignIn';
-import styles from './Register.module.css';
 
 const Register = () => {
   const navigate = useNavigate();
@@ -50,7 +49,7 @@ const Register = () => {
     setError('');
     
     try {
-      const result = await AuthAPI.register({
+      await AuthAPI.register({
         username: formData.username,
         email: formData.email,
         password: formData.password
@@ -70,7 +69,7 @@ const Register = () => {
     setError('');
     
     try {
-      const result = await AuthAPI.verifyRegistration({
+      await AuthAPI.verifyRegistration({
         email: formData.email,
         username: formData.username,
         password: formData.password,
@@ -92,7 +91,7 @@ const Register = () => {
     setError('');
     
     try {
-      const result = await AuthAPI.resendOTP(formData.email);
+      await AuthAPI.resendOTP(formData.email);
       setSuccess('New OTP sent to your email');
       setResendTimer(60);
     } catch (err) {
@@ -112,115 +111,118 @@ const Register = () => {
   };
 
   return (
-    <div className={styles.container}>
-      <div className={styles.wrapper}>
-        <div className={styles.card}>
-          <div className={styles.header}>
-            <div className={styles.iconCircle}>
-              <UserPlus className={styles.icon} />
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 via-blue-50 to-white px-4">
+      <div className="w-full max-w-lg mx-auto">
+        <div className="bg-white rounded-2xl shadow-xl p-8 flex flex-col gap-6">
+          <div className="flex flex-col items-center gap-2">
+            <div className="inline-flex items-center justify-center w-14 h-14 bg-purple-100 rounded-full mb-2">
+              <UserPlus className="w-8 h-8 text-purple-600" />
             </div>
-            <h2 className={styles.title}>Create Account</h2>
-            <p className={styles.subtitle}>
+            <h2 className="text-2xl font-bold text-gray-900">Create Account</h2>
+            <p className="text-gray-500 text-sm">
               {step === 1 ? 'Join our IELTS learning platform' : 'Verify your email address'}
             </p>
           </div>
 
-          <div className={styles.progress}>
-            <div className={`${styles.progressStep} ${step >= 1 ? styles.progressActive : styles.progressInactive}`}>1</div>
-            <div className={`${styles.progressBar} ${step >= 2 ? styles.progressBarActive : ''}`}></div>
-            <div className={`${styles.progressStep} ${step >= 2 ? styles.progressActive : styles.progressInactive}`}>2</div>
+          {/* Progress Bar */}
+          <div className="flex items-center justify-center gap-2 mb-2">
+            <div className={`flex items-center justify-center w-8 h-8 rounded-full font-bold text-white ${step >= 1 ? 'bg-purple-600' : 'bg-gray-300'}`}>1</div>
+            <div className={`w-16 h-1 rounded-full ${step >= 2 ? 'bg-purple-600' : 'bg-gray-200'}`}></div>
+            <div className={`flex items-center justify-center w-8 h-8 rounded-full font-bold text-white ${step >= 2 ? 'bg-purple-600' : 'bg-gray-300'}`}>2</div>
           </div>
 
           {error && (
-            <div className={styles.errorMsg}>
-              <AlertCircle className={styles.msgIcon} />
+            <div className="flex items-center gap-2 bg-red-50 border border-red-200 text-red-700 rounded-lg px-4 py-2 text-sm">
+              <AlertCircle className="w-5 h-5" />
               <span>{error}</span>
             </div>
           )}
 
           {success && (
-            <div className={styles.successMsg}>
-              <CheckCircle className={styles.msgIcon} />
+            <div className="flex items-center gap-2 bg-green-50 border border-green-200 text-green-700 rounded-lg px-4 py-2 text-sm">
+              <CheckCircle className="w-5 h-5" />
               <span>{success}</span>
             </div>
           )}
 
           {step === 1 ? (
             <>
-              <div className={styles.formGroup}>
-                <label className={styles.label}>Username</label>
-                <div className={styles.inputWrapper}>
-                  <User className={styles.inputIcon} />
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Username</label>
+                <div className="relative">
+                  <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                   <input
                     type="text"
                     name="username"
                     value={formData.username}
                     onChange={handleChange}
-                    className={styles.input}
+                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:outline-none bg-gray-50 text-gray-900 transition"
                     placeholder="Choose a username"
                     required
                   />
                 </div>
               </div>
 
-              <div className={styles.formGroup}>
-                <label className={styles.label}>Email</label>
-                <div className={styles.inputWrapper}>
-                  <Mail className={styles.inputIcon} />
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                   <input
                     type="email"
                     name="email"
                     value={formData.email}
                     onChange={handleChange}
-                    className={styles.input}
+                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:outline-none bg-gray-50 text-gray-900 transition"
                     placeholder="Enter your email"
                     required
                   />
                 </div>
               </div>
 
-              <div className={styles.formGroup}>
-                <label className={styles.label}>Password</label>
-                <div className={styles.inputWrapper}>
-                  <Lock className={styles.inputIcon} />
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                   <input
                     type={showPassword ? 'text' : 'password'}
                     name="password"
                     value={formData.password}
                     onChange={handleChange}
-                    className={styles.input}
+                    className="w-full pl-10 pr-10 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:outline-none bg-gray-50 text-gray-900 transition"
                     placeholder="Create a password"
                     required
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className={styles.togglePassword}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-purple-600"
+                    tabIndex={-1}
                   >
-                    {showPassword ? <EyeOff className={styles.eyeIcon} /> : <Eye className={styles.eyeIcon} />}
+                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                   </button>
                 </div>
               </div>
 
-              <div className={styles.formGroup}>
-                <label className={styles.label}>Confirm Password</label>
-                <div className={styles.inputWrapper}>
-                  <Lock className={styles.inputIcon} />
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Confirm Password</label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                   <input
                     type={showConfirmPassword ? 'text' : 'password'}
                     name="confirmPassword"
                     value={formData.confirmPassword}
                     onChange={handleChange}
-                    className={styles.input}
+                    className="w-full pl-10 pr-10 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:outline-none bg-gray-50 text-gray-900 transition"
                     placeholder="Confirm your password"
                     required
                   />
                   <button
                     type="button"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className={styles.togglePassword}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-purple-600"
+                    tabIndex={-1}
                   >
-                    {showConfirmPassword ? <EyeOff className={styles.eyeIcon} /> : <Eye className={styles.eyeIcon} />}
+                    {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                   </button>
                 </div>
               </div>
@@ -228,11 +230,11 @@ const Register = () => {
               <button
                 onClick={handleRegister}
                 disabled={loading || !formData.username || !formData.email || !formData.password || !formData.confirmPassword}
-                className={styles.submitBtn}
+                className="w-full bg-purple-600 text-white font-semibold py-2 rounded-lg shadow hover:bg-purple-700 transition disabled:opacity-50 flex items-center justify-center gap-2 mt-2"
               >
                 {loading ? (
                   <>
-                    <Loader2 className={styles.loader} />
+                    <Loader2 className="w-5 h-5 animate-spin" />
                     Creating account...
                   </>
                 ) : (
@@ -240,10 +242,12 @@ const Register = () => {
                 )}
               </button>
 
-              <div className={styles.dividerWrapper}>
-                <div className={styles.divider}></div>
-                <div className={styles.dividerText}>
-                  <span>Or sign up with</span>
+              <div className="relative my-4">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-gray-200"></div>
+                </div>
+                <div className="relative flex justify-center">
+                  <span className="bg-white px-3 text-gray-500 text-sm">Or sign up with</span>
                 </div>
               </div>
 
@@ -251,42 +255,45 @@ const Register = () => {
             </>
           ) : (
             <div>
-              <div className={styles.otpBox}>
-                <p className={styles.subtitle} style={{ marginBottom: 8 }}>
+              <div className="text-center p-4 bg-purple-50 rounded-lg mb-4">
+                <p className="text-gray-700 mb-2">
                   We've sent a 6-digit verification code to:
                 </p>
-                <p className={styles.title} style={{ fontSize: '1rem', color: '#a21caf' }}>{formData.email}</p>
+                <p className="font-bold text-purple-600">{formData.email}</p>
               </div>
 
-              <div className={styles.formGroup}>
-                <label className={styles.label}>Verification Code</label>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Verification Code</label>
                 <input
                   type="text"
                   name="otp"
                   value={formData.otp}
                   onChange={handleChange}
                   maxLength="6"
-                  className={styles.otpInput}
+                  className="w-full py-3 text-2xl text-center tracking-widest border border-gray-300 rounded-lg bg-gray-50 focus:ring-2 focus:ring-purple-500 focus:outline-none transition"
                   placeholder="000000"
                   required
                 />
               </div>
 
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.95rem', marginBottom: 12 }}>
+              <div className="flex items-center justify-between text-sm mt-4 mb-2">
                 <button
                   type="button"
                   onClick={() => setStep(1)}
-                  className={styles.backBtn}
+                  className="flex items-center gap-1 text-gray-600 hover:text-gray-900 transition"
                 >
-                  <ArrowLeft style={{ width: 16, height: 16 }} />
+                  <ArrowLeft className="w-4 h-4" />
                   Back
                 </button>
                 <button
                   type="button"
                   onClick={handleResendOTP}
                   disabled={resendTimer > 0 || loading}
-                  className={styles.resendBtn}
-                  style={resendTimer > 0 || loading ? { color: '#a1a1aa', cursor: 'not-allowed' } : {}}
+                  className={`font-medium transition ${
+                    resendTimer > 0 || loading
+                      ? 'text-gray-400 cursor-not-allowed'
+                      : 'text-purple-600 hover:underline'
+                  }`}
                 >
                   {resendTimer > 0 ? `Resend in ${resendTimer}s` : 'Resend code'}
                 </button>
@@ -295,11 +302,11 @@ const Register = () => {
               <button
                 onClick={handleVerifyOTP}
                 disabled={loading || formData.otp.length !== 6}
-                className={styles.submitBtn}
+                className="w-full bg-purple-600 text-white font-semibold py-2 rounded-lg shadow hover:bg-purple-700 transition disabled:opacity-50 flex items-center justify-center gap-2 mt-2"
               >
                 {loading ? (
                   <>
-                    <Loader2 className={styles.loader} />
+                    <Loader2 className="w-5 h-5 animate-spin" />
                     Verifying...
                   </>
                 ) : (
@@ -309,9 +316,9 @@ const Register = () => {
             </div>
           )}
 
-          <p className={styles.loginText}>
+          <p className="text-center text-sm text-gray-600 mt-4">
             Already have an account?{' '}
-            <Link to="/login" className={styles.loginLink}>
+            <Link to="/login" className="text-purple-600 font-medium hover:underline">
               Sign in
             </Link>
           </p>

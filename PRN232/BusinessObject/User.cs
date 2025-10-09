@@ -20,11 +20,17 @@ namespace BusinessObject
         [StringLength(255)]
         public string? Password { get; set; }
 
+        [StringLength(15)]
+        [Phone]
+        public string? Phone { get; set; }
         public UserRole Role { get; set; } = UserRole.Student;
 
         public DateTime Createdat { get; set; } = DateTime.UtcNow;
 
         public bool EmailVerified { get; set; } = false;
+        public bool IsBanned { get; set; } = false;
+
+        public DateTime? BannedAt { get; set; }
         public virtual ICollection<OtpVerify> OtpVerifies { get; set; } = new List<OtpVerify>();
 
         public virtual ICollection<QuizResult> QuizResults { get; set; } = new List<QuizResult>();

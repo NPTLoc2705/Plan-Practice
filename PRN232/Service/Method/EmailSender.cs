@@ -3,9 +3,10 @@ using MailKit.Security;
 using MimeKit;
 using Microsoft.Extensions.Configuration;
 using System.Threading.Tasks;
+using Service.Interface;
 
 
-namespace Service
+namespace Service.Method
 {
     public class EmailSender : IEmailSender
     {
@@ -35,7 +36,7 @@ namespace Service
 
                 using (var client = new SmtpClient())
                 {
-                    await client.ConnectAsync(smtpHost, smtpPort, MailKit.Security.SecureSocketOptions.StartTls);
+                    await client.ConnectAsync(smtpHost, smtpPort, SecureSocketOptions.StartTls);
                     await client.AuthenticateAsync(smtpUsername, smtpPassword);
                     await client.SendAsync(message);
                     await client.DisconnectAsync(true);

@@ -79,4 +79,14 @@ namespace BusinessObject.Dtos.Auth
         [Required]
         public string IdToken { get; set; }
     }
+
+    public class UpdateUserProfileDto
+    {
+        public string UserName { get; set; }
+        public string Phone { get; set; }
+
+        // For password change - both must be provided
+        public string OldPassword { get; set; }
+        public string NewPassword { get; set; }
+    }
 }

@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using BusinessObject;
-namespace Service
+namespace Service.Interface
 {
     public interface IUserService
     {
@@ -14,5 +14,7 @@ namespace Service
         Task<string> VerifyRegistrationAsync(VerifyRegistrationRequest request);
         Task<string> ResendRegistrationOtpAsync(string email);
         Task<LoginResponse> GoogleLoginAsync(GoogleAuthDto googleAuthDto);
+
+        Task<User> UpdateUserProfile(int userId, UpdateUserProfileDto updateUserProfileDto);
     }
 }
