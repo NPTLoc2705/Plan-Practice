@@ -2,13 +2,16 @@
 using DAL;
 using DAL.LessonDAO;
 using DAL.QuizDAO;
+using DAL.Student;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.OpenApi;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Repository.Interface;
+using Repository.Interface.Student;
 using Repository.Method;
+using Repository.Method.Student;
 using Scalar.AspNetCore;
 using Service.Interface;
 using Service.JWT;
@@ -61,12 +64,16 @@ namespace PRN232
             builder.Services.AddScoped<UserDAO>();
             builder.Services.AddScoped<OtpVerifyDAO>();
             builder.Services.AddScoped<AdminDAO>();
-            //builder.Services.AddScoped<AnswerStudentDAO>();
-            //builder.Services.AddScoped<QuestionStudentDAO>();
-            //builder.Services.AddScoped<QuizResultStudentDAO>();
-            //builder.Services.AddScoped<QuizStatisticsStudentDAO>();
-            //builder.Services.AddScoped<QuizStudentDAO>();
-            //builder.Services.AddScoped<UserAnswerStudentDAO>();
+            //Student
+            builder.Services.AddScoped<AnswerStudentDAO>();
+            builder.Services.AddScoped<QuestionStudentDAO>();
+            builder.Services.AddScoped<QuizResultStudentDAO>();
+            builder.Services.AddScoped<QuizStatisticsStudentDAO>();
+            builder.Services.AddScoped<QuizStudentDAO>();
+            builder.Services.AddScoped<UserAnswerStudentDAO>();
+            //Quiz otp
+            builder.Services.AddScoped<QuizOTPDAO>();
+            builder.Services.AddScoped<QuizOTPAccessDAO>();
 
 
 
@@ -86,12 +93,16 @@ namespace PRN232
             builder.Services.AddScoped<IUserAnswerRepository, UserAnswerRepository>();
             builder.Services.AddScoped<IAdminRepository, AdminRepository>();
             //Student
-            //builder.Services.AddScoped<IQuizStudentRepository, QuizStudentRepository>();
-            //builder.Services.AddScoped<IQuestionStudentRepository, QuestionStudentRepository>();
-            //builder.Services.AddScoped<IAnswerStudentRepository, AnswerStudentRepository>();
-            //builder.Services.AddScoped<IQuizResultStudentRepository, QuizResultStudentRepository>();
-            //builder.Services.AddScoped<IUserAnswerStudentRepository, UserAnswerStudentRepository>();
-            //builder.Services.AddScoped<IQuizStatisticsStudentRepository, QuizStatisticsStudentRepository>();
+            builder.Services.AddScoped<IQuizStudentRepository, QuizStudentRepository>();
+            builder.Services.AddScoped<IQuestionStudentRepository, QuestionStudentRepository>();
+            builder.Services.AddScoped<IAnswerStudentRepository, AnswerStudentRepository>();
+            builder.Services.AddScoped<IQuizResultStudentRepository, QuizResultStudentRepository>();
+            builder.Services.AddScoped<IUserAnswerStudentRepository, UserAnswerStudentRepository>();
+            builder.Services.AddScoped<IQuizStatisticsStudentRepository, QuizStatisticsStudentRepository>();
+
+            //Quiz OTP
+            builder.Services.AddScoped<IQuizOTPRepository, QuizOTPRepository>();
+            builder.Services.AddScoped<IQuizOTPAccessRepository, QuizOTPAccessRepository>();
 
 
             builder.Services.AddScoped<IQuizService, QuizService>();
@@ -102,6 +113,9 @@ namespace PRN232
             builder.Services.AddScoped<ILessonService,LessonService>();
             builder.Services.AddScoped<IAdminService, AdminService>();
             //  builder.Services.AddScoped<IStudentQuizService, StudentQuizService>();
+            builder.Services.AddScoped<IStudentQuizService, StudentQuizService>();
+            builder.Services.AddScoped<IQuizOTPService, QuizOTPService>();
+
             var jwtKey = builder.Configuration["Jwt:Key"];
             var key = Encoding.ASCII.GetBytes(jwtKey);
 

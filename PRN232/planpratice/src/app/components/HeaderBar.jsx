@@ -39,6 +39,8 @@ const HeaderBar = () => {
     { path: '/landing', label: 'Home' },
     { path: '/quizmanagement', label: 'Quiz Management' },
     { path: '/teacher', label: 'Teacher Dashboard' },
+    { path: "/quizzes", label: "Quizzes" },
+    { path: "/history", label: "Quiz History" },
   ];
 
   const getLinkClasses = (path) =>
