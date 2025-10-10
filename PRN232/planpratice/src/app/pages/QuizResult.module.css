@@ -1,0 +1,252 @@
+.quizResultContainer {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  background: #ffffff;
+}
+
+.resultHeader {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.resultHeader h2 {
+  font-size: 2.5rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #2563eb 0%, #0891b2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.resultHeader h3 {
+  color: #64748b;
+  font-size: 1.5rem;
+  margin-top: 0.5rem;
+  font-weight: 500;
+}
+
+.scoreCard {
+  background: white;
+  border-radius: 1.25rem;
+  padding: 2.5rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  margin-bottom: 2rem;
+  border: 1px solid #e5e7eb;
+}
+
+.scoreCircle {
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #2563eb 0%, #0891b2 100%);
+  color: white;
+  box-shadow: 0 8px 20px rgba(37, 99, 235, 0.2);
+}
+
+.scoreValue {
+  font-size: 3rem;
+  font-weight: 800;
+}
+
+.scoreLabel {
+  font-size: 1.1rem;
+  opacity: 0.9;
+  margin-top: 0.5rem;
+}
+
+.scoreSummary {
+  flex: 1;
+  background: #f8fafc;
+  padding: 1.5rem;
+  border-radius: 1rem;
+  border: 1px solid #e2e8f0;
+}
+
+.summaryItem {
+  display: flex;
+  justify-content: space-between;
+  padding: 1rem;
+  border-bottom: 1px solid #e5e7eb;
+  font-weight: 500;
+}
+
+.summaryItem span:first-child {
+  color: #64748b;
+}
+
+.summaryItem span:last-child {
+  color: #1a202c;
+  font-weight: 600;
+}
+
+.summaryItem:last-child {
+  border-bottom: none;
+}
+
+/* Style cho phần Review */
+.answerReview {
+  background: white;
+  border-radius: 1.25rem;
+  padding: 2.5rem;
+  margin-top: 2rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e5e7eb;
+}
+
+.answerReview h3 {
+  font-size: 1.5rem;
+  color: #1a202c;
+  margin-bottom: 2rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.reviewItem {
+  background: #f8fafc;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  border: 1px solid #e2e8f0;
+}
+
+.reviewItem.correct {
+  border-left: 4px solid #059669;
+}
+
+.reviewItem.incorrect {
+  border-left: 4px solid #dc2626;
+}
+
+.questionNumber {
+  font-weight: 600;
+  color: #64748b;
+  margin-bottom: 0.5rem;
+}
+
+.questionContent {
+  font-size: 1.1rem;
+  color: #1a202c;
+  margin-bottom: 1rem;
+}
+
+.answerInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.yourAnswer, .correctAnswer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem;
+  background: white;
+  border-radius: 0.5rem;
+  border: 1px solid #e5e7eb;
+}
+
+.text-success {
+  color: #059669;
+  font-weight: 600;
+}
+
+.text-danger {
+  color: #dc2626;
+  font-weight: 600;
+}
+
+/* Actions buttons */
+.resultActions {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.btnPrimary, .btnSecondary {
+  padding: 0.75rem 2rem;
+  border-radius: 0.75rem;
+  font-weight: 600;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  border: none;
+  cursor: pointer;
+  min-width: 160px;
+}
+
+.btnPrimary {
+  background: linear-gradient(135deg, #2563eb 0%, #0891b2 100%);
+  color: white;
+}
+
+.btnPrimary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(37, 99, 235, 0.2);
+}
+
+.btnSecondary {
+  background: #f1f5f9;
+  color: #475569;
+  border: 1px solid #e2e8f0;
+}
+
+.btnSecondary:hover {
+  background: #e2e8f0;
+}
+
+@media (max-width: 768px) {
+  .quizResultContainer {
+    padding: 1rem;
+  }
+
+  .scoreCard {
+    flex-direction: column;
+    padding: 1.5rem;
+  }
+
+  .scoreCircle {
+    width: 150px;
+    height: 150px;
+  }
+
+  .resultActions {
+    flex-direction: column;
+  }
+
+  .btnPrimary, .btnSecondary {
+    width: 100%;
+  }
+}
+.textSuccess {
+  color: #059669;
+  font-weight: 600;
+}
+
+.textDanger {
+  color: #dc2626;
+  font-weight: 600;
+}
+
+.loading, .error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  font-size: 1.25rem;
+  font-weight: 500;
+}
+
+.loading {
+  color: #2563eb;
+}
+
+.error {
+  color: #dc2626;
+}
