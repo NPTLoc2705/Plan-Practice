@@ -13,11 +13,13 @@ const AdminRoute = ({ children }) => {
 
 export const AdminRoutes = function () {
     return (
-        <Route path="/admin" element={<AdminRoute />}>
+        <Route path="/admin" >
             <Route
                 index
                 element={
-                    <AdminDashboard />
+                    <AdminRoute>
+                        <AdminDashboard />
+                    </AdminRoute>
                 }
             />
         </Route>

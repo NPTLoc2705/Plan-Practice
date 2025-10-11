@@ -13,7 +13,7 @@ const TeacherProtectedRoute = ({ children }) => {
 
 export const TeacherRoutes = function () {
     return (
-        <Route path="/teacher" element={<TeacherProtectedRoute />}>
+        <Route path="/teacher">
             <Route
                 index
                 element={
