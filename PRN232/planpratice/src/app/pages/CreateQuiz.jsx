@@ -114,7 +114,7 @@ export default function CreateQuiz() {
             }
 
             alert('Quiz created successfully!');
-            navigate('/quizmanagement');
+            navigate('/teacher/quiz');
         } catch (err) {
             console.error(err);
             setError(err.message || 'Failed to create quiz.');

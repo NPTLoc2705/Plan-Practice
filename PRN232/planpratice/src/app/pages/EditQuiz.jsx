@@ -158,7 +158,7 @@ const EditQuiz = () => {
             }
 
             setSuccess('Quiz, questions, and answers updated successfully!');
-            setTimeout(() => navigate('/quizmanagement'), 1500);
+            setTimeout(() => navigate('/teacher/quiz'), 1500);
         } catch (err) {
             console.error(err);
             setError(err.message);

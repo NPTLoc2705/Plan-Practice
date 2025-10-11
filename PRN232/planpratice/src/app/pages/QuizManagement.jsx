@@ -27,7 +27,7 @@ const QuizManagement = () => {
     }, []);
 
     const handleEdit = (quizId) => {
-        navigate(`/quizmanagement/edit-quiz/${quizId}`);
+        navigate(`/teacher/quiz/edit/${quizId}`);
     };
 
     const handleDelete = async (quizId) => {
@@ -45,7 +45,7 @@ const QuizManagement = () => {
     };
 
     const handleCreate = () => {
-        navigate('/quizmanagement/create-quiz');
+        navigate('/teacher/quiz/create');
     };
 
     if (loading) {
