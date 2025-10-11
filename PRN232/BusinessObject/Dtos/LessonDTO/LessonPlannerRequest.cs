@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace BusinessObject.Dtos.LessonDTO
 {
-    public class LessonRequest
+    public class LessonPlannerRequest
     {
         [Required(ErrorMessage = "Title is required")]
         [StringLength(200, ErrorMessage = "Title cannot exceed 200 characters")]
@@ -12,13 +12,11 @@ namespace BusinessObject.Dtos.LessonDTO
         [Required(ErrorMessage = "Content is required")]
         public string Content { get; set; }
 
-        [Required(ErrorMessage = "Grade level is required")]
-        [Range(1, 12, ErrorMessage = "Grade level must be between 1 and 12")]
-        public int GradeLevel { get; set; }
-
         [StringLength(500, ErrorMessage = "Description cannot exceed 500 characters")]
         public string Description { get; set; }
 
-        // UserId is removed - will be set from JWT token automatically
+        [Required(ErrorMessage = "Class ID is required")]
+        [Range(1, int.MaxValue, ErrorMessage = "Invalid Class ID")]
+        public int ClassId { get; set; }
     }
 }

@@ -58,12 +58,12 @@ namespace PRN232
             builder.Services.AddScoped<AnswerDAO>();
             builder.Services.AddScoped<QuizResultDAO>();
             builder.Services.AddScoped<UserAnswerDAO>();
-            builder.Services.AddScoped<LessonDAO>();
-            builder.Services.AddScoped<ILessonRepository, LessonRepository>();
-            builder.Services.AddScoped<ILessonService, LessonService>();
+            builder.Services.AddScoped<LessonPlannerDAO>();
             builder.Services.AddScoped<UserDAO>();
             builder.Services.AddScoped<OtpVerifyDAO>();
             builder.Services.AddScoped<AdminDAO>();
+            builder.Services.AddScoped<GradeLevelDAO>();
+            builder.Services.AddScoped<ClassDAO>();
             //Student
             builder.Services.AddScoped<AnswerStudentDAO>();
             builder.Services.AddScoped<QuestionStudentDAO>();
@@ -85,13 +85,15 @@ namespace PRN232
             builder.Services.AddScoped<IEmailSender, EmailSender>();
             builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<IJwtService, JWTService>();
-            builder.Services.AddScoped<ILessonRepository, LessonRepository>();
+            builder.Services.AddScoped<ILessonPlannerRepository, LessonPlannerRepository>();
             builder.Services.AddScoped<IQuizRepository, QuizRepository>();
             builder.Services.AddScoped<IQuestionRepository, QuestionRepository>();
             builder.Services.AddScoped<IAnswerRepository, AnswerRepository>();
             builder.Services.AddScoped<IQuizResultRepository, QuizResultRepository>();
             builder.Services.AddScoped<IUserAnswerRepository, UserAnswerRepository>();
             builder.Services.AddScoped<IAdminRepository, AdminRepository>();
+            builder.Services.AddScoped<IGradeLevelRepository,GradeLevelRepository>();
+            builder.Services.AddScoped<IClassRepository, ClassRepository>();
             //Student
             builder.Services.AddScoped<IQuizStudentRepository, QuizStudentRepository>();
             builder.Services.AddScoped<IQuestionStudentRepository, QuestionStudentRepository>();
@@ -104,13 +106,14 @@ namespace PRN232
             builder.Services.AddScoped<IQuizOTPRepository, QuizOTPRepository>();
             builder.Services.AddScoped<IQuizOTPAccessRepository, QuizOTPAccessRepository>();
 
-
+            builder.Services.AddScoped<ILessonPlannerService, LessonPlannerService>();
+            builder.Services.AddScoped<IGradeLevelService, GradeLevelService>();
+            builder.Services.AddScoped<IClassService, ClassService>();
             builder.Services.AddScoped<IQuizService, QuizService>();
             builder.Services.AddScoped<IQuizResultService, QuizResultService>();
             builder.Services.AddScoped<IQuestionService, QuestionService>();
             builder.Services.AddScoped<IAnswerService, AnswerService>();
             builder.Services.AddScoped<IUserAnswerService, UserAnswerService>();
-            builder.Services.AddScoped<ILessonService,LessonService>();
             builder.Services.AddScoped<IAdminService, AdminService>();
             //  builder.Services.AddScoped<IStudentQuizService, StudentQuizService>();
             builder.Services.AddScoped<IStudentQuizService, StudentQuizService>();

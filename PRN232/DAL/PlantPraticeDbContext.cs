@@ -29,7 +29,9 @@ namespace DAL
         public DbSet<Answer> Answers { get; set; }
         public DbSet<QuizResult> QuizResults { get; set; }
         public DbSet<UserAnswer> UserAnswers { get; set; }
-        public DbSet<Lesson> Lessons { get; set; }
+        public DbSet<LessonPlanner> LessonPlanners { get; set; }
+        public DbSet<Class>Classes { get; set; }
+        public DbSet<GradeLevel> GradeLevels { get; set; }
 
         public DbSet<QuizOTP> QuizOTPs { get; set; }
 
