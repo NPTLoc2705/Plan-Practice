@@ -31,6 +31,10 @@ namespace DAL
         public DbSet<UserAnswer> UserAnswers { get; set; }
         public DbSet<Lesson> Lessons { get; set; }
 
+        public DbSet<QuizOTP> QuizOTPs { get; set; }
+
+        public DbSet<QuizOTPAccess> QuizOTPAccesses {  get; set; }
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
             => optionsBuilder.UseNpgsql(GetConnectionString());
 
@@ -87,6 +91,87 @@ namespace DAL
                 entity.HasIndex(e => e.ExpiredAt)
                     .HasDatabaseName("IX_OtpVerify_ExpiredAt");
             });
+
+            modelBuilder.Entity<QuizOTP>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Id).ValueGeneratedOnAdd();
+
+                entity.Property(e => e.OTPCode)
+                    .IsRequired()
+                    .HasMaxLength(10);
+
+                entity.Property(e => e.CreatedAt)
+                    .HasDefaultValueSql("timezone('utc', now())");
+
+                entity.Property(e => e.ExpiresAt)
+                    .IsRequired();
+
+                entity.Property(e => e.IsActive)
+                    .HasDefaultValue(true);
+
+                entity.Property(e => e.UsageCount)
+                    .HasDefaultValue(0);
+
+                // Quan hệ 1 QuizOTP - N QuizOTPAccess
+                entity.HasMany(e => e.AccessLogs)
+                    .WithOne(a => a.OTP)
+                    .HasForeignKey(a => a.OTPId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                // Quan hệ 1 User (teacher) - N QuizOTP
+                entity.HasOne(e => e.CreatedByTeacher)
+                    .WithMany() // nếu bạn không cần collection trong User
+                    .HasForeignKey(e => e.CreatedByTeacherId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                // Quan hệ 1 Quiz - N QuizOTP
+                entity.HasOne(e => e.Quiz)
+                    .WithMany()
+                    .HasForeignKey(e => e.QuizId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                // Index để tăng tốc truy vấn tìm OTP còn hiệu lực
+                entity.HasIndex(e => new { e.OTPCode, e.IsActive, e.ExpiresAt })
+                    .HasDatabaseName("IX_QuizOTP_Code_IsActive_ExpiresAt");
+            });
+
+
+            // QuizOTPAccess entity configuration
+            modelBuilder.Entity<QuizOTPAccess>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Id).ValueGeneratedOnAdd();
+
+                entity.Property(e => e.AccessedAt)
+                    .HasDefaultValueSql("timezone('utc', now())");
+
+                entity.Property(e => e.IPAddress)
+                    .HasMaxLength(45); // IPv6 max length
+
+                entity.Property(e => e.UserAgent)
+                    .HasMaxLength(255);
+
+                // Quan hệ N QuizOTPAccess - 1 QuizOTP
+                entity.HasOne(e => e.OTP)
+                    .WithMany(o => o.AccessLogs)
+                    .HasForeignKey(e => e.OTPId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                // Quan hệ N QuizOTPAccess - 1 User (Student)
+                entity.HasOne(e => e.Student)
+                    .WithMany() // nếu không có navigation trong User
+                    .HasForeignKey(e => e.StudentId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                // Index giúp tìm theo OTP hoặc Student nhanh hơn
+                entity.HasIndex(e => new { e.OTPId, e.StudentId })
+                    .HasDatabaseName("IX_QuizOTPAccess_OTP_Student");
+
+                entity.HasIndex(e => e.AccessedAt)
+                    .HasDatabaseName("IX_QuizOTPAccess_AccessedAt");
+            });
+
 
             // Quiz relationships
             modelBuilder.Entity<Quiz>()

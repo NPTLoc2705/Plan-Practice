@@ -7,22 +7,20 @@ const AdminRoute = ({ children }) => {
     const user = AuthAPI.getUser();
     const isAuthenticated = AuthAPI.isAuthenticated();
     const isAdmin = user && user.role === 2;
-    
+
     return isAuthenticated && isAdmin ? children : <Navigate to="/" replace />;
 };
 
 export const AdminRoutes = function () {
     return (
-        <>
+        <Route path="/admin" element={<AdminRoute />}>
             <Route
-                path="/admin/dashboard"
+                index
                 element={
-                    <AdminRoute>
-                        <AdminDashboard />
-                    </AdminRoute>
+                    <AdminDashboard />
                 }
             />
-        </>
+        </Route>
     );
 };
 

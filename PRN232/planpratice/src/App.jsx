@@ -1,4 +1,4 @@
-﻿import './App.css'
+import './App.css'
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import HeaderBar from './app/components/HeaderBar.jsx';
 import {
@@ -42,12 +42,12 @@ function App() {
                     {/* Landing Page */}
                     <Route path="/" element={<Landing />} />
 
-                    {/* Fallback */}
-                    <Route path="*" element={<Navigate to="/" replace />} />
-                </Routes>
-            </Layout>
-        </BrowserRouter>
-    );
+          {/* Fallback */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </Layout>
+    </BrowserRouter>
+  );
 }
 
 export default App;

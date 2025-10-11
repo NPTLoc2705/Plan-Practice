@@ -13,9 +13,9 @@ const TeacherProtectedRoute = ({ children }) => {
 
 export const TeacherRoutes = function () {
     return (
-        <>
+        <Route path="/teacher" element={<TeacherProtectedRoute />}>
             <Route
-                path="/teacher"
+                index
                 element={
                     <TeacherProtectedRoute>
                         <TeacherDashboard />
@@ -23,7 +23,7 @@ export const TeacherRoutes = function () {
                 }
             />
             <Route
-                path="/LessonPlanner"
+                path="LessonPlanner"
                 element={
                     <TeacherProtectedRoute>
                         <LessonPlanGenerator />
@@ -32,7 +32,7 @@ export const TeacherRoutes = function () {
             />
             {/* Quiz CRUD Routes */}
             <Route
-                path="/quizmanagement"
+                path="quiz"
                 element={
                     <TeacherProtectedRoute>
                         <QuizManagement />
@@ -40,7 +40,7 @@ export const TeacherRoutes = function () {
                 }
             />
             <Route
-                path="/quizmanagement/create-quiz"
+                path="quiz/create"
                 element={
                     <TeacherProtectedRoute>
                         <CreateQuiz />
@@ -48,14 +48,14 @@ export const TeacherRoutes = function () {
                 }
             />
             <Route
-                path="/quizmanagement/edit-quiz/:quizId"
+                path="quiz/edit/:quizId"
                 element={
                     <TeacherProtectedRoute>
                         <EditQuiz />
                     </TeacherProtectedRoute>
                 }
             />
-        </>
+        </Route>
     );
 };
 
