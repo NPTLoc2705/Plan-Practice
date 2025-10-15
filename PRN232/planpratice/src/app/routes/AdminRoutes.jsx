@@ -6,16 +6,30 @@ import { AuthAPI } from '../components/APIService/AuthAPI';
 const AdminRoute = ({ children }) => {
     const user = AuthAPI.getUser();
     const isAuthenticated = AuthAPI.isAuthenticated();
-    const isAdmin = user && user.role === 2;
+    
+    // Handle both numeric (2) and string ('Admin') roles
+    let isAdmin = false;
+    if (user && user.role !== undefined && user.role !== null) {
+        const role = user.role.toString().toLowerCase();
+        isAdmin = role === 'admin' || role === '2';
+    }
+
+    console.log('AdminRoute Debug:', {
+        user,
+        isAuthenticated,
+        userRole: user?.role,
+        isAdmin,
+        roleType: typeof user?.role
+    });
 
     return isAuthenticated && isAdmin ? children : <Navigate to="/" replace />;
 };
 
 export const AdminRoutes = function () {
     return (
-        <Route path="/admin" >
+        <Route path="/admin">
             <Route
-                index
+                path="dashboard"
                 element={
                     <AdminRoute>
                         <AdminDashboard />

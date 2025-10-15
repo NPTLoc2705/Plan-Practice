@@ -34,7 +34,7 @@ namespace Service.JWT
     };
 
             // Add CreatedAt claim only if it has value
-            claims.Add(new Claim("Createdat", user.Createdat.ToString("o")));
+            claims.Add(new Claim("createdAt", user.Createdat.ToString("o")));
 
             var tokenDescriptor = new SecurityTokenDescriptor
             {
