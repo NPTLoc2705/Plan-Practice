@@ -8,7 +8,8 @@ const headers = () => ({
 
 export class QuizAPI {
     // 🟢 Lấy danh sách quiz của teacher hiện tại
-    static async getTeacherQuizzes() {
+  static async getTeacherQuizzes() {
+    try {
         const response = await fetch(`${API_BASE_URL}/quiz/teacher/me`, {
             method: 'GET',
             headers: headers(),
@@ -19,8 +20,26 @@ export class QuizAPI {
             throw new Error(error.message || 'Failed to fetch quizzes');
         }
 
-        return await response.json();
+        const result = await response.json();
+        
+        // Transform the quiz data to match the component's expectations
+        if (result.success && Array.isArray(result.data)) {
+            return {
+                success: true,
+                data: result.data.map(quiz => ({
+                    ...quiz,
+                    totalQuestions: quiz.totalQuestion || 0 // Map from backend's totalQuestion to frontend's totalQuestions
+                })),
+                message: result.message
+            };
+        }
+
+        return result;
+    } catch (error) {
+        console.error('Error in getTeacherQuizzes:', error);
+        throw new Error('Failed to fetch quizzes');
     }
+}
 
     // 🟢 Tạo quiz mới
     static async createQuiz(data) {
@@ -189,4 +208,5 @@ export class QuizAPI {
         if (!res.ok) throw new Error('Failed to delete answer');
     }
 }
+export default QuizAPI;
 

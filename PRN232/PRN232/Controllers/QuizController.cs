@@ -200,9 +200,15 @@ namespace PRN232.Controllers
                     Id = q.Id,
                     Title = q.Title,
                     Description = q.Description,
-                    CreatedBy = q.CreatedBy
+                    CreatedBy = q.CreatedBy,
+                   TotalQuestion = q.Questions?.Count ?? 0
                 });
-                return Ok(quizDtos);
+                return Ok(new
+                {
+                    success = true,
+                    data = quizDtos,
+                    message = "Quizzes retrieved successfully"
+                });
             }
             catch (ArgumentException ex)
             {

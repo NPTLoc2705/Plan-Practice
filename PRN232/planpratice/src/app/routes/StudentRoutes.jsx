@@ -5,6 +5,7 @@ import TakeQuiz from '../pages/TakeQuiz';
 import QuizResult from '../pages/QuizResult';
 import QuizHistory from '../pages/QuizHistory';
 
+import TakeQuizWithOTP from "../pages/TakeQuizWithOTP";
 // Protected Route Component for students
 const StudentProtectedRoute = ({ children }) => {
     return AuthAPI.isAuthenticated() ? children : <Navigate to="/login" replace />;
@@ -47,7 +48,17 @@ export const StudentRoutes = function () {
                     </StudentProtectedRoute>
                 }
             />
+             <Route 
+                path="quiz/otp" 
+                element={
+                    <StudentProtectedRoute>
+                        <TakeQuizWithOTP />
+                    </StudentProtectedRoute>
+                } 
+            /> 
+      
         </Route>
+        
     );
 };
 

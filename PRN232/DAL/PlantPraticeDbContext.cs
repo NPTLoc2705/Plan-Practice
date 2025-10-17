@@ -143,14 +143,7 @@ namespace DAL
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.Id).ValueGeneratedOnAdd();
 
-                entity.Property(e => e.AccessedAt)
-                    .HasDefaultValueSql("timezone('utc', now())");
-
-                entity.Property(e => e.IPAddress)
-                    .HasMaxLength(45); // IPv6 max length
-
-                entity.Property(e => e.UserAgent)
-                    .HasMaxLength(255);
+         
 
                 // Quan hệ N QuizOTPAccess - 1 QuizOTP
                 entity.HasOne(e => e.OTP)
@@ -168,8 +161,7 @@ namespace DAL
                 entity.HasIndex(e => new { e.OTPId, e.StudentId })
                     .HasDatabaseName("IX_QuizOTPAccess_OTP_Student");
 
-                entity.HasIndex(e => e.AccessedAt)
-                    .HasDatabaseName("IX_QuizOTPAccess_AccessedAt");
+               
             });
 
 

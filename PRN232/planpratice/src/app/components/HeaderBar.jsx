@@ -41,6 +41,9 @@ const HeaderBar = () => {
     { path: '/teacher', label: 'Teacher Dashboard' },
     { path: "/student/quizzes", label: "Quizzes" },
     { path: "/student/history", label: "Quiz History" },
+
+     { path: '/student/quiz/otp', label: '🔐 Take Quiz (OTP)' },
+     { path: '/teacher/otp-manager', label: '🔑 OTP Manager' },
   ];
 
   const getLinkClasses = (path) =>
