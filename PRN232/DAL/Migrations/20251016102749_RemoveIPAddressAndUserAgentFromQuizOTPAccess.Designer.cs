@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DAL.Migrations
 {
     [DbContext(typeof(PlantPraticeDbContext))]
-    [Migration("20251008063909_Adjust")]
-    partial class Adjust
+    [Migration("20251016102749_RemoveIPAddressAndUserAgentFromQuizOTPAccess")]
+    partial class RemoveIPAddressAndUserAgentFromQuizOTPAccess
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -245,6 +245,85 @@ namespace DAL.Migrations
                     b.ToTable("UserAnswers");
                 });
 
+            modelBuilder.Entity("BusinessObject.QuizOTP", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValueSql("timezone('utc', now())");
+
+                    b.Property<int>("CreatedByTeacherId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(true);
+
+                    b.Property<int?>("MaxUsage")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("OTPCode")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)");
+
+                    b.Property<int>("QuizId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("UsageCount")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(0);
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedByTeacherId");
+
+                    b.HasIndex("QuizId");
+
+                    b.HasIndex("OTPCode", "IsActive", "ExpiresAt")
+                        .HasDatabaseName("IX_QuizOTP_Code_IsActive_ExpiresAt");
+
+                    b.ToTable("QuizOTPs");
+                });
+
+            modelBuilder.Entity("BusinessObject.QuizOTPAccess", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("AccessedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("OTPId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("StudentId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("StudentId");
+
+                    b.HasIndex("OTPId", "StudentId")
+                        .HasDatabaseName("IX_QuizOTPAccess_OTP_Student");
+
+                    b.ToTable("QuizOTPAccesses");
+                });
+
             modelBuilder.Entity("BusinessObject.User", b =>
                 {
                     b.Property<int>("Id")
@@ -281,7 +360,6 @@ namespace DAL.Migrations
                         .HasColumnType("character varying(255)");
 
                     b.Property<string>("Phone")
-                        .IsRequired()
                         .HasMaxLength(15)
                         .HasColumnType("character varying(15)");
 
@@ -409,6 +487,44 @@ namespace DAL.Migrations
                     b.Navigation("QuizResult");
                 });
 
+            modelBuilder.Entity("BusinessObject.QuizOTP", b =>
+                {
+                    b.HasOne("BusinessObject.User", "CreatedByTeacher")
+                        .WithMany()
+                        .HasForeignKey("CreatedByTeacherId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("BusinessObject.Quiz.Quiz", "Quiz")
+                        .WithMany()
+                        .HasForeignKey("QuizId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("CreatedByTeacher");
+
+                    b.Navigation("Quiz");
+                });
+
+            modelBuilder.Entity("BusinessObject.QuizOTPAccess", b =>
+                {
+                    b.HasOne("BusinessObject.QuizOTP", "OTP")
+                        .WithMany("AccessLogs")
+                        .HasForeignKey("OTPId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("BusinessObject.User", "Student")
+                        .WithMany()
+                        .HasForeignKey("StudentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("OTP");
+
+                    b.Navigation("Student");
+                });
+
             modelBuilder.Entity("BusinessObject.Quiz.Question", b =>
                 {
                     b.Navigation("Answers");
@@ -424,6 +540,11 @@ namespace DAL.Migrations
             modelBuilder.Entity("BusinessObject.Quiz.QuizResult", b =>
                 {
                     b.Navigation("UserAnswers");
+                });
+
+            modelBuilder.Entity("BusinessObject.QuizOTP", b =>
+                {
+                    b.Navigation("AccessLogs");
                 });
 
             modelBuilder.Entity("BusinessObject.User", b =>

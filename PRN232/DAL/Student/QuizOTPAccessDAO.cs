@@ -45,7 +45,7 @@ namespace DAL.Student
             return await _context.QuizOTPAccesses
                 .Include(a => a.Student)
                 .Where(a => a.OTPId == otpId)
-                .OrderByDescending(a => a.AccessedAt)
+               // .OrderByDescending(a => a.AccessedAt)
                 .ToListAsync();
         }
 
@@ -55,7 +55,7 @@ namespace DAL.Student
                 .Include(a => a.OTP)
                     .ThenInclude(o => o.Quiz)
                 .Where(a => a.StudentId == studentId)
-                .OrderByDescending(a => a.AccessedAt)
+               // .OrderByDescending(a => a.AccessedAt)
                 .ToListAsync();
         }
 
@@ -75,7 +75,7 @@ namespace DAL.Student
         {
             return await _context.QuizOTPAccesses
                 .Where(a => a.OTPId == otpId && a.StudentId == studentId)
-                .OrderByDescending(a => a.AccessedAt)
+              //  .OrderByDescending(a => a.AccessedAt)
                 .FirstOrDefaultAsync();
         }
     }

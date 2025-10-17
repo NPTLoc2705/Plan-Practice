@@ -59,6 +59,5 @@ namespace BusinessObject.Dtos.Quiz
         public string StudentName { get; set; }
         public int StudentId { get; set; }
         public DateTime AccessedAt { get; set; }
-        public string IPAddress { get; set; }
     }
 }

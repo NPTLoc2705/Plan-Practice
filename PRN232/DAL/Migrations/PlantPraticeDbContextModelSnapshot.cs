@@ -303,14 +303,7 @@ namespace DAL.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("AccessedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasDefaultValueSql("timezone('utc', now())");
-
-                    b.Property<string>("IPAddress")
-                        .IsRequired()
-                        .HasMaxLength(45)
-                        .HasColumnType("character varying(45)");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("OTPId")
                         .HasColumnType("integer");
@@ -318,15 +311,7 @@ namespace DAL.Migrations
                     b.Property<int>("StudentId")
                         .HasColumnType("integer");
 
-                    b.Property<string>("UserAgent")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
-
                     b.HasKey("Id");
-
-                    b.HasIndex("AccessedAt")
-                        .HasDatabaseName("IX_QuizOTPAccess_AccessedAt");
 
                     b.HasIndex("StudentId");
 

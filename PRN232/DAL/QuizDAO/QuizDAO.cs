@@ -54,6 +54,7 @@ namespace DAL.QuizDAO
             return await _context.Quizzes
                 .Where(q => q.CreatedBy == teacherId)
                 .Include(q => q.QuizResults)
+                .Include(q => q.Questions)
                 .OrderByDescending(q => q.CreatedAt)
                 .ToListAsync();
         }
