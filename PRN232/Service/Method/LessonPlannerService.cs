@@ -30,8 +30,6 @@ namespace Services
                 UserId = planner.UserId,
                 ClassId = planner.ClassId,
                 ClassName = planner.Class?.Name,
-                GradeLevelId = planner.Class?.GradeLevelId ?? 0,
-                GradeLevelName = planner.Class?.GradeLevel?.Name
             };
         }
 
@@ -42,8 +40,14 @@ namespace Services
                 Title = request.Title?.Trim(),
                 Content = request.Content?.Trim(),
                 Description = request.Description?.Trim(),
+                LessonNumber = request.LessonNumber?.Trim() ?? throw new ArgumentNullException(nameof(request.LessonNumber)),
                 UserId = userId,
-                ClassId = request.ClassId
+                ClassId = request.ClassId,
+                DateOfPreparation = request.DateOfPreparation,
+                DateOfTeaching = request.DateOfTeaching,
+                UnitId = request.UnitId,
+                LessonDefinitionId = request.LessonDefinitionId,
+                MethodTemplateId = request.MethodTemplateId
             };
             if (id.HasValue)
             {
@@ -51,7 +55,6 @@ namespace Services
             }
             return entity;
         }
-
         public async Task<LessonPlannerResponse> CreateLessonPlannerAsync(LessonPlannerRequest request, int currentUserId)
         {
             var lessonPlannerEntity = MapToEntity(request, currentUserId);

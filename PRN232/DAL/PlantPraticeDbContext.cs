@@ -1,5 +1,6 @@
 ﻿using BusinessObject;
 using BusinessObject.Lesson;
+using BusinessObject.Lesson.Template;
 using BusinessObject.Quiz;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -36,6 +37,32 @@ namespace DAL
         public DbSet<QuizOTP> QuizOTPs { get; set; }
 
         public DbSet<QuizOTPAccess> QuizOTPAccesses {  get; set; }
+        //TEST
+        public DbSet<Unit> Units { get; set; }
+        public DbSet<LessonDefinition> LessonDefinitions { get; set; }
+
+        // ============================================
+        // LESSON COMPONENTS (Join Tables)
+        // ============================================
+        public DbSet<LessonObjective> LessonObjectives { get; set; }
+        public DbSet<LessonSkill> LessonSkills { get; set; }
+        public DbSet<LessonAttitude> LessonAttitudes { get; set; }
+        public DbSet<LessonLanguageFocus> LessonLanguageFocusItems { get; set; }
+        public DbSet<LessonPreparation> LessonPreparations { get; set; }
+        public DbSet<LessonActivityStage> LessonActivityStages { get; set; }
+        public DbSet<LessonActivityItem> LessonActivityItems { get; set; }
+
+        // ============================================
+        // USER-OWNED TEMPLATE MODELS
+        // ============================================
+        public DbSet<ObjectiveTemplate> ObjectiveTemplates { get; set; }
+        public DbSet<SkillTemplate> SkillTemplates { get; set; }
+        public DbSet<AttitudeTemplate> AttitudeTemplates { get; set; }
+        public DbSet<LanguageFocusType> LanguageFocusTypes { get; set; }
+        public DbSet<MethodTemplate> MethodTemplates { get; set; }
+        public DbSet<InteractionPattern> InteractionPatterns { get; set; }
+        public DbSet<SkillType> SkillTypes { get; set; }
+        public DbSet<PreparationType> PreparationTypes { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
             => optionsBuilder.UseNpgsql(GetConnectionString());
@@ -50,6 +77,36 @@ namespace DAL
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+
+            modelBuilder.Entity<LessonPlanner>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Id).ValueGeneratedOnAdd();
+
+                entity.Property(e => e.LessonNumber)
+                    .HasColumnName("LessonNumber")
+                    .HasMaxLength(100)
+                    .IsRequired();
+
+                entity.Property(e => e.Title)
+                    .HasMaxLength(200)
+                    .IsRequired();
+
+                entity.Property(e => e.CreatedAt)
+                    .HasDefaultValueSql("timezone('utc', now())");
+
+                // User relationship
+                entity.HasOne(e => e.User)
+                    .WithMany()
+                    .HasForeignKey(e => e.UserId)
+                    .OnDelete(DeleteBehavior.Restrict);
+                // Optional relationships
+                entity.HasOne(e => e.MethodTemplate)
+                    .WithMany()
+                    .HasForeignKey(e => e.MethodTemplateId)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
+
             // User entity configuration
             modelBuilder.Entity<User>(entity =>
             {

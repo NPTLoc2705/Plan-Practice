@@ -3,6 +3,7 @@ using DAL;
 using DAL.LessonDAO;
 using DAL.QuizDAO;
 using DAL.Student;
+using DAL.LessonDAO.Template;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.OpenApi;
 using Microsoft.EntityFrameworkCore;
@@ -20,6 +21,10 @@ using Service.QuizzInterface;
 using Service.QuizzMethod;
 using Services;
 using System.Text;
+using Repository.Interface.Template;
+using Repository.Method.Template;
+using Service.Interface.Template;
+using Service.Method.Template;
 
 namespace PRN232
 {
@@ -51,6 +56,48 @@ namespace PRN232
             {
                 options.AddDocumentTransformer<BearerSecuritySchemeTransformer>();
             });
+
+            //LessonPlanner Related Shitzzz
+
+            builder.Services.AddScoped<SkillTypeDAO>();
+            builder.Services.AddScoped<ISkillTypeRepository, SkillTypeRepository>();
+            builder.Services.AddScoped<ISkillTypeService, SkillTypeService>();
+
+            builder.Services.AddScoped<LessonPlannerDAO>();
+            builder.Services.AddScoped<ILessonPlannerRepository, LessonPlannerRepository>();
+            builder.Services.AddScoped<ILessonPlannerService, LessonPlannerService>();
+
+            builder.Services.AddScoped<GradeLevelDAO>();
+            builder.Services.AddScoped<IGradeLevelRepository, GradeLevelRepository>();
+            builder.Services.AddScoped<IGradeLevelService, GradeLevelService>();
+
+            builder.Services.AddScoped<ClassDAO>();
+            builder.Services.AddScoped<IClassRepository, ClassRepository>();
+            builder.Services.AddScoped<IClassService, ClassService>();
+
+            builder.Services.AddScoped<AttitudeTemplateDAO>();
+            builder.Services.AddScoped<IAttitudeTemplateRepository, AttitudeTemplateRepository>();
+            builder.Services.AddScoped<IAttitudeTemplateService, AttitudeTemplateService>();
+
+            builder.Services.AddScoped<InteractionPatternDAO>();
+            builder.Services.AddScoped<IInteractionPatternRepository, InteractionPatternRepository>();
+            builder.Services.AddScoped<IInteractionPatternService, InteractionPatternService>();
+
+            builder.Services.AddScoped<LanguageFocusTypeDAO>();
+            builder.Services.AddScoped<ILanguageFocusTypeRepository, LanguageFocusTypeRepository>();
+            builder.Services.AddScoped<ILanguageFocusTypeService, LanguageFocusTypeService>();
+
+            builder.Services.AddScoped<ObjectiveTemplateDAO>();
+            builder.Services.AddScoped<IObjectiveTemplateRepository, ObjectiveTemplateRepository>();
+            builder.Services.AddScoped<IObjectiveTemplateService, ObjectiveTemplateService>();
+
+            builder.Services.AddScoped<PreparationTypeDAO>();
+            builder.Services.AddScoped<IPreparationTypeRepository, PreparationTypeRepository>();
+            builder.Services.AddScoped<IPreparationTypeService, PreparationTypeService>();
+
+            builder.Services.AddScoped<SkillTemplateDAO>();
+            builder.Services.AddScoped<ISkillTemplateRepository, SkillTemplateRepository>();
+            builder.Services.AddScoped<ISkillTemplateService, SkillTemplateService>();
             //Injection of DAO
 
             builder.Services.AddScoped<QuizDAO>();
@@ -58,12 +105,10 @@ namespace PRN232
             builder.Services.AddScoped<AnswerDAO>();
             builder.Services.AddScoped<QuizResultDAO>();
             builder.Services.AddScoped<UserAnswerDAO>();
-            builder.Services.AddScoped<LessonPlannerDAO>();
             builder.Services.AddScoped<UserDAO>();
             builder.Services.AddScoped<OtpVerifyDAO>();
             builder.Services.AddScoped<AdminDAO>();
-            builder.Services.AddScoped<GradeLevelDAO>();
-            builder.Services.AddScoped<ClassDAO>();
+
             //Student
             builder.Services.AddScoped<AnswerStudentDAO>();
             builder.Services.AddScoped<QuestionStudentDAO>();
@@ -83,17 +128,17 @@ namespace PRN232
             builder.Services.AddScoped<IUserRepository, UserRepository>();
             builder.Services.AddScoped<IOtpVerifyRepository, OtpVerifyRepository>();
             builder.Services.AddScoped<IEmailSender, EmailSender>();
-            builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<IJwtService, JWTService>();
-            builder.Services.AddScoped<ILessonPlannerRepository, LessonPlannerRepository>();
+            builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<IQuizRepository, QuizRepository>();
             builder.Services.AddScoped<IQuestionRepository, QuestionRepository>();
             builder.Services.AddScoped<IAnswerRepository, AnswerRepository>();
             builder.Services.AddScoped<IQuizResultRepository, QuizResultRepository>();
             builder.Services.AddScoped<IUserAnswerRepository, UserAnswerRepository>();
             builder.Services.AddScoped<IAdminRepository, AdminRepository>();
-            builder.Services.AddScoped<IGradeLevelRepository,GradeLevelRepository>();
-            builder.Services.AddScoped<IClassRepository, ClassRepository>();
+
+
+
             //Student
             builder.Services.AddScoped<IQuizStudentRepository, QuizStudentRepository>();
             builder.Services.AddScoped<IQuestionStudentRepository, QuestionStudentRepository>();
@@ -106,9 +151,8 @@ namespace PRN232
             builder.Services.AddScoped<IQuizOTPRepository, QuizOTPRepository>();
             builder.Services.AddScoped<IQuizOTPAccessRepository, QuizOTPAccessRepository>();
 
-            builder.Services.AddScoped<ILessonPlannerService, LessonPlannerService>();
-            builder.Services.AddScoped<IGradeLevelService, GradeLevelService>();
-            builder.Services.AddScoped<IClassService, ClassService>();
+
+            
             builder.Services.AddScoped<IQuizService, QuizService>();
             builder.Services.AddScoped<IQuizResultService, QuizResultService>();
             builder.Services.AddScoped<IQuestionService, QuestionService>();
@@ -119,7 +163,8 @@ namespace PRN232
             builder.Services.AddScoped<IStudentQuizService, StudentQuizService>();
             builder.Services.AddScoped<IQuizOTPService, QuizOTPService>();
 
-            var jwtKey = builder.Configuration["Jwt:Key"];
+
+           var jwtKey = builder.Configuration["Jwt:Key"];
             var key = Encoding.ASCII.GetBytes(jwtKey);
 
             builder.Services.AddAuthentication(options =>

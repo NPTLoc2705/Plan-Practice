@@ -10,9 +10,10 @@ namespace Repository.Interface
     public interface IClassRepository
     {
         Task<Class> CreateAsync(Class newClass);
-        Task<Class> GetByIdAsync(int id);
-        Task<List<Class>> GetAllAsync();
+        Task<Class> GetByIdAsync(int id, int userId);
+        Task<List<Class>> GetAllByUserIdAsync(int userId);
         Task<Class> UpdateAsync(Class aClass);
         Task<bool> DeleteAsync(int id);
+        Task<List<Class>> GetAllByGradeLevelIdAsync(int gradeLevelId, int userId);
     }
 }

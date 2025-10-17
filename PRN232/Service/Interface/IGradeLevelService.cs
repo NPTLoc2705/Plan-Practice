@@ -9,10 +9,10 @@ namespace Service.Interface
 {
     public interface IGradeLevelService
     {
-        Task<GradeLevelResponse> CreateAsync(GradeLevelRequest request);
-        Task<GradeLevelResponse> GetByIdAsync(int id);
-        Task<List<GradeLevelResponse>> GetAllAsync();
-        Task<GradeLevelResponse> UpdateAsync(int id, GradeLevelRequest request);
-        Task<bool> DeleteAsync(int id);
+        Task<GradeLevelResponse> CreateAsync(GradeLevelRequest request, int currentUserId);
+        Task<GradeLevelResponse> UpdateAsync(int gradeLevelId, GradeLevelRequest request, int currentUserId);
+        Task<GradeLevelResponse> GetByIdAsync(int id, int userId);
+        Task<List<GradeLevelResponse>> GetAllByUserIdAsync(int userId);
+        Task<bool> DeleteAsync(int id, int currentUserId);
     }
 }

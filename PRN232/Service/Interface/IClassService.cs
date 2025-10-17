@@ -9,10 +9,11 @@ namespace Service.Interface
 {
     public interface IClassService
     {
-        Task<ClassResponse> CreateAsync(ClassRequest request);
-        Task<ClassResponse> GetByIdAsync(int id);
-        Task<List<ClassResponse>> GetAllAsync();
-        Task<ClassResponse> UpdateAsync(int id, ClassRequest request);
-        Task<bool> DeleteAsync(int id);
+        Task<ClassResponse> CreateAsync(ClassRequest request, int userId);
+        Task<ClassResponse> UpdateAsync(int id, ClassRequest request, int userId);
+        Task<ClassResponse> GetByIdAsync(int id, int userId);
+        Task<List<ClassResponse>> GetAllByUserIdAsync(int userId);
+        Task<bool> DeleteAsync(int id, int userId);
+        Task<List<ClassResponse>> GetAllByGradeLevelIdAsync(int gradeLevelId, int userId);
     }
 }

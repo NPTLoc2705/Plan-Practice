@@ -35,7 +35,8 @@ namespace DAL.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
                     b.HasKey("Id");
 
@@ -57,11 +58,201 @@ namespace DAL.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 
+                    b.HasIndex("UserId");
+
                     b.ToTable("GradeLevels");
+                });
+
+            modelBuilder.Entity("BusinessObject.Lesson.LessonActivityItem", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("DisplayOrder")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("InteractionPatternId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("LessonActivityStageId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("TimeInMinutes")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("InteractionPatternId");
+
+                    b.HasIndex("LessonActivityStageId");
+
+                    b.ToTable("LessonActivityItems");
+                });
+
+            modelBuilder.Entity("BusinessObject.Lesson.LessonActivityStage", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("DisplayOrder")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("LessonPlannerId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("StageName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("LessonPlannerId");
+
+                    b.ToTable("LessonActivityStages");
+                });
+
+            modelBuilder.Entity("BusinessObject.Lesson.LessonAttitude", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int?>("AttitudeTemplateId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("CustomContent")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("DisplayOrder")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("LessonPlannerId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AttitudeTemplateId");
+
+                    b.HasIndex("LessonPlannerId");
+
+                    b.ToTable("LessonAttitudes");
+                });
+
+            modelBuilder.Entity("BusinessObject.Lesson.LessonDefinition", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("DisplayOrder")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("LessonNumber")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("LessonTitle")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<int>("UnitId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UnitId");
+
+                    b.ToTable("LessonDefinitions");
+                });
+
+            modelBuilder.Entity("BusinessObject.Lesson.LessonLanguageFocus", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("DisplayOrder")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("LanguageFocusTypeId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("LessonPlannerId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("LanguageFocusTypeId");
+
+                    b.HasIndex("LessonPlannerId");
+
+                    b.ToTable("LessonLanguageFocusItems");
+                });
+
+            modelBuilder.Entity("BusinessObject.Lesson.LessonObjective", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("CustomContent")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("DisplayOrder")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("LessonPlannerId")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("ObjectiveTemplateId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("LessonPlannerId");
+
+                    b.HasIndex("ObjectiveTemplateId");
+
+                    b.ToTable("LessonObjectives");
                 });
 
             modelBuilder.Entity("BusinessObject.Lesson.LessonPlanner", b =>
@@ -79,13 +270,43 @@ namespace DAL.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValueSql("timezone('utc', now())");
+
+                    b.Property<DateTime?>("DateOfPreparation")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("DateOfTeaching")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<int?>("LessonDefinitionId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("LessonNumber")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("LessonNumber");
+
+                    b.Property<int?>("MethodTemplateId")
+                        .HasColumnType("integer");
+
                     b.Property<string>("Title")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<int?>("UnitId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("UserId")
                         .HasColumnType("integer");
@@ -94,9 +315,372 @@ namespace DAL.Migrations
 
                     b.HasIndex("ClassId");
 
+                    b.HasIndex("LessonDefinitionId");
+
+                    b.HasIndex("MethodTemplateId");
+
+                    b.HasIndex("UnitId");
+
                     b.HasIndex("UserId");
 
                     b.ToTable("LessonPlanners");
+                });
+
+            modelBuilder.Entity("BusinessObject.Lesson.LessonPreparation", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("DisplayOrder")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("LessonPlannerId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Materials")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("PreparationTypeId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("LessonPlannerId");
+
+                    b.HasIndex("PreparationTypeId");
+
+                    b.ToTable("LessonPreparations");
+                });
+
+            modelBuilder.Entity("BusinessObject.Lesson.LessonSkill", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("CustomContent")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("DisplayOrder")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("LessonPlannerId")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("SkillTemplateId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("LessonPlannerId");
+
+                    b.HasIndex("SkillTemplateId");
+
+                    b.ToTable("LessonSkills");
+                });
+
+            modelBuilder.Entity("BusinessObject.Lesson.Template.AttitudeTemplate", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("DisplayOrder")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("AttitudeTemplates");
+                });
+
+            modelBuilder.Entity("BusinessObject.Lesson.Template.InteractionPattern", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("ShortCode")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("InteractionPatterns");
+                });
+
+            modelBuilder.Entity("BusinessObject.Lesson.Template.LanguageFocusType", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("DisplayOrder")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("LanguageFocusTypes");
+                });
+
+            modelBuilder.Entity("BusinessObject.Lesson.Template.MethodTemplate", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("MethodTemplates");
+                });
+
+            modelBuilder.Entity("BusinessObject.Lesson.Template.ObjectiveTemplate", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("DisplayOrder")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("ObjectiveTemplates");
+                });
+
+            modelBuilder.Entity("BusinessObject.Lesson.Template.PreparationType", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("PreparationTypes");
+                });
+
+            modelBuilder.Entity("BusinessObject.Lesson.Template.SkillTemplate", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("DisplayOrder")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<int>("SkillTypeId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SkillTypeId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("SkillTemplates");
+                });
+
+            modelBuilder.Entity("BusinessObject.Lesson.Template.SkillType", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("SkillTypes");
+                });
+
+            modelBuilder.Entity("BusinessObject.Lesson.Unit", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("DisplayOrder")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("GradeLevelId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("UnitName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("UnitNumber")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("GradeLevelId");
+
+                    b.ToTable("Units");
                 });
 
             modelBuilder.Entity("BusinessObject.OtpVerify", b =>
@@ -453,11 +1037,252 @@ namespace DAL.Migrations
                     b.Navigation("GradeLevel");
                 });
 
+            modelBuilder.Entity("BusinessObject.Lesson.GradeLevel", b =>
+                {
+                    b.HasOne("BusinessObject.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("BusinessObject.Lesson.LessonActivityItem", b =>
+                {
+                    b.HasOne("BusinessObject.Lesson.Template.InteractionPattern", "InteractionPattern")
+                        .WithMany()
+                        .HasForeignKey("InteractionPatternId");
+
+                    b.HasOne("BusinessObject.Lesson.LessonActivityStage", "LessonActivityStage")
+                        .WithMany("ActivityItems")
+                        .HasForeignKey("LessonActivityStageId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("InteractionPattern");
+
+                    b.Navigation("LessonActivityStage");
+                });
+
+            modelBuilder.Entity("BusinessObject.Lesson.LessonActivityStage", b =>
+                {
+                    b.HasOne("BusinessObject.Lesson.LessonPlanner", "LessonPlanner")
+                        .WithMany("ActivityStages")
+                        .HasForeignKey("LessonPlannerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("LessonPlanner");
+                });
+
+            modelBuilder.Entity("BusinessObject.Lesson.LessonAttitude", b =>
+                {
+                    b.HasOne("BusinessObject.Lesson.Template.AttitudeTemplate", "AttitudeTemplate")
+                        .WithMany()
+                        .HasForeignKey("AttitudeTemplateId");
+
+                    b.HasOne("BusinessObject.Lesson.LessonPlanner", "LessonPlanner")
+                        .WithMany("Attitudes")
+                        .HasForeignKey("LessonPlannerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("AttitudeTemplate");
+
+                    b.Navigation("LessonPlanner");
+                });
+
+            modelBuilder.Entity("BusinessObject.Lesson.LessonDefinition", b =>
+                {
+                    b.HasOne("BusinessObject.Lesson.Unit", "Unit")
+                        .WithMany("LessonDefinitions")
+                        .HasForeignKey("UnitId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Unit");
+                });
+
+            modelBuilder.Entity("BusinessObject.Lesson.LessonLanguageFocus", b =>
+                {
+                    b.HasOne("BusinessObject.Lesson.Template.LanguageFocusType", "LanguageFocusType")
+                        .WithMany()
+                        .HasForeignKey("LanguageFocusTypeId");
+
+                    b.HasOne("BusinessObject.Lesson.LessonPlanner", "LessonPlanner")
+                        .WithMany("LanguageFocusItems")
+                        .HasForeignKey("LessonPlannerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("LanguageFocusType");
+
+                    b.Navigation("LessonPlanner");
+                });
+
+            modelBuilder.Entity("BusinessObject.Lesson.LessonObjective", b =>
+                {
+                    b.HasOne("BusinessObject.Lesson.LessonPlanner", "LessonPlanner")
+                        .WithMany("Objectives")
+                        .HasForeignKey("LessonPlannerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("BusinessObject.Lesson.Template.ObjectiveTemplate", "ObjectiveTemplate")
+                        .WithMany()
+                        .HasForeignKey("ObjectiveTemplateId");
+
+                    b.Navigation("LessonPlanner");
+
+                    b.Navigation("ObjectiveTemplate");
+                });
+
             modelBuilder.Entity("BusinessObject.Lesson.LessonPlanner", b =>
                 {
                     b.HasOne("BusinessObject.Lesson.Class", "Class")
                         .WithMany("LessonPlanners")
                         .HasForeignKey("ClassId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("BusinessObject.Lesson.LessonDefinition", "LessonDefinition")
+                        .WithMany("LessonPlanners")
+                        .HasForeignKey("LessonDefinitionId");
+
+                    b.HasOne("BusinessObject.Lesson.Template.MethodTemplate", "MethodTemplate")
+                        .WithMany()
+                        .HasForeignKey("MethodTemplateId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("BusinessObject.Lesson.Unit", "Unit")
+                        .WithMany("LessonPlanners")
+                        .HasForeignKey("UnitId");
+
+                    b.HasOne("BusinessObject.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Class");
+
+                    b.Navigation("LessonDefinition");
+
+                    b.Navigation("MethodTemplate");
+
+                    b.Navigation("Unit");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("BusinessObject.Lesson.LessonPreparation", b =>
+                {
+                    b.HasOne("BusinessObject.Lesson.LessonPlanner", "LessonPlanner")
+                        .WithMany("Preparations")
+                        .HasForeignKey("LessonPlannerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("BusinessObject.Lesson.Template.PreparationType", "PreparationType")
+                        .WithMany()
+                        .HasForeignKey("PreparationTypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("LessonPlanner");
+
+                    b.Navigation("PreparationType");
+                });
+
+            modelBuilder.Entity("BusinessObject.Lesson.LessonSkill", b =>
+                {
+                    b.HasOne("BusinessObject.Lesson.LessonPlanner", "LessonPlanner")
+                        .WithMany("Skills")
+                        .HasForeignKey("LessonPlannerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("BusinessObject.Lesson.Template.SkillTemplate", "SkillTemplate")
+                        .WithMany()
+                        .HasForeignKey("SkillTemplateId");
+
+                    b.Navigation("LessonPlanner");
+
+                    b.Navigation("SkillTemplate");
+                });
+
+            modelBuilder.Entity("BusinessObject.Lesson.Template.AttitudeTemplate", b =>
+                {
+                    b.HasOne("BusinessObject.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("BusinessObject.Lesson.Template.InteractionPattern", b =>
+                {
+                    b.HasOne("BusinessObject.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("BusinessObject.Lesson.Template.LanguageFocusType", b =>
+                {
+                    b.HasOne("BusinessObject.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("BusinessObject.Lesson.Template.MethodTemplate", b =>
+                {
+                    b.HasOne("BusinessObject.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("BusinessObject.Lesson.Template.ObjectiveTemplate", b =>
+                {
+                    b.HasOne("BusinessObject.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("BusinessObject.Lesson.Template.PreparationType", b =>
+                {
+                    b.HasOne("BusinessObject.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("BusinessObject.Lesson.Template.SkillTemplate", b =>
+                {
+                    b.HasOne("BusinessObject.Lesson.Template.SkillType", "SkillType")
+                        .WithMany()
+                        .HasForeignKey("SkillTypeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -467,9 +1292,31 @@ namespace DAL.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Class");
+                    b.Navigation("SkillType");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("BusinessObject.Lesson.Template.SkillType", b =>
+                {
+                    b.HasOne("BusinessObject.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("BusinessObject.Lesson.Unit", b =>
+                {
+                    b.HasOne("BusinessObject.Lesson.GradeLevel", "GradeLevel")
+                        .WithMany("Units")
+                        .HasForeignKey("GradeLevelId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("GradeLevel");
                 });
 
             modelBuilder.Entity("BusinessObject.OtpVerify", b =>
@@ -607,6 +1454,40 @@ namespace DAL.Migrations
             modelBuilder.Entity("BusinessObject.Lesson.GradeLevel", b =>
                 {
                     b.Navigation("Classes");
+
+                    b.Navigation("Units");
+                });
+
+            modelBuilder.Entity("BusinessObject.Lesson.LessonActivityStage", b =>
+                {
+                    b.Navigation("ActivityItems");
+                });
+
+            modelBuilder.Entity("BusinessObject.Lesson.LessonDefinition", b =>
+                {
+                    b.Navigation("LessonPlanners");
+                });
+
+            modelBuilder.Entity("BusinessObject.Lesson.LessonPlanner", b =>
+                {
+                    b.Navigation("ActivityStages");
+
+                    b.Navigation("Attitudes");
+
+                    b.Navigation("LanguageFocusItems");
+
+                    b.Navigation("Objectives");
+
+                    b.Navigation("Preparations");
+
+                    b.Navigation("Skills");
+                });
+
+            modelBuilder.Entity("BusinessObject.Lesson.Unit", b =>
+                {
+                    b.Navigation("LessonDefinitions");
+
+                    b.Navigation("LessonPlanners");
                 });
 
             modelBuilder.Entity("BusinessObject.Quiz.Question", b =>

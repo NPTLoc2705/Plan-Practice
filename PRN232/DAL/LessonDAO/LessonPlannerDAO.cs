@@ -17,16 +17,25 @@ namespace DAL.LessonDAO
             _context = context;
         }
 
-        // Helper to include related data
+        // Helper to include all related data for a full lesson plan view.
         private IQueryable<LessonPlanner> GetLessonPlannersWithDetails()
         {
             return _context.LessonPlanners
-                .Include(lp => lp.Class)
-                .ThenInclude(c => c.GradeLevel);
+                .Include(lp => lp.Class).ThenInclude(c => c.GradeLevel)
+                .Include(lp => lp.Unit)
+                .Include(lp => lp.LessonDefinition)
+                .Include(lp => lp.MethodTemplate)
+                .Include(lp => lp.Objectives)
+                .Include(lp => lp.Skills)
+                .Include(lp => lp.Attitudes)
+                .Include(lp => lp.LanguageFocusItems)
+                .Include(lp => lp.Preparations)
+                .Include(lp => lp.ActivityStages).ThenInclude(s => s.ActivityItems);
         }
 
         public async Task<LessonPlanner> CreateLessonPlannerAsync(LessonPlanner lessonPlanner)
         {
+            lessonPlanner.CreatedAt = DateTime.UtcNow;
             _context.LessonPlanners.Add(lessonPlanner);
             await _context.SaveChangesAsync();
             return lessonPlanner;
@@ -34,31 +43,50 @@ namespace DAL.LessonDAO
 
         public async Task<LessonPlanner> GetLessonPlannerByIdAsync(int id)
         {
-            return await GetLessonPlannersWithDetails().FirstOrDefaultAsync(lp => lp.Id == id);
+            return await GetLessonPlannersWithDetails().AsNoTracking().FirstOrDefaultAsync(lp => lp.Id == id);
         }
 
         public async Task<List<LessonPlanner>> GetAllLessonPlannersAsync()
         {
-            return await GetLessonPlannersWithDetails().ToListAsync();
+            // Note: Not using GetLessonPlannersWithDetails for list views to avoid performance issues.
+            // Only essential data is loaded.
+            return await _context.LessonPlanners
+                .Include(lp => lp.Class)
+                .Include(lp => lp.Unit)
+                .AsNoTracking()
+                .ToListAsync();
         }
 
         public async Task<List<LessonPlanner>> GetLessonPlannersByUserIdAsync(int userId)
         {
-            return await GetLessonPlannersWithDetails()
+            return await _context.LessonPlanners
                 .Where(l => l.UserId == userId)
+                .Include(lp => lp.Class)
+                .Include(lp => lp.Unit)
+                .AsNoTracking()
                 .ToListAsync();
         }
 
         public async Task<LessonPlanner> UpdateLessonPlannerAsync(LessonPlanner lessonPlanner)
         {
-            _context.Entry(lessonPlanner).State = EntityState.Modified;
+            lessonPlanner.UpdatedAt = DateTime.UtcNow;
+
+            // The service layer will manage adding/updating/deleting children.
+            // Here, we just persist the changes to the tracked entity.
+            _context.LessonPlanners.Update(lessonPlanner);
             await _context.SaveChangesAsync();
             return lessonPlanner;
         }
 
         public async Task<bool> DeleteLessonPlannerAsync(int id)
         {
-            var lessonPlanner = await _context.LessonPlanners.FindAsync(id);
+            // Loading with all children ensures that dependent data is also removed
+            // if cascading deletes are configured. This is a safer approach.
+            var lessonPlanner = await _context.LessonPlanners
+                .Include(lp => lp.ActivityStages).ThenInclude(s => s.ActivityItems)
+                .Include(lp => lp.Objectives)
+                .FirstOrDefaultAsync(lp => lp.Id == id);
+
             if (lessonPlanner == null) return false;
 
             _context.LessonPlanners.Remove(lessonPlanner);

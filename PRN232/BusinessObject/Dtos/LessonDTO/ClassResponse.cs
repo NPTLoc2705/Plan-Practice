@@ -9,6 +9,7 @@ namespace BusinessObject.Dtos.LessonDTO
     public class ClassResponse
     {
         public int Id { get; set; }
+        public int UserId { get; set; }
         public string Name { get; set; }
         public int GradeLevelId { get; set; }
         public string GradeLevelName { get; set; }

@@ -1,22 +1,46 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace BusinessObject.Dtos.LessonDTO
 {
     public class LessonPlannerRequest
     {
-        [Required(ErrorMessage = "Title is required")]
-        [StringLength(200, ErrorMessage = "Title cannot exceed 200 characters")]
+        [Required]
+        [MaxLength(200)]
         public string Title { get; set; }
-
-        [Required(ErrorMessage = "Content is required")]
         public string Content { get; set; }
-
-        [StringLength(500, ErrorMessage = "Description cannot exceed 500 characters")]
         public string Description { get; set; }
+        public DateTime? DateOfPreparation { get; set; }
+        public DateTime? DateOfTeaching { get; set; }
 
-        [Required(ErrorMessage = "Class ID is required")]
-        [Range(1, int.MaxValue, ErrorMessage = "Invalid Class ID")]
+        [MaxLength(100)]
+        [Required]
+        public string LessonNumber { get; set; }
+
+        [Required]
         public int ClassId { get; set; }
+        public int? UnitId { get; set; }
+        public int? LessonDefinitionId { get; set; }
+        public int? MethodTemplateId { get; set; }
+
+        public List<LessonObjectiveDto> Objectives { get; set; } = new();
+        public List<LessonSkillDto> Skills { get; set; } = new();
+        public List<LessonAttitudeDto> Attitudes { get; set; } = new();
+        public List<LessonLanguageFocusDto> LanguageFocusItems { get; set; } = new();
+        public List<LessonPreparationDto> Preparations { get; set; } = new();
+        public List<LessonActivityStageDto> ActivityStages { get; set; } = new();
     }
+
+
+    public class LessonObjectiveDto { public int Id { get; set; } public int? ObjectiveTemplateId { get; set; } public string CustomContent { get; set; } public int DisplayOrder { get; set; } }
+    public class LessonSkillDto { public int Id { get; set; } public int? SkillTemplateId { get; set; } public string Description { get; set; } public int DisplayOrder { get; set; } }
+    public class LessonAttitudeDto { public int Id { get; set; } public int? AttitudeTemplateId { get; set; } public string CustomContent { get; set; } public int DisplayOrder { get; set; } }
+    public class LessonLanguageFocusDto { public int Id { get; set; } public int? LanguageFocusTypeId { get; set; } public string Content { get; set; } public int DisplayOrder { get; set; } }
+    public class LessonPreparationDto { public int Id { get; set; } public int PreparationTypeId { get; set; } public string Materials { get; set; } public int DisplayOrder { get; set; } }
+    public class LessonActivityItemDto { public int Id { get; set; } public int TimeInMinutes { get; set; } public string Content { get; set; } public int? InteractionPatternId { get; set; } public int DisplayOrder { get; set; } }
+    public class LessonActivityStageDto { public int Id { get; set; } public string StageName { get; set; } public int DisplayOrder { get; set; } public List<LessonActivityItemDto> ActivityItems { get; set; } = new(); }
 }

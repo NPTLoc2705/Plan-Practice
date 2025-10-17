@@ -1,11 +1,11 @@
-﻿using BusinessObject.Dtos.LessonDTO;
+﻿using BusinessObject;
+using BusinessObject.Dtos.LessonDTO;
 using BusinessObject.Lesson;
-using Repository.Interface;
+using Repository.Interface; // Import repository interface namespace
 using Service.Interface;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Service.Method
@@ -13,7 +13,7 @@ namespace Service.Method
     public class ClassService : IClassService
     {
         private readonly IClassRepository _classRepo;
-        private readonly IGradeLevelRepository _gradeLevelRepo; // To validate GradeLevelId
+        private readonly IGradeLevelRepository _gradeLevelRepo;
 
         public ClassService(IClassRepository classRepo, IGradeLevelRepository gradeLevelRepo)
         {
@@ -21,63 +21,108 @@ namespace Service.Method
             _gradeLevelRepo = gradeLevelRepo;
         }
 
-        private ClassResponse MapToResponse(Class entity) => new ClassResponse
+        private ClassResponse MapToResponse(Class entity)
         {
-            Id = entity.Id,
-            Name = entity.Name,
-            GradeLevelId = entity.GradeLevelId,
-            GradeLevelName = entity.GradeLevel?.Name
-        };
+            if (entity == null) return null;
+            return new ClassResponse
+            {
+                Id = entity.Id,
+                UserId = entity.GradeLevel.UserId,
+                Name = entity.Name,
+                GradeLevelId = entity.GradeLevelId,
+                GradeLevelName = entity.GradeLevel?.Name
+            };
+        }
 
-        public async Task<ClassResponse> CreateAsync(ClassRequest request)
+        private Class MapToEntity(ClassRequest request, int userId, int? id = null)
         {
-            var gradeLevelExists = await _gradeLevelRepo.GetByIdAsync(request.GradeLevelId);
-            if (gradeLevelExists == null)
-                throw new KeyNotFoundException($"GradeLevel with ID {request.GradeLevelId} not found.");
+            var entity = new Class
+            {
+                Name = request.Name?.Trim() ?? throw new ArgumentNullException(nameof(request.Name)),
+                GradeLevelId = request.GradeLevelId
+            };
+            if (id.HasValue)
+            {
+                entity.Id = id.Value;
+            }
+            return entity;
+        }
 
-            var entity = new Class { Name = request.Name, GradeLevelId = request.GradeLevelId };
+        public async Task<ClassResponse> CreateAsync(ClassRequest request, int userId)
+        {
+            // ✅ FIXED: Pass both id and userId
+            var gradeLevel = await _gradeLevelRepo.GetByIdAsync(request.GradeLevelId, userId);
+            if (gradeLevel == null || gradeLevel.UserId != userId)
+            {
+                throw new UnauthorizedAccessException("You can only create a class for a grade level you own.");
+            }
+
+            var entity = MapToEntity(request, userId);
             var created = await _classRepo.CreateAsync(entity);
-
-            // Re-fetch to populate navigation property for the response
-            var createdWithDetails = await _classRepo.GetByIdAsync(created.Id);
+            var createdWithDetails = await _classRepo.GetByIdAsync(created.Id, userId);
             return MapToResponse(createdWithDetails);
         }
 
-        public async Task<ClassResponse> GetByIdAsync(int id)
+        public async Task<ClassResponse> UpdateAsync(int id, ClassRequest request, int userId)
         {
-            var entity = await _classRepo.GetByIdAsync(id);
-            if (entity == null) throw new KeyNotFoundException($"Class with ID {id} not found.");
-            return MapToResponse(entity);
-        }
+            var existing = await _classRepo.GetByIdAsync(id, userId);
+            if (existing == null)
+            {
+                throw new KeyNotFoundException($"Class with ID {id} not found.");
+            }
 
-        public async Task<List<ClassResponse>> GetAllAsync()
-        {
-            var entities = await _classRepo.GetAllAsync();
-            return entities.Select(MapToResponse).ToList();
-        }
+            // ✅ FIXED: Pass both id and userId
+            var gradeLevel = await _gradeLevelRepo.GetByIdAsync(request.GradeLevelId, userId);
+            if (gradeLevel == null || gradeLevel.UserId != userId)
+            {
+                throw new UnauthorizedAccessException("You can only assign a class to a grade level you own.");
+            }
 
-        public async Task<ClassResponse> UpdateAsync(int id, ClassRequest request)
-        {
-            var existing = await _classRepo.GetByIdAsync(id);
-            if (existing == null) throw new KeyNotFoundException($"Class with ID {id} not found.");
-
-            var gradeLevelExists = await _gradeLevelRepo.GetByIdAsync(request.GradeLevelId);
-            if (gradeLevelExists == null)
-                throw new KeyNotFoundException($"GradeLevel with ID {request.GradeLevelId} not found.");
-
-            existing.Name = request.Name;
+            existing.Name = request.Name?.Trim();
             existing.GradeLevelId = request.GradeLevelId;
 
             var updated = await _classRepo.UpdateAsync(existing);
-            return MapToResponse(updated);
+            var updatedWithDetails = await _classRepo.GetByIdAsync(updated.Id, userId);
+            return MapToResponse(updatedWithDetails);
         }
 
-        public async Task<bool> DeleteAsync(int id)
+        public async Task<ClassResponse> GetByIdAsync(int id, int userId)
         {
-            var existing = await _classRepo.GetByIdAsync(id);
-            if (existing == null) throw new KeyNotFoundException($"Class with ID {id} not found.");
+            var entity = await _classRepo.GetByIdAsync(id, userId);
+            if (entity == null)
+            {
+                throw new KeyNotFoundException($"Class with ID {id} not found for this user.");
+            }
+            return MapToResponse(entity);
+        }
 
+        public async Task<List<ClassResponse>> GetAllByUserIdAsync(int userId)
+        {
+            var entities = await _classRepo.GetAllByUserIdAsync(userId);
+            return entities.Select(MapToResponse).ToList();
+        }
+
+        public async Task<bool> DeleteAsync(int id, int userId)
+        {
+            var existing = await _classRepo.GetByIdAsync(id, userId);
+            if (existing == null)
+            {
+                return false;
+            }
             return await _classRepo.DeleteAsync(id);
+        }
+
+        public async Task<List<ClassResponse>> GetAllByGradeLevelIdAsync(int gradeLevelId, int userId)
+        {
+            // ✅ FIXED: Pass both id and userId
+            var gradeLevel = await _gradeLevelRepo.GetByIdAsync(gradeLevelId, userId);
+            if (gradeLevel == null || gradeLevel.UserId != userId)
+            {
+                throw new UnauthorizedAccessException("You are not authorized to view classes for this grade level.");
+            }
+
+            var entities = await _classRepo.GetAllByGradeLevelIdAsync(gradeLevelId, userId);
+            return entities.Select(MapToResponse).ToList();
         }
     }
 }

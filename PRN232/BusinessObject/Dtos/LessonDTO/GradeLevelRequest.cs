@@ -10,11 +10,9 @@ namespace BusinessObject.Dtos.LessonDTO
     public class GradeLevelRequest
     {
         [Required]
-        [StringLength(50)]
-        public string Name { get; set; }
-
+        [MaxLength(100)]
+        public string Name { get; set; } // e.g., "Grade 6", "Grade 10"
         [Required]
-        [Range(1, 12, ErrorMessage = "Level must be between 1 and 12")]
-        public int Level { get; set; }
+        public int Level { get; set; } // Numeric level for sorting
     }
 }

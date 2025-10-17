@@ -10,11 +10,9 @@ namespace BusinessObject.Dtos.LessonDTO
     public class ClassRequest
     {
         [Required]
-        [StringLength(50)]
-        public string Name { get; set; }
-
+        [MaxLength(100)]
+        public string Name { get; set; } // e.g., "6A", "10B"
         [Required]
-        [Range(1, int.MaxValue, ErrorMessage = "Invalid Grade Level ID")]
         public int GradeLevelId { get; set; }
     }
 }
