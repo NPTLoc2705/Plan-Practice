@@ -19,12 +19,12 @@ namespace BusinessObject
         [Required]
         public int StudentId { get; set; }
 
-        [Required]
+        //[Required]
         public DateTime AccessedAt { get; set; } = DateTime.UtcNow;
 
-        public string IPAddress { get; set; }
+        //public string IPAddress { get; set; }
 
-        public string UserAgent { get; set; }
+        //public string UserAgent { get; set; }
 
         // Navigation properties
         [ForeignKey("OTPId")]
@@ -34,6 +34,3 @@ namespace BusinessObject
         public virtual User Student { get; set; }
     }
 }
-
-//QuizOTP  1 - 1 với user
-// quizOTP - QuizOTPAccess 1-n

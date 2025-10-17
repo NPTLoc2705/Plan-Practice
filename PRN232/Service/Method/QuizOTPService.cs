@@ -190,9 +190,9 @@ namespace Service.Method
             {
                 OTPId = otp.Id,
                 StudentId = studentId,
-                AccessedAt = DateTime.UtcNow,
-                IPAddress = ipAddress,
-                UserAgent = userAgent
+                //AccessedAt = DateTime.UtcNow,
+                //IPAddress = ipAddress,
+                //UserAgent = userAgent
             };
             await _accessRepository.CreateAsync(accessLog);
 
@@ -250,8 +250,8 @@ namespace Service.Method
                 Id = log.Id,
                 StudentName = log.Student?.Username ?? "Unknown",
                 StudentId = log.StudentId,
-                AccessedAt = log.AccessedAt,
-                IPAddress = log.IPAddress
+                //AccessedAt = log.AccessedAt,
+                //IPAddress = log.IPAddress
             });
         }
 

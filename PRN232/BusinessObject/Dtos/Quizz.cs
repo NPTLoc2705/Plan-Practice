@@ -31,6 +31,7 @@ namespace BusinessObject.Dtos
         public string Title { get; set; }
         public string Description { get; set; }
         
+        public int TotalQuestion { get; set; }
         public int CreatedBy { get; set; }
     }
 

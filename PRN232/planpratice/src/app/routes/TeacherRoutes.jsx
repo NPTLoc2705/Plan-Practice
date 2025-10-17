@@ -6,6 +6,7 @@ import EditQuiz from '../pages/EditQuiz';
 import LessonPlanGenerator from '../pages/LessonPlanner/Lesson';
 import { AuthAPI } from '../components/APIService/AuthAPI';
 
+import TeacherOTPManager from "../pages/TeacherOTPManager";
 // Protected Route Component for teachers
 const TeacherProtectedRoute = ({ children }) => {
     return AuthAPI.isAuthenticated() ? children : <Navigate to="/login" replace />;
@@ -39,6 +40,8 @@ export const TeacherRoutes = function () {
                     </TeacherProtectedRoute>
                 }
             />
+            {/* Teacher routes */}
+        <Route path="otp-manager" element={<TeacherOTPManager />} />
             <Route
                 path="quiz/create"
                 element={

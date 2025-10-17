@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, RefreshCw, GraduationCap, BookOpen, Users, Shield, BarChart3, Filter } from 'lucide-react';
+import { Search, RefreshCw, GraduationCap, BookOpen, Users, Shield, BarChart3, Filter, Ban, UserCheck } from 'lucide-react';
 
 // Components
 import Toast from '../components/Toast/Toast';
@@ -15,6 +15,7 @@ const AdminDashboard = () => {
   const [teachers, setTeachers] = useState([]);
   const [loading, setLoading] = useState({ students: false, teachers: false });
   const [searchTerm, setSearchTerm] = useState('');
+  const [banFilter, setBanFilter] = useState('all'); // 'all', 'banned', 'active'
   const [currentPage, setCurrentPage] = useState({ students: 1, teachers: 1 });
   const [editingUser, setEditingUser] = useState(null);
   const [activeTab, setActiveTab] = useState('overview');
@@ -115,14 +116,28 @@ const AdminDashboard = () => {
     }
   };
 
+  // Enhanced filter function with ban status
   const filterUsers = (users) => {
-    if (!searchTerm) return users;
-    const term = searchTerm.toLowerCase();
-    return users.filter(user => 
-      user.username.toLowerCase().includes(term) ||
-      user.email.toLowerCase().includes(term) ||
-      user.phone.includes(term)
-    );
+    let filtered = users;
+
+    // Apply search filter
+    if (searchTerm) {
+      const term = searchTerm.toLowerCase();
+      filtered = filtered.filter(user => 
+        user.username?.toLowerCase().includes(term) ||
+        user.email?.toLowerCase().includes(term) ||
+        user.phone?.includes(term)
+      );
+    }
+
+    // Apply ban status filter
+    if (banFilter !== 'all') {
+      filtered = filtered.filter(user => 
+        banFilter === 'banned' ? user.isBanned : !user.isBanned
+      );
+    }
+
+    return filtered;
   };
 
   const paginateUsers = (users, page) => {
@@ -134,6 +149,16 @@ const AdminDashboard = () => {
   const filteredTeachers = filterUsers(teachers);
   const paginatedStudents = paginateUsers(filteredStudents, currentPage.students);
   const paginatedTeachers = paginateUsers(filteredTeachers, currentPage.teachers);
+
+  // Clear all filters
+  const clearFilters = () => {
+    setSearchTerm('');
+    setBanFilter('all');
+    setCurrentPage({ students: 1, teachers: 1 });
+  };
+
+  // Check if any filter is active
+  const hasActiveFilters = searchTerm || banFilter !== 'all';
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50/30">
@@ -229,28 +254,86 @@ const AdminDashboard = () => {
           </div>
         )}
 
-        {/* Search Bar with Filters */}
+        {/* Enhanced Search and Filter Bar */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
           <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
-            <div className="relative flex-1 max-w-2xl">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
-              <input
-                type="text"
-                placeholder="Search by username, email, or phone..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:outline-none transition-all"
-              />
+            <div className="flex flex-col sm:flex-row gap-4 flex-1 max-w-4xl">
+              {/* Search Input */}
+              <div className="relative flex-1 min-w-[300px]">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+                <input
+                  type="text"
+                  placeholder="Search by username, email, or phone..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:outline-none transition-all"
+                />
+              </div>
+
+              {/* Ban Status Filter */}
+              <div className="flex gap-2 items-center">
+                <select
+                  value={banFilter}
+                  onChange={(e) => setBanFilter(e.target.value)}
+                  className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:outline-none transition-all"
+                >
+                  <option value="all">All Users</option>
+                  <option value="active">Active Only</option>
+                  <option value="banned">Banned Only</option>
+                </select>
+              </div>
             </div>
+
             <div className="flex gap-3 w-full lg:w-auto">
-              <button className="flex items-center gap-2 px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-                <Filter className="h-4 w-4" />
-                Filters
-              </button>
+              {/* Clear Filters Button */}
+              {hasActiveFilters && (
+                <button 
+                  onClick={clearFilters}
+                  className="flex items-center gap-2 px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  Clear Filters
+                </button>
+              )}
+              
               <button className="px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
                 Export Data
               </button>
             </div>
+          </div>
+
+          {/* Active Filters Display */}
+          {hasActiveFilters && (
+            <div className="mt-4 flex flex-wrap gap-2">
+              {searchTerm && (
+                <span className="inline-flex items-center gap-1 px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
+                  Search: "{searchTerm}"
+                  <button 
+                    onClick={() => setSearchTerm('')}
+                    className="hover:text-blue-600"
+                  >
+                    ×
+                  </button>
+                </span>
+              )}
+              {banFilter !== 'all' && (
+                <span className="inline-flex items-center gap-1 px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-sm">
+                  Status: {banFilter === 'banned' ? 'Banned' : 'Active'}
+                  <button 
+                    onClick={() => setBanFilter('all')}
+                    className="hover:text-purple-600"
+                  >
+                    ×
+                  </button>
+                </span>
+              )}
+            </div>
+          )}
+
+          {/* Results Count */}
+          <div className="mt-4 text-sm text-gray-600">
+            Showing {filteredStudents.length + filteredTeachers.length} users 
+            ({filteredStudents.length} students, {filteredTeachers.length} teachers)
+            {hasActiveFilters && ` (filtered from ${students.length + teachers.length} total)`}
           </div>
         </div>
 
@@ -266,7 +349,7 @@ const AdminDashboard = () => {
                   <h2 className="text-xl font-bold text-gray-900">Students Management</h2>
                   <p className="text-sm text-gray-600">
                     Showing {paginatedStudents.length} of {filteredStudents.length} students
-                    {searchTerm && ` (filtered from ${students.length} total)`}
+                    {hasActiveFilters && ` (filtered from ${students.length} total)`}
                   </p>
                 </div>
               </div>
@@ -314,7 +397,7 @@ const AdminDashboard = () => {
                   <h2 className="text-xl font-bold text-gray-900">Teachers Management</h2>
                   <p className="text-sm text-gray-600">
                     Showing {paginatedTeachers.length} of {filteredTeachers.length} teachers
-                    {searchTerm && ` (filtered from ${teachers.length} total)`}
+                    {hasActiveFilters && ` (filtered from ${teachers.length} total)`}
                   </p>
                 </div>
               </div>
