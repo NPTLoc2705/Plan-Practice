@@ -21,7 +21,11 @@ namespace BusinessObject.Lesson
         [ForeignKey("ObjectiveTemplateId")]
         public virtual ObjectiveTemplate ObjectiveTemplate { get; set; }
 
-        public string CustomContent { get; set; } // Override template if needed
+        public string? CustomContent { get; set; } // Override template if needed
         public int DisplayOrder { get; set; }
+
+        // History/Snapshot fields - preserve data even if template is deleted
+        public string? SnapshotName { get; set; }
+        public string? SnapshotContent { get; set; }
     }
 }

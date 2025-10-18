@@ -3,6 +3,7 @@ using System;
 using DAL;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DAL.Migrations
 {
     [DbContext(typeof(PlantPraticeDbContext))]
-    partial class PlantPraticeDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251017015558_AddHistorySnapshotFields")]
+    partial class AddHistorySnapshotFields
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -80,6 +83,7 @@ namespace DAL.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Content")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<int>("DisplayOrder")
@@ -92,9 +96,11 @@ namespace DAL.Migrations
                         .HasColumnType("integer");
 
                     b.Property<string>("SnapshotInteractionName")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("SnapshotInteractionShortCode")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<int>("TimeInMinutes")
@@ -124,6 +130,7 @@ namespace DAL.Migrations
                         .HasColumnType("integer");
 
                     b.Property<string>("StageName")
+                        .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
@@ -146,6 +153,7 @@ namespace DAL.Migrations
                         .HasColumnType("integer");
 
                     b.Property<string>("CustomContent")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<int>("DisplayOrder")
@@ -155,9 +163,11 @@ namespace DAL.Migrations
                         .HasColumnType("integer");
 
                     b.Property<string>("SnapshotContent")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("SnapshotName")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.HasKey("Id");
@@ -213,6 +223,7 @@ namespace DAL.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Content")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<int>("DisplayOrder")
@@ -225,6 +236,7 @@ namespace DAL.Migrations
                         .HasColumnType("integer");
 
                     b.Property<string>("SnapshotTypeName")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.HasKey("Id");
@@ -245,6 +257,7 @@ namespace DAL.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("CustomContent")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<int>("DisplayOrder")
@@ -257,9 +270,11 @@ namespace DAL.Migrations
                         .HasColumnType("integer");
 
                     b.Property<string>("SnapshotContent")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("SnapshotName")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.HasKey("Id");
@@ -283,6 +298,7 @@ namespace DAL.Migrations
                         .HasColumnType("integer");
 
                     b.Property<string>("Content")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<DateTime>("CreatedAt")
@@ -297,6 +313,7 @@ namespace DAL.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Description")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<int?>("LessonDefinitionId")
@@ -312,15 +329,19 @@ namespace DAL.Migrations
                         .HasColumnType("integer");
 
                     b.Property<string>("SnapshotClassName")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("SnapshotGradeLevelName")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("SnapshotMethodDescription")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("SnapshotMethodName")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Title")
@@ -367,12 +388,14 @@ namespace DAL.Migrations
                         .HasColumnType("integer");
 
                     b.Property<string>("Materials")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<int?>("PreparationTypeId")
                         .HasColumnType("integer");
 
                     b.Property<string>("SnapshotTypeName")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.HasKey("Id");
@@ -393,6 +416,7 @@ namespace DAL.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("CustomContent")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<int>("DisplayOrder")
@@ -405,12 +429,15 @@ namespace DAL.Migrations
                         .HasColumnType("integer");
 
                     b.Property<string>("SnapshotDescription")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("SnapshotName")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("SnapshotSkillType")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.HasKey("Id");

@@ -42,57 +42,69 @@ import {
 } from 'lucide-react';
 
 // =================================================================
-// MOCK BACKEND DATA (InteractionPatterns removed)
+// LESSON PLANNER WITH FULL API INTEGRATION
 // =================================================================
-const mockDatabase = {
+// This component integrates with the following backend APIs:
+// - GET /api/GradeLevel/my-grade-levels
+// - GET /api/Class/my-classes
+// - GET /api/InteractionPattern/my-patterns
+// - GET /api/AttitudeTemplate/my-templates
+// - GET /api/ObjectiveTemplate/my-templates
+// - GET /api/PreparationType/my-types
+// - GET /api/SkillTemplate/my-templates
+// - GET /api/LanguageFocusType/my-types
+// - GET /api/LessonPlanner/my-planners
+// - POST /api/LessonPlanner (create new lesson plan)
+//
+// Note: MethodTemplate API not yet implemented - using mock data
+// =================================================================
 
-  classes: [
-    { id: 101, gradeId: 1, name: 'Class 10A1' },
-    { id: 102, gradeId: 1, name: 'Class 10A2' },
-    { id: 103, gradeId: 1, name: 'Class 10B' },
-    { id: 201, gradeId: 2, name: 'Class 11A1' },
-    { id: 202, gradeId: 2, name: 'Class 11C' },
-    { id: 301, gradeId: 3, name: 'Class 12D' },
-  ],
+// =================================================================
+// API CONFIGURATION
+// =================================================================
+const API_BASE_URL = 'https://localhost:7025/api';
 
-  skillTemplates: [
-    { id: 1, skillType: 'Reading', name: 'Reading for general ideas', description: 'Reading for general ideas and specific information' },
-    { id: 2, skillType: 'Speaking', name: 'Talking about topics', description: 'Talking about how to protect endangered species' },
-    { id: 3, skillType: 'Listening', name: 'Listening comprehension', description: 'Listening for specific information' },
-    { id: 4, skillType: 'Writing', name: 'Report writing', description: 'Writing a report about endangered species' },
-  ],
-  methodTemplates: [
-    { id: 1, name: 'Integrated, mainly communicative', description: 'The whole lesson: Integrated, mainly communicative' },
-    { id: 2, name: 'Task-based learning', description: 'Task-based approach with pair and group work' },
-    { id: 3, name: 'CLT', description: 'Communicative Language Teaching approach' },
-  ],
-  // InteractionPatterns are now fetched from the API
+// =================================================================
+// API HELPER FUNCTIONS
+// =================================================================
+const getAuthToken = () => {
+  const token = localStorage.getItem('token');
+  if (!token) {
+    throw new Error('Authentication required. Please log in.');
+  }
+  return token;
 };
 
-// =================================================================
-// MOCK API FETCH FUNCTIONS
-// =================================================================
-const mockApiFetch = (data, delay = 500) => {
-  return new Promise(resolve => {
-    setTimeout(() => {
-      resolve({ success: true, data: data });
-    }, delay);
+const fetchFromApi = async (endpoint, token) => {
+  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+    headers: { 'Authorization': `Bearer ${token}` },
   });
+  if (!response.ok) {
+    throw new Error(`API request to ${endpoint} failed with status ${response.status}`);
+  }
+  const result = await response.json();
+  if (result.success && result.data !== undefined) {
+    return result.data;
+  }
+  throw new Error(`Invalid data format from ${endpoint}`);
 };
-const mockFetchGrades = () => mockApiFetch(mockDatabase.gradeLevels);
-const mockFetchClassesByGrade = (gradeId) => {
-  const filteredClasses = mockDatabase.classes.filter(c => c.gradeId === parseInt(gradeId));
-  return mockApiFetch(filteredClasses);
+
+const postToApi = async (endpoint, data, token) => {
+  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(data),
+  });
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.message || `API request failed with status ${response.status}`);
+  }
+  const result = await response.json();
+  return result;
 };
-const mockSaveLesson = (lessonData) => {
-    console.log("Saving lesson data to mock backend:", lessonData);
-    const newLesson = {
-        ...lessonData,
-        id: Date.now(),
-        createdAt: new Date().toISOString(),
-    };
-    return mockApiFetch(newLesson, 1000);
-}
 
 export default function App() {
   // ... (all other state declarations remain the same)
@@ -120,29 +132,29 @@ export default function App() {
   const [attitudeTemplates, setAttitudeTemplates] = useState([]);
   const [selectedAttitudes, setSelectedAttitudes] = useState([]);
   const [attitudeToAdd, setAttitudeToAdd] = useState('');
+  const [languageFocusTypes, setLanguageFocusTypes] = useState([]);
   const [languageFocus, setLanguageFocus] = useState([
-    { type: 'Vocabulary', content: 'species, extinct, habitat, conservation' },
-    { type: 'Grammar', content: 'Conditional sentences type 1' },
-    { type: 'Pronunciation', content: '/s/ vs /z/ sounds' },
+    { typeId: null, content: '' },
   ]);
-const [preparationTemplates, setPreparationTemplates] = useState([]);
-const [selectedPreparations, setSelectedPreparations] = useState([]);
-const [preparationToAdd, setPreparationToAdd] = useState('');
+  const [preparationTemplates, setPreparationTemplates] = useState([]);
+  const [selectedPreparations, setSelectedPreparations] = useState([]);
+  const [preparationToAdd, setPreparationToAdd] = useState('');
   const [methodTemplates, setMethodTemplates] = useState([]);
   const [selectedMethod, setSelectedMethod] = useState('');
-  const [interactionPatterns, setInteractionPatterns] = useState([]); // Initial state is empty array
+  const [interactionPatterns, setInteractionPatterns] = useState([]);
+  const [myLessonPlanners, setMyLessonPlanners] = useState([]);
   const [activities, setActivities] = useState([
     {
       stageName: 'Warm up',
       subActivities: [
-        { timeInMinutes: 5, content: '- Look at the pictures and name the animals\n- T shows the pictures and has Ss name the animals.\n- T asks Ss the questions to elicit the new lesson.', interactionPatternId: '1' }
+        { timeInMinutes: 5, content: '- Look at the pictures and name the animals\n- T shows the pictures and has Ss name the animals.\n- T asks Ss the questions to elicit the new lesson.', interactionPatternId: '' }
       ]
     },
     {
       stageName: 'New lesson',
       subActivities: [
-        { timeInMinutes: 17, content: 'Activity 1: Listen and read\n- T. plays the recording, asks Ss to listen and read silently.\n- Ss listen and read silently.', interactionPatternId: '1' },
-        { timeInMinutes: 10, content: 'Activity 2: Decide whether the statements are True, False or Not Given.\n- Ask Ss to read the statements individually first.\n- Encourage Ss to provide reasons for their answers.', interactionPatternId: '3' },
+        { timeInMinutes: 17, content: 'Activity 1: Listen and read\n- T. plays the recording, asks Ss to listen and read silently.\n- Ss listen and read silently.', interactionPatternId: '' },
+        { timeInMinutes: 10, content: 'Activity 2: Decide whether the statements are True, False or Not Given.\n- Ask Ss to read the statements individually first.\n- Encourage Ss to provide reasons for their answers.', interactionPatternId: '' },
       ]
     }
   ]);
@@ -203,68 +215,65 @@ const [preparationToAdd, setPreparationToAdd] = useState('');
 
 
   // =================================================================
-  // MODIFIED useEffect TO FETCH REAL DATA FOR InteractionPatterns
+  // MODIFIED useEffect TO FETCH REAL DATA FROM ALL APIs
   // =================================================================
-useEffect(() => {
-    // --- GENERIC API FETCHER FUNCTION ---
-    const fetchFromApi = async (endpoint, token) => {
-      const response = await fetch(endpoint, {
-        headers: { 'Authorization': `Bearer ${token}` },
-      });
-      if (!response.ok) {
-        throw new Error(`API request to ${endpoint} failed with status ${response.status}`);
-      }
-      const result = await response.json();
-      if (result.success && Array.isArray(result.data)) {
-        return result.data;
-      }
-      throw new Error(`Invalid data format from ${endpoint}`);
-    };
-
-    // --- MAIN DATA FETCHING LOGIC ---
+  useEffect(() => {
     const fetchInitialData = async () => {
-      // Set a general loading indicator
       setIsLoadingGrades(true);
       
       try {
-        // 1. Get token once for all calls.
-        const token = localStorage.getItem('token');
-        if (!token) {
-          setMessage("Authentication error: Not logged in.");
-          return;
-        }
+        const token = getAuthToken();
 
-        // 2. Define all API calls
-        const gradesData = fetchFromApi('https://localhost:7025/api/GradeLevel/my-grade-levels', token);
-        const patternsData = fetchFromApi('https://localhost:7025/api/InteractionPattern/my-patterns', token);
-        const attitudesData = fetchFromApi('https://localhost:7025/api/AttitudeTemplate/my-templates', token);
-        const objectivesData = fetchFromApi('https://localhost:7025/api/ObjectiveTemplate/my-templates', token);
-         const preparationsData = fetchFromApi('https://localhost:7025/api/PreparationType/my-types', token);
-        
-        // 3. Wait for all fetches to complete
+        // Fetch all data from API endpoints
         const [
           grades,
           patterns,
           attitudes,
           objectives,
-          preparations
-        ] = await Promise.all([gradesData, patternsData, attitudesData, objectivesData,preparationsData]);
+          preparations,
+          skills,
+          languageTypes,
+          lessonPlanners,
+          allClasses
+        ] = await Promise.all([
+          fetchFromApi('/GradeLevel/my-grade-levels', token),
+          fetchFromApi('/InteractionPattern/my-patterns', token),
+          fetchFromApi('/AttitudeTemplate/my-templates', token),
+          fetchFromApi('/ObjectiveTemplate/my-templates', token),
+          fetchFromApi('/PreparationType/my-types', token),
+          fetchFromApi('/SkillTemplate/my-templates', token),
+          fetchFromApi('/LanguageFocusType/my-types', token),
+          fetchFromApi('/LessonPlanner/my-planners', token),
+          fetchFromApi('/Class/my-classes', token)
+        ]);
 
-        // 4. Update all states with live data
+        // Update all states with live data
         setGradeLevels(grades);
         setInteractionPatterns(patterns);
         setAttitudeTemplates(attitudes);
         setObjectiveTemplates(objectives);
         setPreparationTemplates(preparations);
-        // Set remaining mock data (if any)
-        setSkillTemplates(mockDatabase.skillTemplates);
-        setMethodTemplates(mockDatabase.methodTemplates);
+        setSkillTemplates(skills);
+        setLanguageFocusTypes(languageTypes);
+        setMyLessonPlanners(lessonPlanners);
+        
+        // Store all classes for later filtering
+        if (allClasses && allClasses.length > 0) {
+          // Will be filtered by grade in the other useEffect
+        }
+        
+        // Mock method templates since no API exists yet
+        setMethodTemplates([
+          { id: 1, name: 'Integrated, mainly communicative', description: 'The whole lesson: Integrated, mainly communicative' },
+          { id: 2, name: 'Task-based learning', description: 'Task-based approach with pair and group work' },
+          { id: 3, name: 'CLT', description: 'Communicative Language Teaching approach' },
+        ]);
 
+        setMessage('✅ All data loaded successfully from API!');
       } catch (error) {
         console.error("Failed to fetch initial data:", error);
-        setMessage("Error: Could not load data from the server.");
+        setMessage(`❌ Error: ${error.message}`);
       } finally {
-        // Turn off the loading indicator
         setIsLoadingGrades(false);
       }
     };
@@ -272,7 +281,7 @@ useEffect(() => {
     fetchInitialData();
   }, []);
 
-  // ... (the second useEffect for fetching classes remains the same)
+  // Fetch classes when grade is selected
   useEffect(() => {
     if (!selectedGradeId) {
       setClasses([]);
@@ -281,9 +290,18 @@ useEffect(() => {
     }
     const fetchClasses = async () => {
       setIsLoadingClasses(true);
-      const result = await mockFetchClassesByGrade(selectedGradeId);
-      setClasses(result.data || []);
-      setIsLoadingClasses(false);
+      try {
+        const token = getAuthToken();
+        const allClasses = await fetchFromApi('/Class/my-classes', token);
+        // Filter classes by selected grade
+        const filteredClasses = allClasses.filter(c => c.gradeLevelId === parseInt(selectedGradeId));
+        setClasses(filteredClasses);
+      } catch (error) {
+        console.error("Failed to fetch classes:", error);
+        setMessage(`Error loading classes: ${error.message}`);
+      } finally {
+        setIsLoadingClasses(false);
+      }
     };
     fetchClasses();
   }, [selectedGradeId]);
@@ -321,12 +339,13 @@ useEffect(() => {
       });
     }
     html += `<h3 style="color: #dc2626; margin-top: 20px;">B. Competences:</h3>`
-    const hasLanguageFocus = languageFocus.some(lf => lf.content.trim());
+    const hasLanguageFocus = languageFocus.some(lf => lf.content && lf.content.trim());
     if (hasLanguageFocus) {
       html += `<p><strong>1. Language focus:</strong></p><ul style="list-style-position: inside; padding-left: 10px;">`;
       languageFocus.forEach(lf => {
-        if (lf.content.trim()) {
-          html += `<li><strong>${lf.type}:</strong> ${lf.content}</li>`;
+        if (lf.content && lf.content.trim()) {
+          const typeName = lf.typeId ? languageFocusTypes.find(t => t.id === parseInt(lf.typeId))?.name : 'Other';
+          html += `<li><strong>${typeName || 'Other'}:</strong> ${lf.content}</li>`;
         }
       });
       html += `</ul>`;
@@ -412,32 +431,88 @@ useEffect(() => {
     }
   };
   const handleSaveLesson = async () => {
-    setMessage('Saving lesson...');
+    setMessage('Saving lesson to backend...');
+    
+    // Build the request object matching LessonPlannerRequest DTO
     const saveRequest = {
       title: lessonTitle,
       description: lessonDescription,
       content: contentRef.current?.innerHTML || '',
       classId: parseInt(selectedClassId),
-      dateOfPreparation,
-      dateOfTeaching,
-      unitNumber,
-      unitName,
-      lessonNumber,
-      objectives: selectedObjectives,
-      skills: selectedSkills,
-      attitudes: selectedAttitudes,
-      languageFocus: languageFocus.filter(lf => lf.content.trim()),
-      preparations: selectedPreparations.map(p => ({ type: p.name, materials: p.materials })).filter(p => p.materials.trim()),
-      methodId: selectedMethod ? parseInt(selectedMethod) : null,
-      activities: activities,
+      dateOfPreparation: dateOfPreparation ? new Date(dateOfPreparation).toISOString() : null,
+      dateOfTeaching: dateOfTeaching ? new Date(dateOfTeaching).toISOString() : null,
+      lessonNumber: lessonNumber,
+      unitId: null, // Can be added later if needed
+      lessonDefinitionId: null, // Can be added later if needed
+      methodTemplateId: selectedMethod ? parseInt(selectedMethod) : null,
+      
+      // Objectives with display order
+      objectives: selectedObjectives.map((objId, index) => ({
+        id: 0,
+        objectiveTemplateId: objId,
+        displayOrder: index + 1
+      })),
+      
+      // Skills with display order
+      skills: selectedSkills.map((skillId, index) => ({
+        id: 0,
+        skillTemplateId: skillId,
+        displayOrder: index + 1
+      })),
+      
+      // Attitudes with display order
+      attitudes: selectedAttitudes.map((attId, index) => ({
+        id: 0,
+        attitudeTemplateId: attId,
+        displayOrder: index + 1
+      })),
+      
+      // Language Focus Items with display order
+      languageFocusItems: languageFocus
+        .filter(lf => lf.content && lf.content.trim())
+        .map((lf, index) => ({
+          id: 0,
+          languageFocusTypeId: lf.typeId ? parseInt(lf.typeId) : null,
+          content: lf.content,
+          displayOrder: index + 1
+        })),
+      
+      // Preparations with display order
+      preparations: selectedPreparations.map((prep, index) => ({
+        id: 0,
+        preparationTypeId: prep.id,
+        materials: prep.materials,
+        displayOrder: index + 1
+      })),
+      
+      // Activity Stages with items
+      activityStages: activities.map((stage, stageIndex) => ({
+        id: 0,
+        stageName: stage.stageName,
+        displayOrder: stageIndex + 1,
+        activityItems: stage.subActivities.map((subActivity, subIndex) => ({
+          id: 0,
+          timeInMinutes: subActivity.timeInMinutes || 0,
+          content: subActivity.content,
+          interactionPatternId: subActivity.interactionPatternId ? parseInt(subActivity.interactionPatternId) : null,
+          displayOrder: subIndex + 1
+        }))
+      }))
     };
+
     try {
-      const result = await mockSaveLesson(saveRequest);
+      const token = getAuthToken();
+      const result = await postToApi('/LessonPlanner', saveRequest, token);
+      
       if (result.success) {
-        setMessage(`Lesson saved successfully! Mock ID: ${result.data.id}`);
+        setMessage(`✅ Lesson saved successfully! ID: ${result.data.id}`);
+        // Refresh the lesson planners list
+        const updatedPlanners = await fetchFromApi('/LessonPlanner/my-planners', token);
+        setMyLessonPlanners(updatedPlanners);
       }
     } catch (error) {
-      setMessage('Failed to save lesson: ' + error.message);
+      console.error('Failed to save lesson:', error);
+      setMessage(`❌ Failed to save lesson: ${error.message}`);
     }
   };
 
@@ -459,6 +534,27 @@ useEffect(() => {
       {message && (
         <div className="mb-4 p-3 bg-indigo-100 text-indigo-800 rounded-lg shadow-sm text-sm font-medium animate-fade-in">
           {message}
+        </div>
+      )}
+
+      {/* My Lesson Planners Section */}
+      {myLessonPlanners && myLessonPlanners.length > 0 && (
+        <div className="mb-8 p-6 bg-white rounded-xl shadow-lg">
+          <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
+            <FileText className="w-6 h-6 mr-2 text-blue-600" />
+            My Saved Lesson Planners ({myLessonPlanners.length})
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-h-64 overflow-y-auto">
+            {myLessonPlanners.map((planner) => (
+              <div key={planner.id} className="p-4 border-2 border-gray-200 rounded-lg hover:border-blue-400 hover:shadow-md transition-all">
+                <h3 className="font-bold text-gray-800 mb-1">{planner.title}</h3>
+                <p className="text-sm text-gray-600 mb-2">{planner.lessonNumber}</p>
+                <p className="text-xs text-gray-500">Class: {planner.className || 'N/A'}</p>
+                <p className="text-xs text-gray-500">Grade: {planner.gradeLevelName || 'N/A'}</p>
+                <p className="text-xs text-gray-500">Created: {planner.createdAt ? new Date(planner.createdAt).toLocaleDateString() : 'N/A'}</p>
+              </div>
+            ))}
+          </div>
         </div>
       )}
 
@@ -586,16 +682,55 @@ useEffect(() => {
    
                       <div className="mt-6">
                           <h3 className="font-bold text-gray-700 mb-3">Language Focus</h3>
-                          {languageFocus.map((lf, idx) => (
-                              <div key={idx} className="mb-3">
-                                  <label className="block text-sm font-semibold text-gray-600 mb-1">{lf.type}</label>
-                                  <textarea rows="2" placeholder={`Enter ${lf.type.toLowerCase()} details...`} value={lf.content} onChange={(e) => {
+                          <div className="space-y-3">
+                            {languageFocus.map((lf, idx) => (
+                              <div key={idx} className="flex gap-2 items-start">
+                                <div className="flex-1">
+                                  <select 
+                                    value={lf.typeId || ''} 
+                                    onChange={(e) => {
+                                      const updated = [...languageFocus];
+                                      updated[idx].typeId = e.target.value;
+                                      setLanguageFocus(updated);
+                                    }} 
+                                    className="w-full p-2 border border-gray-300 rounded-lg text-sm mb-1"
+                                  >
+                                    <option value="">Select type...</option>
+                                    {languageFocusTypes.map(type => (
+                                      <option key={type.id} value={type.id}>{type.name}</option>
+                                    ))}
+                                  </select>
+                                  <textarea 
+                                    rows="2" 
+                                    placeholder="Enter content..." 
+                                    value={lf.content} 
+                                    onChange={(e) => {
                                       const updated = [...languageFocus];
                                       updated[idx].content = e.target.value;
                                       setLanguageFocus(updated);
-                                  }} className="w-full p-2 border border-gray-300 rounded-lg text-sm" />
+                                    }} 
+                                    className="w-full p-2 border border-gray-300 rounded-lg text-sm" 
+                                  />
+                                </div>
+                                <button 
+                                  onClick={() => {
+                                    const updated = languageFocus.filter((_, i) => i !== idx);
+                                    setLanguageFocus(updated.length > 0 ? updated : [{ typeId: null, content: '' }]);
+                                  }} 
+                                  className="text-red-500 hover:text-red-700 p-1 mt-1"
+                                >
+                                  <X className="w-4 h-4" />
+                                </button>
                               </div>
-                          ))}
+                            ))}
+                            <button 
+                              onClick={() => setLanguageFocus([...languageFocus, { typeId: null, content: '' }])} 
+                              className="w-full py-2 px-4 bg-green-100 text-green-800 rounded-lg hover:bg-green-200 flex items-center justify-center space-x-2"
+                            >
+                              <Plus className="w-4 h-4" />
+                              <span>Add Language Focus Item</span>
+                            </button>
+                          </div>
                       </div>
                   </div>
               )}

@@ -21,8 +21,10 @@ namespace BusinessObject.Lesson
         [ForeignKey("LanguageFocusTypeId")]
         public virtual LanguageFocusType LanguageFocusType { get; set; }
 
-        [Required]
-        public string Content { get; set; }
+        public string? Content { get; set; }
         public int DisplayOrder { get; set; }
+
+        // History/Snapshot fields - preserve data even if language focus type is deleted
+        public string? SnapshotTypeName { get; set; }
     }
 }

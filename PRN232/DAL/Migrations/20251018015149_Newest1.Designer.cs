@@ -3,6 +3,7 @@ using System;
 using DAL;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DAL.Migrations
 {
     [DbContext(typeof(PlantPraticeDbContext))]
-    partial class PlantPraticeDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251018015149_Newest1")]
+    partial class Newest1
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -80,6 +83,7 @@ namespace DAL.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Content")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<int>("DisplayOrder")
@@ -124,6 +128,7 @@ namespace DAL.Migrations
                         .HasColumnType("integer");
 
                     b.Property<string>("StageName")
+                        .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
@@ -146,6 +151,7 @@ namespace DAL.Migrations
                         .HasColumnType("integer");
 
                     b.Property<string>("CustomContent")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<int>("DisplayOrder")
@@ -213,6 +219,7 @@ namespace DAL.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Content")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<int>("DisplayOrder")
@@ -245,6 +252,7 @@ namespace DAL.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("CustomContent")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<int>("DisplayOrder")
@@ -283,6 +291,7 @@ namespace DAL.Migrations
                         .HasColumnType("integer");
 
                     b.Property<string>("Content")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<DateTime>("CreatedAt")
@@ -297,6 +306,7 @@ namespace DAL.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Description")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<int?>("LessonDefinitionId")
@@ -367,6 +377,7 @@ namespace DAL.Migrations
                         .HasColumnType("integer");
 
                     b.Property<string>("Materials")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<int?>("PreparationTypeId")
@@ -393,6 +404,7 @@ namespace DAL.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("CustomContent")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<int>("DisplayOrder")

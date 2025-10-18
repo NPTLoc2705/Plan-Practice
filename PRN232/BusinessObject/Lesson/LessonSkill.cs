@@ -20,7 +20,12 @@ namespace BusinessObject.Lesson
         [ForeignKey("SkillTemplateId")]
         public virtual SkillTemplate SkillTemplate { get; set; }
 
-        public string CustomContent { get; set; }
+        public string? CustomContent { get; set; }
         public int DisplayOrder { get; set; }
+
+        // History/Snapshot fields - preserve data even if template is deleted
+        public string? SnapshotSkillType { get; set; }
+        public string? SnapshotName { get; set; }
+        public string? SnapshotDescription { get; set; }
     }
 }

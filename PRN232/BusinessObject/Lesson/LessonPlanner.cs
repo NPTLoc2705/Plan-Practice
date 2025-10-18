@@ -18,15 +18,15 @@ namespace BusinessObject.Lesson
         [MaxLength(200)]
         public string Title { get; set; }
 
-        public string Content { get; set; }
-        public string Description { get; set; }
+        public string? Content { get; set; }
+        public string? Description { get; set; }
 
         // Metadata
         public DateTime? DateOfPreparation { get; set; }
         public DateTime? DateOfTeaching { get; set; }
 
         [MaxLength(100)]
-        public string LessonNumber { get; set; }
+        public string? LessonNumber { get; set; }
 
         // Foreign Keys
         public int UserId { get; set; }
@@ -60,5 +60,13 @@ namespace BusinessObject.Lesson
 
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
+
+        // History/Snapshot fields for Class and GradeLevel
+        public string? SnapshotClassName { get; set; }
+        public string? SnapshotGradeLevelName { get; set; }
+
+        // History/Snapshot fields for Method
+        public string? SnapshotMethodName { get; set; }
+        public string? SnapshotMethodDescription { get; set; }
     }
 }

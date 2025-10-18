@@ -16,9 +16,8 @@ namespace BusinessObject.Lesson
         [ForeignKey("LessonPlannerId")]
         public virtual LessonPlanner LessonPlanner { get; set; }
 
-        [Required]
         [MaxLength(100)]
-        public string StageName { get; set; } // e.g., "Warm-up", "Presentation", "Practice"
+        public string? StageName { get; set; } // e.g., "Warm-up", "Presentation", "Practice"
 
         public int DisplayOrder { get; set; }
 

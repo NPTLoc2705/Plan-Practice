@@ -16,12 +16,14 @@ namespace BusinessObject.Lesson
         [ForeignKey("LessonPlannerId")]
         public virtual LessonPlanner LessonPlanner { get; set; }
 
-        public int PreparationTypeId { get; set; }
+        public int? PreparationTypeId { get; set; }
         [ForeignKey("PreparationTypeId")]
         public virtual PreparationType PreparationType { get; set; }
 
-        [Required]
-        public string Materials { get; set; }
+        public string? Materials { get; set; }
         public int DisplayOrder { get; set; }
+
+        // History/Snapshot fields - preserve data even if preparation type is deleted
+        public string? SnapshotTypeName { get; set; }
     }
 }
