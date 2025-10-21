@@ -337,5 +337,23 @@ namespace Service.Method
             // Return updated user (without password)
             return user;
         }
+    
+
+     public async Task<User> UpdateTeacherRole(string email)
+        {
+            // Get existing user
+            var user = await _userRepository.GetByEmailAsync(email);
+            if (user == null)
+            {
+                throw new Exception("User not found");
+            }
+            user.Role = UserRole.Teacher;
+            // Save changes
+            await _userRepository.UpdateAsync(user);
+
+            // Return updated user (without password)
+            return user;
+        }
     }
+
 }
