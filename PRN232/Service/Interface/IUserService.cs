@@ -14,7 +14,7 @@ namespace Service.Interface
         Task<string> VerifyRegistrationAsync(VerifyRegistrationRequest request);
         Task<string> ResendRegistrationOtpAsync(string email);
         Task<LoginResponse> GoogleLoginAsync(GoogleAuthDto googleAuthDto);
-
+        Task<User> UpdateTeacherRole(string email);
         Task<User> UpdateUserProfile(int userId, UpdateUserProfileDto updateUserProfileDto);
     }
 }
