@@ -25,10 +25,19 @@ namespace BusinessObject.Lesson
         [ForeignKey("InteractionPatternId")]
         public virtual InteractionPattern InteractionPattern { get; set; }
 
+        public int? ActivityTemplateId { get; set; }
+        [ForeignKey("ActivityTemplateId")]
+        public virtual ActivityTemplate ActivityTemplate { get; set; }
+
         public int DisplayOrder { get; set; }
 
         // History/Snapshot fields - preserve data even if interaction pattern is deleted
         public string? SnapshotInteractionName { get; set; }
         public string? SnapshotInteractionShortCode { get; set; }
+
+        // History/Snapshot fields - preserve data even if activity template is deleted
+        public string? SnapshotActivityName { get; set; }
+        public string? SnapshotActivityDescription { get; set; }
+        public string? SnapshotActivityContent { get; set; }
     }
 }

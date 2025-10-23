@@ -28,6 +28,12 @@ namespace BusinessObject.Lesson
         [MaxLength(100)]
         public string? LessonNumber { get; set; }
 
+        [MaxLength(100)]
+        public string? UnitNumber { get; set; }
+
+        [MaxLength(200)]
+        public string? UnitName { get; set; }
+
         // Foreign Keys
         public int UserId { get; set; }
         [ForeignKey("UserId")]

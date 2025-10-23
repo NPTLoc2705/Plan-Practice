@@ -156,6 +156,50 @@ class AuthAPI {
   static getToken() {
     return localStorage.getItem('token');
   }
+
+  static decodeToken() {
+    const token = this.getToken();
+    if (!token) return null;
+    
+    try {
+      // JWT structure: header.payload.signature
+      const base64Url = token.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+      }).join(''));
+      
+      return JSON.parse(jsonPayload);
+    } catch (error) {
+      console.error('Error decoding token:', error);
+      return null;
+    }
+  }
+
+  static getUserRole() {
+    const decoded = this.decodeToken();
+    return decoded ? decoded.role : null;
+  }
+
+  static hasRole(requiredRole) {
+    const userRole = this.getUserRole();
+    if (!userRole) return false;
+    
+    // Case-insensitive comparison
+    return userRole.toLowerCase() === requiredRole.toLowerCase();
+  }
+
+  static isTeacher() {
+    return this.hasRole('Teacher');
+  }
+
+  static isStudent() {
+    return this.hasRole('Student');
+  }
+
+  static isAdmin() {
+    return this.hasRole('Admin');
+  }
 }
 
 export { AuthAPI, GOOGLE_CLIENT_ID };

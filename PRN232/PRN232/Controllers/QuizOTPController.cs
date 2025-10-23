@@ -330,10 +330,8 @@ namespace PRN232.Controllers
                 }
 
                 var studentId = GetCurrentUserId();
-                var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString();
-                var userAgent = Request.Headers["User-Agent"].ToString();
 
-                var result = await _otpService.ValidateOTPAsync(dto.OTPCode, studentId, ipAddress, userAgent);
+                var result = await _otpService.ValidateOTPAsync(dto.OTPCode, studentId);
 
                 if (!result.IsValid)
                 {

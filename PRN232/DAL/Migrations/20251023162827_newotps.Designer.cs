@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DAL.Migrations
 {
     [DbContext(typeof(PlantPraticeDbContext))]
-    [Migration("20251018015751_MakeContentFieldsNullable")]
-    partial class MakeContentFieldsNullable
+    [Migration("20251023162827_newotps")]
+    partial class newotps
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -82,6 +82,9 @@ namespace DAL.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<int?>("ActivityTemplateId")
+                        .HasColumnType("integer");
+
                     b.Property<string>("Content")
                         .HasColumnType("text");
 
@@ -94,6 +97,15 @@ namespace DAL.Migrations
                     b.Property<int>("LessonActivityStageId")
                         .HasColumnType("integer");
 
+                    b.Property<string>("SnapshotActivityContent")
+                        .HasColumnType("text");
+
+                    b.Property<string>("SnapshotActivityDescription")
+                        .HasColumnType("text");
+
+                    b.Property<string>("SnapshotActivityName")
+                        .HasColumnType("text");
+
                     b.Property<string>("SnapshotInteractionName")
                         .HasColumnType("text");
 
@@ -104,6 +116,8 @@ namespace DAL.Migrations
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ActivityTemplateId");
 
                     b.HasIndex("InteractionPatternId");
 
@@ -334,6 +348,14 @@ namespace DAL.Migrations
                     b.Property<int?>("UnitId")
                         .HasColumnType("integer");
 
+                    b.Property<string>("UnitName")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("UnitNumber")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -423,6 +445,40 @@ namespace DAL.Migrations
                     b.HasIndex("SkillTemplateId");
 
                     b.ToTable("LessonSkills");
+                });
+
+            modelBuilder.Entity("BusinessObject.Lesson.Template.ActivityTemplate", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("ActivityTemplates");
                 });
 
             modelBuilder.Entity("BusinessObject.Lesson.Template.AttitudeTemplate", b =>
@@ -1074,6 +1130,10 @@ namespace DAL.Migrations
 
             modelBuilder.Entity("BusinessObject.Lesson.LessonActivityItem", b =>
                 {
+                    b.HasOne("BusinessObject.Lesson.Template.ActivityTemplate", "ActivityTemplate")
+                        .WithMany()
+                        .HasForeignKey("ActivityTemplateId");
+
                     b.HasOne("BusinessObject.Lesson.Template.InteractionPattern", "InteractionPattern")
                         .WithMany()
                         .HasForeignKey("InteractionPatternId");
@@ -1083,6 +1143,8 @@ namespace DAL.Migrations
                         .HasForeignKey("LessonActivityStageId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("ActivityTemplate");
 
                     b.Navigation("InteractionPattern");
 
@@ -1232,6 +1294,17 @@ namespace DAL.Migrations
                     b.Navigation("LessonPlanner");
 
                     b.Navigation("SkillTemplate");
+                });
+
+            modelBuilder.Entity("BusinessObject.Lesson.Template.ActivityTemplate", b =>
+                {
+                    b.HasOne("BusinessObject.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("BusinessObject.Lesson.Template.AttitudeTemplate", b =>

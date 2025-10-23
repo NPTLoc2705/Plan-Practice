@@ -4,12 +4,26 @@ import QuizManagement from '../pages/QuizManagement';
 import CreateQuiz from '../pages/CreateQuiz';
 import EditQuiz from '../pages/EditQuiz';
 import LessonPlanGenerator from '../pages/LessonPlanner/Lesson';
+import EditLesson from '../pages/LessonPlanner/EditLesson';
+import LessonSettings from '../pages/LessonPlanner/LessonSettings';
 import { AuthAPI } from '../components/APIService/AuthAPI';
 
 import TeacherOTPManager from "../pages/TeacherOTPManager";
+
 // Protected Route Component for teachers
 const TeacherProtectedRoute = ({ children }) => {
-    return AuthAPI.isAuthenticated() ? children : <Navigate to="/login" replace />;
+    // Check if user is authenticated
+    if (!AuthAPI.isAuthenticated()) {
+        return <Navigate to="/login" replace />;
+    }
+    
+    // Check if user has Teacher role
+    if (!AuthAPI.isTeacher()) {
+        console.warn('Access denied: User does not have Teacher role');
+        return <Navigate to="/" replace />;
+    }
+    
+    return children;
 };
 
 export const TeacherRoutes = function () {
@@ -28,6 +42,22 @@ export const TeacherRoutes = function () {
                 element={
                     <TeacherProtectedRoute>
                         <LessonPlanGenerator />
+                    </TeacherProtectedRoute>
+                }
+            />
+            <Route
+                path="LessonPlanner/edit/:id"
+                element={
+                    <TeacherProtectedRoute>
+                        <EditLesson />
+                    </TeacherProtectedRoute>
+                }
+            />
+            <Route
+                path="LessonPlanner/settings"
+                element={
+                    <TeacherProtectedRoute>
+                        <LessonSettings />
                     </TeacherProtectedRoute>
                 }
             />

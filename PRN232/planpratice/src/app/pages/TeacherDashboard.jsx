@@ -62,15 +62,15 @@ const TeacherDashboard = () => {
   };
 
   const handleCreateLesson = () => {
-    navigate('/LessonPlanner');
+    navigate('LessonPlanner');
   };
 
   const handleUpdateLesson = (lessonId) => {
-    navigate(`/LessonPlanner/${lessonId}`);
+    navigate(`LessonPlanner/${lessonId}`);
   };
 
   const handleViewLesson = (lessonId) => {
-    navigate(`/LessonPlanner/${lessonId}/view`);
+    navigate(`LessonPlanner/${lessonId}/view`);
   };
 
   const handleDeleteLesson = async (lessonId) => {

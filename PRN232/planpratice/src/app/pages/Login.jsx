@@ -25,7 +25,7 @@ const Login = () => {
     try {
       const result = await AuthAPI.login(formData);
       setSuccess('Login successful! Redirecting...');
-      setTimeout(() => navigate('/dashboard'), 1500);
+      setTimeout(() => navigate('/'), 1500);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -35,7 +35,7 @@ const Login = () => {
 
   const handleGoogleSuccess = (result) => {
     setSuccess('Google login successful! Redirecting...');
-    setTimeout(() => navigate('/dashboard'), 1500);
+    setTimeout(() => navigate('/'), 1500);
   };
 
   const handleGoogleError = (error) => {

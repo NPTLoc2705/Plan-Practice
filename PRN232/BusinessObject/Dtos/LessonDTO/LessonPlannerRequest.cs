@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace BusinessObject.Dtos.LessonDTO
@@ -21,6 +22,12 @@ namespace BusinessObject.Dtos.LessonDTO
         [MaxLength(100)]
         public string? LessonNumber { get; set; }
 
+        [MaxLength(100)]
+        public string? UnitNumber { get; set; }
+
+        [MaxLength(200)]
+        public string? UnitName { get; set; }
+
         [Required]
         public int ClassId { get; set; }
         
@@ -28,11 +35,17 @@ namespace BusinessObject.Dtos.LessonDTO
         public int? LessonDefinitionId { get; set; }
         public int? MethodTemplateId { get; set; }
 
+        [JsonPropertyName("objectives")]
         public List<LessonObjectiveDto>? Objectives { get; set; } = new();
+        [JsonPropertyName("skills")]
         public List<LessonSkillDto>? Skills { get; set; } = new();
+        [JsonPropertyName("attitudes")]
         public List<LessonAttitudeDto>? Attitudes { get; set; } = new();
+        [JsonPropertyName("languageFocusItems")]
         public List<LessonLanguageFocusDto>? LanguageFocusItems { get; set; } = new();
+        [JsonPropertyName("preparations")]
         public List<LessonPreparationDto>? Preparations { get; set; } = new();
+        [JsonPropertyName("activityStages")]
         public List<LessonActivityStageDto>? ActivityStages { get; set; } = new();
     }
 
@@ -82,7 +95,8 @@ namespace BusinessObject.Dtos.LessonDTO
         public int Id { get; set; } 
         public int TimeInMinutes { get; set; } 
         public string? Content { get; set; } 
-        public int? InteractionPatternId { get; set; } 
+        public int? InteractionPatternId { get; set; }
+        public int? ActivityTemplateId { get; set; }
         public int DisplayOrder { get; set; } 
     }
     
@@ -90,7 +104,8 @@ namespace BusinessObject.Dtos.LessonDTO
     { 
         public int Id { get; set; } 
         public string? StageName { get; set; } 
-        public int DisplayOrder { get; set; } 
+        public int DisplayOrder { get; set; }
+        [JsonPropertyName("activityItems")]
         public List<LessonActivityItemDto>? ActivityItems { get; set; } = new(); 
     }
 }

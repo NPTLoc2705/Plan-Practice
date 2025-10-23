@@ -6,6 +6,9 @@ const HeaderBar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const isAuthenticated = AuthAPI.isAuthenticated();
+  const isTeacher = AuthAPI.isTeacher();
+  const isStudent = AuthAPI.isStudent();
+  const isAdmin = AuthAPI.isAdmin();
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
@@ -35,16 +38,43 @@ const HeaderBar = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const navLinks = [
-    { path: '/landing', label: 'Home' },
-    { path: '/teacher/quiz', label: 'Quiz Management' },
-    { path: '/teacher', label: 'Teacher Dashboard' },
-    { path: "/student/quizzes", label: "Quizzes" },
-    { path: "/student/history", label: "Quiz History" },
+  // Define navigation links based on user role
+  const getNavLinks = () => {
+    const links = [
+      { path: '/', label: 'Home', roles: ['all'] },
+    ];
 
-     { path: '/student/quiz/otp', label: '🔐 Take Quiz (OTP)' },
-     { path: '/teacher/otp-manager', label: '🔑 OTP Manager' },
-  ];
+    // Teacher-specific links
+    if (isTeacher) {
+      links.push(
+        { path: '/teacher', label: 'Dashboard', roles: ['teacher'] },
+        { path: '/teacher/LessonPlanner', label: 'Lesson Planner', roles: ['teacher'] },
+        { path: '/teacher/LessonPlanner/settings', label: 'Settings', roles: ['teacher'] },
+        { path: '/teacher/quiz', label: 'Quiz Management', roles: ['teacher'] },
+        { path: '/teacher/otp-manager', label: 'OTP Manager', roles: ['teacher'] },
+      );
+    }
+
+    // Student-specific links
+    if (isStudent) {
+      links.push(
+        { path: '/student/quizzes', label: 'Quizzes', roles: ['student'] },
+        { path: '/student/history', label: 'Quiz History', roles: ['student'] },
+        { path: '/student/quiz/otp', label: 'Take Quiz (OTP)', roles: ['student'] },
+      );
+    }
+
+    // Admin-specific links
+    if (isAdmin) {
+      links.push(
+        { path: '/admin/dashboard', label: 'Admin Dashboard', roles: ['admin'] },
+      );
+    }
+
+    return links;
+  };
+
+  const navLinks = getNavLinks();
 
   const getLinkClasses = (path) =>
     `px-4 py-2 rounded-md font-medium transition-colors duration-200 ${
@@ -103,16 +133,35 @@ const HeaderBar = () => {
               </button>
 
               {isDropdownOpen && (
-                <div className="absolute right-0 mt-2 w-40 bg-white border border-gray-200 rounded-lg shadow-lg py-2">
+                <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg py-2">
+                  {/* User role badge */}
+                  {isAuthenticated && (
+                    <div className="px-4 py-2 border-b border-gray-200">
+                      <span className={`inline-block px-2 py-1 text-xs font-semibold rounded ${
+                        isTeacher ? 'bg-blue-100 text-blue-800' :
+                        isStudent ? 'bg-green-100 text-green-800' :
+                        isAdmin ? 'bg-purple-100 text-purple-800' :
+                        'bg-gray-100 text-gray-800'
+                      }`}>
+                        {isTeacher ? '👨‍🏫 Teacher' :
+                         isStudent ? '👨‍🎓 Student' :
+                         isAdmin ? '👑 Admin' :
+                         'User'}
+                      </span>
+                    </div>
+                  )}
                   <button
-                    onClick={() => navigate('/profile')}
+                    onClick={() => {
+                      navigate('/profile');
+                      setIsDropdownOpen(false);
+                    }}
                     className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600"
                   >
                     View Profile
                   </button>
                   <button
                     onClick={handleLogout}
-                    className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600"
+                    className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-red-50 hover:text-red-600"
                   >
                     Logout
                   </button>

@@ -15,6 +15,7 @@ namespace BusinessObject.Dtos.LessonDTO
         public DateTime? DateOfPreparation { get; set; }
         public DateTime? DateOfTeaching { get; set; }
         public string LessonNumber { get; set; }
+        public string UnitNumber { get; set; }
         public int UserId { get; set; }
         public int ClassId { get; set; }
         public string ClassName { get; set; }

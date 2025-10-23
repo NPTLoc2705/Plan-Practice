@@ -140,7 +140,7 @@ namespace Service.Method
             return true;
         }
 
-        public async Task<OTPValidationResultDto> ValidateOTPAsync(string otpCode, int studentId, string ipAddress, string userAgent)
+        public async Task<OTPValidationResultDto> ValidateOTPAsync(string otpCode, int studentId)
         {
             // Get active OTP
             var otp = await _otpRepository.GetActiveOTPByCodeAsync(otpCode);
@@ -190,9 +190,7 @@ namespace Service.Method
             {
                 OTPId = otp.Id,
                 StudentId = studentId,
-                //AccessedAt = DateTime.UtcNow,
-                //IPAddress = ipAddress,
-                //UserAgent = userAgent
+                AccessedAt = DateTime.UtcNow
             };
             await _accessRepository.CreateAsync(accessLog);
 
@@ -228,7 +226,7 @@ namespace Service.Method
 
         public async Task<QuizDetailDto> GetQuizByOTPAsync(string otpCode, int studentId)
         {
-            var validationResult = await ValidateOTPAsync(otpCode, studentId, null, null);
+            var validationResult = await ValidateOTPAsync(otpCode, studentId);
 
             if (!validationResult.IsValid)
                 throw new InvalidOperationException(validationResult.Message);
@@ -250,8 +248,7 @@ namespace Service.Method
                 Id = log.Id,
                 StudentName = log.Student?.Username ?? "Unknown",
                 StudentId = log.StudentId,
-                //AccessedAt = log.AccessedAt,
-                //IPAddress = log.IPAddress
+                AccessedAt = log.AccessedAt
             });
         }
 

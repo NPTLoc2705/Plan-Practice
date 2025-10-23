@@ -1,4 +1,3 @@
-
 using DAL;
 using DAL.LessonDAO;
 using DAL.QuizDAO;
@@ -25,6 +24,7 @@ using Repository.Interface.Template;
 using Repository.Method.Template;
 using Service.Interface.Template;
 using Service.Method.Template;
+using System.Text.Json.Serialization;
 
 namespace PRN232
 {
@@ -49,7 +49,11 @@ namespace PRN232
             });
 
 
-            builder.Services.AddControllers();
+            builder.Services.AddControllers().AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+        options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
+    });
             builder.Services.AddDbContext<PlantPraticeDbContext>(options =>
    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
             builder.Services.AddOpenApi("v1", options =>
@@ -98,6 +102,14 @@ namespace PRN232
             builder.Services.AddScoped<SkillTemplateDAO>();
             builder.Services.AddScoped<ISkillTemplateRepository, SkillTemplateRepository>();
             builder.Services.AddScoped<ISkillTemplateService, SkillTemplateService>();
+
+            builder.Services.AddScoped<MethodTemplateDAO>();
+            builder.Services.AddScoped<IMethodTemplateRepository, MethodTemplateRepository>();
+            builder.Services.AddScoped<IMethodTemplateService, MethodTemplateService>();
+
+            builder.Services.AddScoped<ActivityTemplateDAO>();
+            builder.Services.AddScoped<IActivityTemplateRepository, ActivityTemplateRepository>();
+            builder.Services.AddScoped<IActivityTemplateService, ActivityTemplateService>();
             //Injection of DAO
 
             builder.Services.AddScoped<QuizDAO>();

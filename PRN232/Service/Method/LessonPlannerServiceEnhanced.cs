@@ -36,9 +36,71 @@ namespace Services
                 Title = planner.Title,
                 Content = planner.Content,
                 Description = planner.Description,
+                DateOfPreparation = planner.DateOfPreparation,
+                DateOfTeaching = planner.DateOfTeaching,
+                LessonNumber = planner.LessonNumber,
+                UnitNumber = planner.UnitNumber,
+                UnitName = planner.UnitName,
                 UserId = planner.UserId,
                 ClassId = planner.ClassId,
                 ClassName = planner.Class?.Name ?? planner.SnapshotClassName,
+                UnitId = planner.UnitId,
+                LessonDefinitionId = planner.LessonDefinitionId,
+                LessonDefinitionTitle = planner.LessonDefinition?.LessonTitle,
+                MethodTemplateId = planner.MethodTemplateId,
+                MethodTemplateName = planner.MethodTemplate?.Name ?? planner.SnapshotMethodName,
+                CreatedAt = planner.CreatedAt,
+                UpdatedAt = planner.UpdatedAt,
+                Objectives = planner.Objectives?.Select(o => new LessonObjectiveDto
+                {
+                    Id = o.Id,
+                    ObjectiveTemplateId = o.ObjectiveTemplateId,
+                    DisplayOrder = o.DisplayOrder
+                }).ToList() ?? new List<LessonObjectiveDto>(),
+                Skills = planner.Skills?.Select(s => new LessonSkillDto
+                {
+                    Id = s.Id,
+                    SkillTemplateId = s.SkillTemplateId,
+                    DisplayOrder = s.DisplayOrder
+                }).ToList() ?? new List<LessonSkillDto>(),
+                Attitudes = planner.Attitudes?.Select(a => new LessonAttitudeDto
+                {
+                    Id = a.Id,
+                    AttitudeTemplateId = a.AttitudeTemplateId,
+                    DisplayOrder = a.DisplayOrder
+                }).ToList() ?? new List<LessonAttitudeDto>(),
+
+                LanguageFocusItems = planner.LanguageFocusItems?.Select(lf => new LessonLanguageFocusDto
+                {
+                    Id = lf.Id,
+                    LanguageFocusTypeId = lf.LanguageFocusTypeId,
+                    Content = lf.Content,
+                    DisplayOrder = lf.DisplayOrder
+                }).ToList() ?? new List<LessonLanguageFocusDto>(),
+
+                Preparations = planner.Preparations?.Select(p => new LessonPreparationDto
+                {
+                    Id = p.Id,
+                    PreparationTypeId = p.PreparationTypeId,
+                    Materials = p.Materials,
+                    DisplayOrder = p.DisplayOrder
+                }).ToList() ?? new List<LessonPreparationDto>(),
+
+                ActivityStages = planner.ActivityStages?.Select(s => new LessonActivityStageDto
+                {
+                    Id = s.Id,
+                    StageName = s.StageName,
+                    DisplayOrder = s.DisplayOrder,
+                    ActivityItems = s.ActivityItems?.Select(i => new LessonActivityItemDto
+                    {
+                        Id = i.Id,
+                        TimeInMinutes = i.TimeInMinutes,
+                        Content = i.Content,
+                        InteractionPatternId = i.InteractionPatternId,
+                        ActivityTemplateId = i.ActivityTemplateId,
+                        DisplayOrder = i.DisplayOrder
+                    }).ToList() ?? new List<LessonActivityItemDto>()
+                }).ToList() ?? new List<LessonActivityStageDto>()
             };
         }
 
@@ -50,6 +112,8 @@ namespace Services
                 Content = request.Content?.Trim(),
                 Description = request.Description?.Trim(),
                 LessonNumber = request.LessonNumber?.Trim(),
+                UnitNumber = request.UnitNumber?.Trim(),
+                UnitName = request.UnitName?.Trim(),
                 UserId = userId,
                 ClassId = request.ClassId,
                 DateOfPreparation = request.DateOfPreparation,
@@ -266,6 +330,22 @@ namespace Services
                             activityItem.SnapshotInteractionShortCode = pattern.ShortCode;
                         }
                         // else: pattern doesn't exist, leave InteractionPatternId as null
+                    }
+
+                    // Populate snapshot data and validate activity template exists
+                    if (itemDto.ActivityTemplateId.HasValue)
+                    {
+                        var activityTemplate = await _context.ActivityTemplates
+                            .FirstOrDefaultAsync(at => at.Id == itemDto.ActivityTemplateId);
+                        
+                        if (activityTemplate != null)
+                        {
+                            activityItem.ActivityTemplateId = itemDto.ActivityTemplateId;
+                            activityItem.SnapshotActivityName = activityTemplate.Name;
+                            activityItem.SnapshotActivityDescription = activityTemplate.Description;
+                            activityItem.SnapshotActivityContent = activityTemplate.Content;
+                        }
+                        // else: template doesn't exist, leave ActivityTemplateId as null
                     }
 
                     stage.ActivityItems.Add(activityItem);

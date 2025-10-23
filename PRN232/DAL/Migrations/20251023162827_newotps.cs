@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DAL.Migrations
 {
     /// <inheritdoc />
-    public partial class test : Migration
+    public partial class newotps : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -31,6 +31,29 @@ namespace DAL.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Users", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ActivityTemplates",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    UserId = table.Column<int>(type: "integer", nullable: false),
+                    Name = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
+                    Description = table.Column<string>(type: "text", nullable: false),
+                    Content = table.Column<string>(type: "text", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ActivityTemplates", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ActivityTemplates_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -154,7 +177,6 @@ namespace DAL.Migrations
                     UserId = table.Column<int>(type: "integer", nullable: false),
                     Name = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
                     Content = table.Column<string>(type: "text", nullable: false),
-                    Category = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
                     DisplayOrder = table.Column<int>(type: "integer", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
@@ -465,9 +487,7 @@ namespace DAL.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     OTPId = table.Column<int>(type: "integer", nullable: false),
                     StudentId = table.Column<int>(type: "integer", nullable: false),
-                    AccessedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "timezone('utc', now())"),
-                    IPAddress = table.Column<string>(type: "character varying(45)", maxLength: 45, nullable: false),
-                    UserAgent = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false)
+                    AccessedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -493,18 +513,24 @@ namespace DAL.Migrations
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Title = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
-                    Content = table.Column<string>(type: "text", nullable: false),
-                    Description = table.Column<string>(type: "text", nullable: false),
+                    Content = table.Column<string>(type: "text", nullable: true),
+                    Description = table.Column<string>(type: "text", nullable: true),
                     DateOfPreparation = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     DateOfTeaching = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     LessonNumber = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    UnitNumber = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
+                    UnitName = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: true),
                     UserId = table.Column<int>(type: "integer", nullable: false),
                     ClassId = table.Column<int>(type: "integer", nullable: false),
                     UnitId = table.Column<int>(type: "integer", nullable: true),
                     LessonDefinitionId = table.Column<int>(type: "integer", nullable: true),
                     MethodTemplateId = table.Column<int>(type: "integer", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "timezone('utc', now())"),
-                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    SnapshotClassName = table.Column<string>(type: "text", nullable: true),
+                    SnapshotGradeLevelName = table.Column<string>(type: "text", nullable: true),
+                    SnapshotMethodName = table.Column<string>(type: "text", nullable: true),
+                    SnapshotMethodDescription = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -579,7 +605,7 @@ namespace DAL.Migrations
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     LessonPlannerId = table.Column<int>(type: "integer", nullable: false),
-                    StageName = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    StageName = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
                     DisplayOrder = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
@@ -601,8 +627,10 @@ namespace DAL.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     LessonPlannerId = table.Column<int>(type: "integer", nullable: false),
                     AttitudeTemplateId = table.Column<int>(type: "integer", nullable: true),
-                    CustomContent = table.Column<string>(type: "text", nullable: false),
-                    DisplayOrder = table.Column<int>(type: "integer", nullable: false)
+                    CustomContent = table.Column<string>(type: "text", nullable: true),
+                    DisplayOrder = table.Column<int>(type: "integer", nullable: false),
+                    SnapshotName = table.Column<string>(type: "text", nullable: true),
+                    SnapshotContent = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -628,8 +656,9 @@ namespace DAL.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     LessonPlannerId = table.Column<int>(type: "integer", nullable: false),
                     LanguageFocusTypeId = table.Column<int>(type: "integer", nullable: true),
-                    Content = table.Column<string>(type: "text", nullable: false),
-                    DisplayOrder = table.Column<int>(type: "integer", nullable: false)
+                    Content = table.Column<string>(type: "text", nullable: true),
+                    DisplayOrder = table.Column<int>(type: "integer", nullable: false),
+                    SnapshotTypeName = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -655,8 +684,10 @@ namespace DAL.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     LessonPlannerId = table.Column<int>(type: "integer", nullable: false),
                     ObjectiveTemplateId = table.Column<int>(type: "integer", nullable: true),
-                    CustomContent = table.Column<string>(type: "text", nullable: false),
-                    DisplayOrder = table.Column<int>(type: "integer", nullable: false)
+                    CustomContent = table.Column<string>(type: "text", nullable: true),
+                    DisplayOrder = table.Column<int>(type: "integer", nullable: false),
+                    SnapshotName = table.Column<string>(type: "text", nullable: true),
+                    SnapshotContent = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -681,9 +712,10 @@ namespace DAL.Migrations
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     LessonPlannerId = table.Column<int>(type: "integer", nullable: false),
-                    PreparationTypeId = table.Column<int>(type: "integer", nullable: false),
-                    Materials = table.Column<string>(type: "text", nullable: false),
-                    DisplayOrder = table.Column<int>(type: "integer", nullable: false)
+                    PreparationTypeId = table.Column<int>(type: "integer", nullable: true),
+                    Materials = table.Column<string>(type: "text", nullable: true),
+                    DisplayOrder = table.Column<int>(type: "integer", nullable: false),
+                    SnapshotTypeName = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -698,8 +730,7 @@ namespace DAL.Migrations
                         name: "FK_LessonPreparations_PreparationTypes_PreparationTypeId",
                         column: x => x.PreparationTypeId,
                         principalTable: "PreparationTypes",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -710,8 +741,11 @@ namespace DAL.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     LessonPlannerId = table.Column<int>(type: "integer", nullable: false),
                     SkillTemplateId = table.Column<int>(type: "integer", nullable: true),
-                    CustomContent = table.Column<string>(type: "text", nullable: false),
-                    DisplayOrder = table.Column<int>(type: "integer", nullable: false)
+                    CustomContent = table.Column<string>(type: "text", nullable: true),
+                    DisplayOrder = table.Column<int>(type: "integer", nullable: false),
+                    SnapshotSkillType = table.Column<string>(type: "text", nullable: true),
+                    SnapshotName = table.Column<string>(type: "text", nullable: true),
+                    SnapshotDescription = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -737,13 +771,24 @@ namespace DAL.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     LessonActivityStageId = table.Column<int>(type: "integer", nullable: false),
                     TimeInMinutes = table.Column<int>(type: "integer", nullable: false),
-                    Content = table.Column<string>(type: "text", nullable: false),
+                    Content = table.Column<string>(type: "text", nullable: true),
                     InteractionPatternId = table.Column<int>(type: "integer", nullable: true),
-                    DisplayOrder = table.Column<int>(type: "integer", nullable: false)
+                    ActivityTemplateId = table.Column<int>(type: "integer", nullable: true),
+                    DisplayOrder = table.Column<int>(type: "integer", nullable: false),
+                    SnapshotInteractionName = table.Column<string>(type: "text", nullable: true),
+                    SnapshotInteractionShortCode = table.Column<string>(type: "text", nullable: true),
+                    SnapshotActivityName = table.Column<string>(type: "text", nullable: true),
+                    SnapshotActivityDescription = table.Column<string>(type: "text", nullable: true),
+                    SnapshotActivityContent = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_LessonActivityItems", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_LessonActivityItems_ActivityTemplates_ActivityTemplateId",
+                        column: x => x.ActivityTemplateId,
+                        principalTable: "ActivityTemplates",
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_LessonActivityItems_InteractionPatterns_InteractionPatternId",
                         column: x => x.InteractionPatternId,
@@ -756,6 +801,11 @@ namespace DAL.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ActivityTemplates_UserId",
+                table: "ActivityTemplates",
+                column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Answers_QuestionId",
@@ -786,6 +836,11 @@ namespace DAL.Migrations
                 name: "IX_LanguageFocusTypes_UserId",
                 table: "LanguageFocusTypes",
                 column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_LessonActivityItems_ActivityTemplateId",
+                table: "LessonActivityItems",
+                column: "ActivityTemplateId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_LessonActivityItems_InteractionPatternId",
@@ -918,11 +973,6 @@ namespace DAL.Migrations
                 column: "QuizId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_QuizOTPAccess_AccessedAt",
-                table: "QuizOTPAccesses",
-                column: "AccessedAt");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_QuizOTPAccess_OTP_Student",
                 table: "QuizOTPAccesses",
                 columns: new[] { "OTPId", "StudentId" });
@@ -1039,6 +1089,9 @@ namespace DAL.Migrations
 
             migrationBuilder.DropTable(
                 name: "UserAnswers");
+
+            migrationBuilder.DropTable(
+                name: "ActivityTemplates");
 
             migrationBuilder.DropTable(
                 name: "InteractionPatterns");

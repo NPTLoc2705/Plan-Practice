@@ -63,6 +63,7 @@ namespace DAL
         public DbSet<InteractionPattern> InteractionPatterns { get; set; }
         public DbSet<SkillType> SkillTypes { get; set; }
         public DbSet<PreparationType> PreparationTypes { get; set; }
+        public DbSet<ActivityTemplate> ActivityTemplates { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
             => optionsBuilder.UseNpgsql(GetConnectionString());

@@ -17,7 +17,7 @@ namespace Service.QuizzInterface
         Task<IEnumerable<OTPAccessLogDto>> GetOTPAccessLogsAsync(int otpId, int teacherId);
 
         // Student operations
-        Task<OTPValidationResultDto> ValidateOTPAsync(string otpCode, int studentId, string ipAddress, string userAgent);
+        Task<OTPValidationResultDto> ValidateOTPAsync(string otpCode, int studentId);
         Task<QuizDetailDto> GetQuizByOTPAsync(string otpCode, int studentId);
 
         // System operations
