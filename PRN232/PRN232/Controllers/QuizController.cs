@@ -123,7 +123,8 @@ namespace PRN232.Controllers
                     Id = quizDto.Id,
                     Title = quizDto.Title,
                     Description = quizDto.Description,
-                    LessonPlannerId = quizDto.LessonPlannerId
+                    LessonPlannerId = quizDto.LessonPlannerId,
+                    CreatedAt=DateTime.UtcNow,
                 };
 
                 await _quizService.UpdateQuizAsync(quiz);
