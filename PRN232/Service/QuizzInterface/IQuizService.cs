@@ -10,13 +10,13 @@ namespace Service.QuizzInterface
 {
     public interface IQuizService
     {
-        Task<IEnumerable<Quiz>> GetAllQuizzesAsync();
-        Task<Quiz?> GetQuizByIdAsync(int quizId);
-        Task CreateQuizAsync(Quiz quiz);
-        Task UpdateQuizAsync(Quiz quiz);
+        Task<IEnumerable<Quizs>> GetAllQuizzesAsync();
+        Task<Quizs?> GetQuizByIdAsync(int quizId);
+        Task CreateQuizAsync(Quizs quiz);
+        Task UpdateQuizAsync(Quizs quiz);
         Task DeleteQuizAsync(int quizId);
         Task<TeacherDashboardDto> GetTeacherDashboardStatsAsync(int teacherId);
-        Task<IEnumerable<Quiz>> GetQuizzesByTeacherAsync(int teacherId);
+        Task<IEnumerable<Quizs>> GetQuizzesByTeacherAsync(int teacherId);
 
 
     }

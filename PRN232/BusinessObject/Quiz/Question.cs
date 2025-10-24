@@ -20,7 +20,7 @@ namespace BusinessObject.Quiz
         public int QuizId { get; set; }
 
         [ForeignKey("QuizId")]
-        public virtual Quiz Quiz { get; set; }
+        public virtual Quizs Quiz { get; set; }
 
         // Navigation property: Một câu hỏi có nhiều lựa chọn
         public virtual ICollection<Answer> Answers { get; set; } = new List<Answer>();

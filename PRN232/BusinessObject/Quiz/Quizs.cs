@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace BusinessObject.Quiz
 {
-    public class Quiz
+    public class Quizs
     {
         [Key]
         public int Id { get; set; }
@@ -20,15 +20,16 @@ namespace BusinessObject.Quiz
 
         [StringLength(500)]
         public string? Description { get; set; }
-        
-        public int CreatedBy { get; set; }
-        
+
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         //public string? QuizCode { get; set; }
 
-        // Navigation property for the creator
-        [ForeignKey("CreatedBy")]
-        public virtual User Creator { get; set; }
+        // Foreign Key for LessonPlanner relationship
+        public int? LessonPlannerId { get; set; }
+
+        // Navigation property for LessonPlanner relationship
+        [ForeignKey("LessonPlannerId")]
+        public virtual Lesson.LessonPlanner LessonPlanner { get; set; }
 
         // Navigation property: Một Quiz có nhiều câu hỏi
         public virtual ICollection<Question> Questions { get; set; } = new List<Question>();

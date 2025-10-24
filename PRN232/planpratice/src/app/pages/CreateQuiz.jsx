@@ -1,14 +1,15 @@
-﻿// src/app/pages/CreateQuiz.jsx
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Plus, Trash2, Save, FileQuestion, CheckCircle, AlertCircle } from 'lucide-react';
 import { QuizAPI } from '../components/APIService/QuizAPI';
-import './output.css'; // Ensure Tailwind CSS is imported
+import './output.css';
+
 export default function CreateQuiz() {
     const navigate = useNavigate();
     const [quiz, setQuiz] = useState({
         title: '',
         description: '',
+        lessonPlannerId: null, // Added to match QuizController schema
         questions: [],
     });
     const [loading, setLoading] = useState(false);
@@ -17,7 +18,7 @@ export default function CreateQuiz() {
     const addQuestion = () => {
         setQuiz((p) => ({
             ...p,
-            questions: [...p.questions, { text: '', answers: [{ text: '', isCorrect: false }] }],
+            questions: [...p.questions, { content: '', answers: [{ content: '', isCorrect: false }] }],
         }));
     };
 
@@ -25,10 +26,10 @@ export default function CreateQuiz() {
         setQuiz((p) => ({ ...p, questions: p.questions.filter((_, i) => i !== qIdx) }));
     };
 
-    const updateQuestionText = (qIdx, value) => {
+    const updateQuestionContent = (qIdx, value) => {
         setQuiz((p) => {
             const q = [...p.questions];
-            q[qIdx].text = value;
+            q[qIdx].content = value;
             return { ...p, questions: q };
         });
     };
@@ -36,7 +37,7 @@ export default function CreateQuiz() {
     const addAnswer = (qIdx) => {
         setQuiz((p) => {
             const q = [...p.questions];
-            q[qIdx].answers.push({ text: '', isCorrect: false });
+            q[qIdx].answers.push({ content: '', isCorrect: false });
             return { ...p, questions: q };
         });
     };
@@ -49,10 +50,10 @@ export default function CreateQuiz() {
         });
     };
 
-    const updateAnswerText = (qIdx, aIdx, value) => {
+    const updateAnswerContent = (qIdx, aIdx, value) => {
         setQuiz((p) => {
             const q = [...p.questions];
-            q[qIdx].answers[aIdx].text = value;
+            q[qIdx].answers[aIdx].content = value;
             return { ...p, questions: q };
         });
     };
@@ -69,11 +70,14 @@ export default function CreateQuiz() {
         if (!quiz.title.trim()) return 'Please enter a quiz title.';
         if (quiz.questions.length === 0) return 'Add at least one question.';
         for (const [i, q] of quiz.questions.entries()) {
-            if (!q.text.trim()) return `Question ${i + 1} is empty.`;
+            if (!q.content.trim()) return `Question ${i + 1} is empty.`;
             if (!q.answers || q.answers.length === 0)
                 return `Question ${i + 1} must have at least one answer.`;
             if (!q.answers.some((a) => a.isCorrect))
                 return `Question ${i + 1} must have a correct answer.`;
+            for (const [j, a] of q.answers.entries()) {
+                if (!a.content.trim()) return `Answer ${j + 1} in Question ${i + 1} is empty.`;
+            }
         }
         return null;
     };
@@ -89,34 +93,41 @@ export default function CreateQuiz() {
 
         setLoading(true);
         try {
-            // 1️⃣ Create Quiz first
-            const quizRes = await QuizAPI.createQuiz({
+            // 1️⃣ Create Quiz first (matching QuizController.cs structure)
+            const quizPayload = {
                 title: quiz.title,
                 description: quiz.description,
-            });
-            const quizId = quizRes.id; // assuming backend returns quiz id
+                lessonPlannerId: quiz.lessonPlannerId, // Include lessonPlannerId
+            };
+
+            const quizRes = await QuizAPI.createQuiz(quizPayload);
+            const quizId = quizRes.id;
 
             // 2️⃣ Create each Question and its Answers
             for (const q of quiz.questions) {
-                const questionRes = await QuizAPI.createQuestion({
-                    content: q.text,
+                const questionPayload = {
+                    content: q.content, // Changed from 'text' to 'content' to match QuestionController
                     quizId,
-                });
+                };
+
+                const questionRes = await QuizAPI.createQuestion(questionPayload);
 
                 // 3️⃣ Create answers for this question
                 for (const a of q.answers) {
-                    await QuizAPI.createAnswer({
-                        content: a.text,
+                    const answerPayload = {
+                        content: a.content, // Changed from 'text' to 'content' to match AnswerController
                         isCorrect: a.isCorrect,
                         questionId: questionRes.id,
-                    });
+                    };
+
+                    await QuizAPI.createAnswer(answerPayload);
                 }
             }
 
             alert('Quiz created successfully!');
             navigate('/teacher/quiz');
         } catch (err) {
-            console.error(err);
+            console.error('Error creating quiz:', err);
             setError(err.message || 'Failed to create quiz.');
         } finally {
             setLoading(false);
@@ -178,6 +189,19 @@ export default function CreateQuiz() {
                                     onChange={(e) => setQuiz({ ...quiz, description: e.target.value })}
                                 />
                             </div>
+
+                            <div>
+                                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                    Lesson Planner ID (Optional)
+                                </label>
+                                <input
+                                    type="number"
+                                    className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 focus:border-teal-500 focus:outline-none transition-colors"
+                                    placeholder="Enter lesson planner ID if applicable..."
+                                    value={quiz.lessonPlannerId || ''}
+                                    onChange={(e) => setQuiz({ ...quiz, lessonPlannerId: e.target.value ? parseInt(e.target.value) : null })}
+                                />
+                            </div>
                         </div>
                     </div>
 
@@ -219,8 +243,8 @@ export default function CreateQuiz() {
                                             </div>
                                             <input
                                                 type="text"
-                                                value={q.text}
-                                                onChange={(e) => updateQuestionText(qIdx, e.target.value)}
+                                                value={q.content}
+                                                onChange={(e) => updateQuestionContent(qIdx, e.target.value)}
                                                 placeholder={`Enter question ${qIdx + 1}...`}
                                                 className="flex-1 border-b-2 border-gray-300 p-2 font-semibold text-gray-800 bg-transparent focus:border-teal-500 focus:outline-none transition-colors"
                                             />
@@ -254,16 +278,16 @@ export default function CreateQuiz() {
                                                     <div
                                                         key={aIdx}
                                                         className={`flex items-center gap-3 p-3 rounded-xl transition-all ${a.isCorrect
-                                                                ? 'bg-emerald-50 border-2 border-emerald-300'
-                                                                : 'bg-white border-2 border-gray-200 hover:border-gray-300'
+                                                            ? 'bg-emerald-50 border-2 border-emerald-300'
+                                                            : 'bg-white border-2 border-gray-200 hover:border-gray-300'
                                                             }`}
                                                     >
                                                         <input
                                                             type="text"
                                                             className="flex-1 px-3 py-2 bg-transparent focus:outline-none"
-                                                            value={a.text}
+                                                            value={a.content}
                                                             onChange={(e) =>
-                                                                updateAnswerText(qIdx, aIdx, e.target.value)
+                                                                updateAnswerContent(qIdx, aIdx, e.target.value)
                                                             }
                                                             placeholder={`Answer ${aIdx + 1}`}
                                                         />

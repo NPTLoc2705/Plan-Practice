@@ -1,27 +1,32 @@
 ﻿import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { QuizAPI } from '../components/APIService/QuizAPI';
-import { Save, Plus, X, Edit3, CheckCircle } from 'lucide-react';
-import './output.css'; // Ensure Tailwind CSS is imported
+import { Save, Plus, X, Edit3, CheckCircle, Trash2 } from 'lucide-react';
+import './output.css';
+
 const EditQuiz = () => {
     const { quizId } = useParams();
     const navigate = useNavigate();
 
-    const [quiz, setQuiz] = useState({ title: '', description: '' });
+    const [quiz, setQuiz] = useState({
+        title: '',
+        description: '',
+        lessonPlannerId: null
+    });
     const [questions, setQuestions] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [success, setSuccess] = useState('');
 
-    // 🧠 Modal states
+    // Modal states
     const [showQuestionModal, setShowQuestionModal] = useState(false);
     const [showAnswerModal, setShowAnswerModal] = useState(false);
-    const [newQuestionText, setNewQuestionText] = useState('');
-    const [newAnswerText, setNewAnswerText] = useState('');
+    const [newQuestionContent, setNewQuestionContent] = useState('');
+    const [newAnswerContent, setNewAnswerContent] = useState('');
     const [isCorrect, setIsCorrect] = useState(false);
     const [currentQuestionId, setCurrentQuestionId] = useState(null);
 
-    // 🧠 Load quiz info + questions + answers
+    // Load quiz info + questions + answers
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -29,6 +34,7 @@ const EditQuiz = () => {
                 setQuiz({
                     title: quizData.title || '',
                     description: quizData.description || '',
+                    lessonPlannerId: quizData.lessonPlannerId || null,
                 });
 
                 const questionsData = await QuizAPI.getQuestionsByQuizId(quizId);
@@ -41,7 +47,7 @@ const EditQuiz = () => {
 
                 setQuestions(questionsWithAnswers);
             } catch (err) {
-                console.error(err);
+                console.error('Error fetching quiz data:', err);
                 setError(err.message);
             } finally {
                 setLoading(false);
@@ -50,27 +56,30 @@ const EditQuiz = () => {
         fetchData();
     }, [quizId]);
 
-    // 🧩 Handle quiz info changes
+    // Handle quiz info changes
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setQuiz((prev) => ({ ...prev, [name]: value }));
+        setQuiz((prev) => ({
+            ...prev,
+            [name]: name === 'lessonPlannerId' ? (value ? parseInt(value) : null) : value
+        }));
     };
 
-    // 🧠 Update question text
+    // Update question content
     const handleQuestionChange = (index, value) => {
         const updated = [...questions];
         updated[index].content = value;
         setQuestions(updated);
     };
 
-    // 🧩 Update answer text
+    // Update answer content
     const handleAnswerChange = (qIdx, aIdx, value) => {
         const updated = [...questions];
         updated[qIdx].answers[aIdx].content = value;
         setQuestions(updated);
     };
 
-    // ✅ Set correct answer
+    // Set correct answer
     const setCorrectAnswer = (qIdx, aIdx) => {
         const updated = [...questions];
         updated[qIdx].answers = updated[qIdx].answers.map((a, i) => ({
@@ -80,25 +89,54 @@ const EditQuiz = () => {
         setQuestions(updated);
     };
 
-    // 🟢 Open modals
+    // Delete question
+    const deleteQuestion = async (qIdx) => {
+        if (!window.confirm('Are you sure you want to delete this question?')) return;
+
+        try {
+            const questionId = questions[qIdx].id;
+            await QuizAPI.deleteQuestion(questionId);
+            setQuestions(prev => prev.filter((_, i) => i !== qIdx));
+        } catch (err) {
+            setError(err.message);
+        }
+    };
+
+    // Delete answer
+    const deleteAnswer = async (qIdx, aIdx) => {
+        if (!window.confirm('Are you sure you want to delete this answer?')) return;
+
+        try {
+            const answerId = questions[qIdx].answers[aIdx].id;
+            await QuizAPI.deleteAnswer(answerId);
+
+            const updated = [...questions];
+            updated[qIdx].answers = updated[qIdx].answers.filter((_, i) => i !== aIdx);
+            setQuestions(updated);
+        } catch (err) {
+            setError(err.message);
+        }
+    };
+
+    // Open modals
     const openQuestionModal = () => {
-        setNewQuestionText('');
+        setNewQuestionContent('');
         setShowQuestionModal(true);
     };
 
     const openAnswerModal = (questionId) => {
-        setNewAnswerText('');
+        setNewAnswerContent('');
         setIsCorrect(false);
         setCurrentQuestionId(questionId);
         setShowAnswerModal(true);
     };
 
-    // 💾 Save question
+    // Save question
     const handleSaveQuestion = async () => {
-        if (!newQuestionText.trim()) return alert('Please enter a question!');
+        if (!newQuestionContent.trim()) return alert('Please enter a question!');
         try {
             const newQuestion = await QuizAPI.createQuestion({
-                content: newQuestionText,
+                content: newQuestionContent,
                 quizId: quizId,
             });
             setQuestions([...questions, { ...newQuestion, answers: [] }]);
@@ -108,12 +146,12 @@ const EditQuiz = () => {
         }
     };
 
-    // 💾 Save answer
+    // Save answer
     const handleSaveAnswer = async () => {
-        if (!newAnswerText.trim()) return alert('Please enter an answer!');
+        if (!newAnswerContent.trim()) return alert('Please enter an answer!');
         try {
             const newAnswer = await QuizAPI.createAnswer({
-                content: newAnswerText,
+                content: newAnswerContent,
                 isCorrect,
                 questionId: currentQuestionId,
             });
@@ -132,21 +170,29 @@ const EditQuiz = () => {
         }
     };
 
-    // 💾 Save all changes
+    // Save all changes
     const handleSaveAll = async (e) => {
         e.preventDefault();
         setError('');
         setSuccess('');
         try {
-            await QuizAPI.updateQuiz(quizId, quiz);
+            // Update quiz (matching QuizController structure)
+            await QuizAPI.updateQuiz(quizId, {
+                id: parseInt(quizId),
+                title: quiz.title,
+                description: quiz.description,
+                lessonPlannerId: quiz.lessonPlannerId,
+            });
 
+            // Update questions
             for (const q of questions) {
                 await QuizAPI.updateQuestion(q.id, {
                     id: q.id,
                     content: q.content,
-                    quizId: quizId,
+                    quizId: parseInt(quizId),
                 });
 
+                // Update answers
                 for (const a of q.answers) {
                     await QuizAPI.updateAnswer(a.id, {
                         id: a.id,
@@ -160,7 +206,7 @@ const EditQuiz = () => {
             setSuccess('Quiz, questions, and answers updated successfully!');
             setTimeout(() => navigate('/teacher/quiz'), 1500);
         } catch (err) {
-            console.error(err);
+            console.error('Error saving quiz:', err);
             setError(err.message);
         }
     };
@@ -215,25 +261,38 @@ const EditQuiz = () => {
 
                             <div>
                                 <label className="block text-sm font-semibold text-gray-700 mb-2">
-                                    Description
+                                    Lesson Planner ID
                                 </label>
-                                <textarea
-                                    name="description"
-                                    value={quiz.description}
+                                <input
+                                    type="number"
+                                    name="lessonPlannerId"
+                                    value={quiz.lessonPlannerId || ''}
                                     onChange={handleChange}
-                                    rows="3"
-                                    className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 focus:border-teal-500 focus:outline-none transition-colors resize-none"
-                                    placeholder="Enter quiz description..."
-                                    required
+                                    className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 focus:border-teal-500 focus:outline-none transition-colors"
+                                    placeholder="Enter lesson planner ID..."
                                 />
                             </div>
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                Description
+                            </label>
+                            <textarea
+                                name="description"
+                                value={quiz.description}
+                                onChange={handleChange}
+                                rows="3"
+                                className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 focus:border-teal-500 focus:outline-none transition-colors resize-none"
+                                placeholder="Enter quiz description..."
+                            />
                         </div>
 
                         {/* Action Buttons - Top */}
                         <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
                             <button
                                 type="button"
-                                onClick={() => navigate('/teacher')}
+                                onClick={() => navigate('/teacher/quiz')}
                                 className="px-6 py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-all font-medium"
                             >
                                 Cancel
@@ -290,8 +349,16 @@ const EditQuiz = () => {
                                         value={q.content}
                                         onChange={(e) => handleQuestionChange(qIdx, e.target.value)}
                                         className="flex-1 border-b-2 border-gray-300 p-2 font-semibold text-gray-800 bg-transparent focus:border-teal-500 focus:outline-none transition-colors"
-                                        placeholder="Enter question text..."
+                                        placeholder="Enter question content..."
                                     />
+                                    <button
+                                        type="button"
+                                        onClick={() => deleteQuestion(qIdx)}
+                                        className="w-9 h-9 flex items-center justify-center rounded-lg text-red-500 hover:bg-red-50 transition-colors flex-shrink-0"
+                                        title="Delete question"
+                                    >
+                                        <Trash2 className="w-5 h-5" />
+                                    </button>
                                 </div>
 
                                 <div className="ml-11 space-y-3">
@@ -299,8 +366,8 @@ const EditQuiz = () => {
                                         <div
                                             key={a.id}
                                             className={`flex items-center gap-3 p-3 rounded-xl transition-all ${a.isCorrect
-                                                    ? 'bg-emerald-50 border-2 border-emerald-300'
-                                                    : 'bg-white border-2 border-gray-200 hover:border-gray-300'
+                                                ? 'bg-emerald-50 border-2 border-emerald-300'
+                                                : 'bg-white border-2 border-gray-200 hover:border-gray-300'
                                                 }`}
                                         >
                                             <input
@@ -310,7 +377,7 @@ const EditQuiz = () => {
                                                     handleAnswerChange(qIdx, aIdx, e.target.value)
                                                 }
                                                 className="flex-1 px-3 py-2 bg-transparent focus:outline-none"
-                                                placeholder="Enter answer text..."
+                                                placeholder="Enter answer content..."
                                             />
                                             <label className="flex items-center gap-2 cursor-pointer group">
                                                 <input
@@ -324,6 +391,14 @@ const EditQuiz = () => {
                                                     Correct
                                                 </span>
                                             </label>
+                                            <button
+                                                type="button"
+                                                onClick={() => deleteAnswer(qIdx, aIdx)}
+                                                className="w-8 h-8 flex items-center justify-center rounded-lg text-red-500 hover:bg-red-50 transition-colors"
+                                                title="Delete answer"
+                                            >
+                                                <Trash2 className="w-4 h-4" />
+                                            </button>
                                         </div>
                                     ))}
                                 </div>
@@ -347,8 +422,6 @@ const EditQuiz = () => {
                 </div>
             </div>
 
-            {/* ===== MODALS ===== */}
-
             {/* Question Modal */}
             {showQuestionModal && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
@@ -366,8 +439,8 @@ const EditQuiz = () => {
                         <div className="p-6">
                             <textarea
                                 rows="4"
-                                value={newQuestionText}
-                                onChange={(e) => setNewQuestionText(e.target.value)}
+                                value={newQuestionContent}
+                                onChange={(e) => setNewQuestionContent(e.target.value)}
                                 placeholder="Enter your question here..."
                                 className="w-full border-2 border-gray-200 rounded-xl p-4 focus:border-teal-500 focus:outline-none transition-colors resize-none"
                             />
@@ -408,9 +481,9 @@ const EditQuiz = () => {
                         <div className="p-6 space-y-4">
                             <textarea
                                 rows="3"
-                                value={newAnswerText}
-                                onChange={(e) => setNewAnswerText(e.target.value)}
-                                placeholder="Enter answer text..."
+                                value={newAnswerContent}
+                                onChange={(e) => setNewAnswerContent(e.target.value)}
+                                placeholder="Enter answer content..."
                                 className="w-full border-2 border-gray-200 rounded-xl p-4 focus:border-teal-500 focus:outline-none transition-colors resize-none"
                             />
 

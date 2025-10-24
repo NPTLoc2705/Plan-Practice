@@ -17,7 +17,7 @@ namespace Repository.Method.Student
         {
             this.quizStudentDAO = quizStudentDAO;
         }
-        public Task<Quiz> GetQuizWithQuestionsAndAnswersAsync(int quizId) => quizStudentDAO.GetQuizWithQuestionsAndAnswersAsync(quizId);
+        public Task<Quizs> GetQuizWithQuestionsAndAnswersAsync(int quizId) => quizStudentDAO.GetQuizWithQuestionsAndAnswersAsync(quizId);
 
 
 

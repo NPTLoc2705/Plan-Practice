@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
 using BusinessObject.Lesson.Template;
+using BusinessObject.Quiz;
 using System.Linq;
 using System.Security.Claims;
 using System.Text;
@@ -63,6 +64,9 @@ namespace BusinessObject.Lesson
         public virtual ICollection<LessonLanguageFocus> LanguageFocusItems { get; set; }
         public virtual ICollection<LessonPreparation> Preparations { get; set; }
         public virtual ICollection<LessonActivityStage> ActivityStages { get; set; }
+
+        // Quiz Navigation Property
+        public virtual ICollection<Quizs> Quizzes { get; set; } = new List<Quizs>();
 
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }

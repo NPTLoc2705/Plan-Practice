@@ -19,7 +19,7 @@ namespace Repository.Method
         {
             _dao = dao;
         }
-        public async Task CreateQuizAsync(Quiz quiz)
+        public async Task CreateQuizAsync(Quizs quiz)
         {
             await _dao.CreateQuizAsync(quiz);
         }
@@ -29,25 +29,25 @@ namespace Repository.Method
             await _dao.DeleteQuizAsync(quizId);
         }
 
-        public async Task<Quiz?> GetQuizByIdAsync(int quizId)
+        public async Task<Quizs?> GetQuizByIdAsync(int quizId)
         {
            return await _dao.GetQuizByIdAsync(quizId);
 
         }
 
-        public async Task<IEnumerable<Quiz>> GetTotalQuizzesAsync()
+        public async Task<IEnumerable<Quizs>> GetTotalQuizzesAsync()
         {
            return await _dao.GetTotalQuizzesAsync();
         }
 
-        public async Task UpdateQuizAsync(Quiz quiz)
+        public async Task UpdateQuizAsync(Quizs quiz)
         {
            await _dao.UpdateQuizAsync(quiz);
         }
 
-        public async Task<IEnumerable<Quiz>> GetQuizzesByTeacherAsync(int teacherId)
+        public async Task<IEnumerable<Quizs>> GetQuizzesByTeacherAsync(int teacherId)
         {
-            return await _dao.GetQuizzesByTeacherAsync(teacherId);
+            return null;
         }
 
         public async Task<IEnumerable<QuizResult>> GetQuizResultsByQuizIdAsync(int quizId)

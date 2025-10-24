@@ -25,7 +25,7 @@ namespace DAL
 
         public DbSet<User> Users { get; set; }
         public DbSet<OtpVerify> OtpVerifies { get; set; }
-        public DbSet<Quiz> Quizzes { get; set; }
+        public DbSet<Quizs> Quizzes { get; set; }
         public DbSet<Question> Questions { get; set; }
         public DbSet<Answer> Answers { get; set; }
         public DbSet<QuizResult> QuizResults { get; set; }
@@ -101,11 +101,18 @@ namespace DAL
                     .WithMany()
                     .HasForeignKey(e => e.UserId)
                     .OnDelete(DeleteBehavior.Restrict);
+                    
                 // Optional relationships
                 entity.HasOne(e => e.MethodTemplate)
                     .WithMany()
                     .HasForeignKey(e => e.MethodTemplateId)
                     .OnDelete(DeleteBehavior.Restrict);
+
+                // Quiz relationship - One LessonPlanner can have many Quizzes
+                entity.HasMany(e => e.Quizzes)
+                    .WithOne(q => q.LessonPlanner)
+                    .HasForeignKey(q => q.LessonPlannerId)
+                    .OnDelete(DeleteBehavior.SetNull);
             });
 
             // User entity configuration
@@ -226,7 +233,19 @@ namespace DAL
 
 
             // Quiz relationships
-            modelBuilder.Entity<Quiz>()
+            modelBuilder.Entity<Quizs>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Id).ValueGeneratedOnAdd();
+
+                // LessonPlanner relationship
+                entity.HasOne(q => q.LessonPlanner)
+                    .WithMany(lp => lp.Quizzes)
+                    .HasForeignKey(q => q.LessonPlannerId)
+                    .OnDelete(DeleteBehavior.SetNull);
+            });
+
+            modelBuilder.Entity<Quizs>()
                 .HasMany(q => q.Questions)
                 .WithOne(q => q.Quiz)
                 .HasForeignKey(q => q.QuizId);

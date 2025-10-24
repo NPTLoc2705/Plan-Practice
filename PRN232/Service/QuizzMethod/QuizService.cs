@@ -19,12 +19,12 @@ namespace Service.QuizzMethod
             _quizRepository = quizRepository ?? throw new ArgumentNullException(nameof(quizRepository));
         }
 
-        public async Task<IEnumerable<Quiz>> GetAllQuizzesAsync()
+        public async Task<IEnumerable<Quizs>> GetAllQuizzesAsync()
         {
             return await _quizRepository.GetTotalQuizzesAsync();
         }
 
-        public async Task<Quiz?> GetQuizByIdAsync(int quizId)
+        public async Task<Quizs?> GetQuizByIdAsync(int quizId)
         {
             if (quizId <= 0)
                 throw new ArgumentException("Quiz ID must be greater than 0", nameof(quizId));
@@ -32,7 +32,7 @@ namespace Service.QuizzMethod
             return await _quizRepository.GetQuizByIdAsync(quizId);
         }
 
-        public async Task CreateQuizAsync(Quiz quiz)
+        public async Task CreateQuizAsync(Quizs quiz)
         {
             if (quiz == null)
                 throw new ArgumentNullException(nameof(quiz));
@@ -44,7 +44,7 @@ namespace Service.QuizzMethod
            
         }
 
-        public async Task UpdateQuizAsync(Quiz quiz)
+        public async Task UpdateQuizAsync(Quizs quiz)
         {  
             await _quizRepository.UpdateQuizAsync(quiz);           
         }
@@ -95,7 +95,7 @@ namespace Service.QuizzMethod
             };
         }
 
-        public async Task<IEnumerable<Quiz>> GetQuizzesByTeacherAsync(int teacherId)
+        public async Task<IEnumerable<Quizs>> GetQuizzesByTeacherAsync(int teacherId)
         {
             if (teacherId <= 0)
                 throw new ArgumentException("Teacher ID must be greater than 0", nameof(teacherId));

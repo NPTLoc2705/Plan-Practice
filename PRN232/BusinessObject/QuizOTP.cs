@@ -38,7 +38,7 @@ namespace BusinessObject
 
         // Navigation properties
         [ForeignKey("QuizId")]
-        public virtual BusinessObject.Quiz.Quiz Quiz { get; set; }
+        public virtual BusinessObject.Quiz.Quizs Quiz { get; set; }
 
         [ForeignKey("CreatedByTeacherId")]
         public virtual User CreatedByTeacher { get; set; }

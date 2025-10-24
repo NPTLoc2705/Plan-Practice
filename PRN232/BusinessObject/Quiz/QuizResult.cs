@@ -26,7 +26,7 @@ namespace BusinessObject.Quiz
         public virtual User User { get; set; }
 
         [ForeignKey("QuizId")]
-        public virtual Quiz Quiz { get; set; }
+        public virtual Quizs Quiz { get; set; }
 
         // Navigation property: Lưu các câu trả lời của người dùng
         public virtual ICollection<UserAnswer> UserAnswers { get; set; } = new List<UserAnswer>();

@@ -7,39 +7,84 @@ const headers = () => ({
 });
 
 export class QuizAPI {
-    // 🟢 Lấy danh sách quiz của teacher hiện tại
-  static async getTeacherQuizzes() {
-    try {
-        const response = await fetch(`${API_BASE_URL}/quiz/teacher/me`, {
-            method: 'GET',
-            headers: headers(),
-        });
+    // 🟢 Get all quizzes (new method to replace teacher-specific endpoint)
+    static async getAllQuizzes() {
+        try {
+            const response = await fetch(`${API_BASE_URL}/quiz`, {
+                method: 'GET',
+                headers: headers(),
+            });
 
-        if (!response.ok) {
-            const error = await response.json().catch(() => ({}));
-            throw new Error(error.message || 'Failed to fetch quizzes');
+            if (!response.ok) {
+                const error = await response.json().catch(() => ({}));
+                throw new Error(error.message || 'Failed to fetch quizzes');
+            }
+
+            const result = await response.json();
+            return Array.isArray(result) ? result : [];
+        } catch (error) {
+            console.error('Error in getAllQuizzes:', error);
+            throw new Error('Failed to fetch quizzes');
         }
-
-        const result = await response.json();
-        
-        // Transform the quiz data to match the component's expectations
-        if (result.success && Array.isArray(result.data)) {
-            return {
-                success: true,
-                data: result.data.map(quiz => ({
-                    ...quiz,
-                    totalQuestions: quiz.totalQuestion || 0 // Map from backend's totalQuestion to frontend's totalQuestions
-                })),
-                message: result.message
-            };
-        }
-
-        return result;
-    } catch (error) {
-        console.error('Error in getTeacherQuizzes:', error);
-        throw new Error('Failed to fetch quizzes');
     }
-}
+
+    // 🟢 Get quizzes by lesson planner ID
+    static async getQuizzesByLessonPlannerId(lessonPlannerId) {
+        try {
+            const response = await fetch(`${API_BASE_URL}/quiz`, {
+                method: 'GET',
+                headers: headers(),
+            });
+
+            if (!response.ok) {
+                const error = await response.json().catch(() => ({}));
+                throw new Error(error.message || 'Failed to fetch quizzes');
+            }
+
+            const result = await response.json();
+            const allQuizzes = Array.isArray(result) ? result : [];
+
+            // Filter quizzes by lesson planner ID
+            return allQuizzes.filter(quiz => quiz.lessonPlannerId === lessonPlannerId);
+        } catch (error) {
+            console.error('Error in getQuizzesByLessonPlannerId:', error);
+            throw new Error('Failed to fetch quizzes for lesson planner');
+        }
+    }
+
+    // 🟢 Lấy danh sách quiz của teacher hiện tại
+    static async getTeacherQuizzes() {
+        try {
+            const response = await fetch(`${API_BASE_URL}/quiz/teacher/me`, {
+                method: 'GET',
+                headers: headers(),
+            });
+
+            if (!response.ok) {
+                const error = await response.json().catch(() => ({}));
+                throw new Error(error.message || 'Failed to fetch quizzes');
+            }
+
+            const result = await response.json();
+
+            // Transform the quiz data to match the component's expectations
+            if (result.success && Array.isArray(result.data)) {
+                return {
+                    success: true,
+                    data: result.data.map(quiz => ({
+                        ...quiz,
+                        totalQuestions: quiz.totalQuestion || 0 // Map from backend's totalQuestion to frontend's totalQuestions
+                    })),
+                    message: result.message
+                };
+            }
+
+            return result;
+        } catch (error) {
+            console.error('Error in getTeacherQuizzes:', error);
+            throw new Error('Failed to fetch quizzes');
+        }
+    }
 
     // 🟢 Tạo quiz mới
     static async createQuiz(data) {
@@ -61,15 +106,8 @@ export class QuizAPI {
     static async updateQuiz(id, quizData) {
         const response = await fetch(`${API_BASE_URL}/quiz/${id}`, {
             method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
-            },
-            body: JSON.stringify({
-                id, // ✅ keep the same id (some APIs need it)
-                title: quizData.title,
-                description: quizData.description,
-            })
+            headers: headers(),
+            body: JSON.stringify(quizData)
         });
 
         if (!response.ok) {
@@ -77,7 +115,9 @@ export class QuizAPI {
             throw new Error(error.message || 'Failed to update quiz');
         }
 
-        return await response.json();
+        // Handle empty response body from controller
+        const text = await response.text();
+        return text ? JSON.parse(text) : null;
     }
 
     // 🔴 Xóa quiz
@@ -92,20 +132,12 @@ export class QuizAPI {
             throw new Error(error.message || 'Failed to delete quiz');
         }
 
-        // ✅ Only parse JSON if response has a body
-        let data = null;
-        try {
-            const text = await response.text();
-            data = text ? JSON.parse(text) : null;
-        } catch {
-            data = null; // Ignore parsing if body is empty
-        }
-
-        return data;
+        // Handle empty response body from controller
+        const text = await response.text();
+        return text ? JSON.parse(text) : null;
     }
 
-
-    // 🔍 Lấy chi tiết quiz theo id (nếu API backend có)
+    // 🔍 Lấy chi tiết quiz theo id
     static async getQuizById(id) {
         const response = await fetch(`${API_BASE_URL}/quiz/${id}`, {
             method: 'GET',
@@ -118,34 +150,27 @@ export class QuizAPI {
         }
 
         return await response.json();
+    }
 
-    }
-    static async getQuestionsByQuizId(quizId) {
-        const res = await fetch(`${API_BASE_URL}/Question/quiz/${quizId}`, {
-            method: 'GET',
-            headers: headers(),
-        });
-        if (!res.ok) throw new Error('Failed to fetch questions');
-        return res.json();
-    }
     // ========================= QUESTION =========================
     static async getQuestionsByQuizId(quizId) {
-        const res = await fetch(`${API_BASE_URL}/Question/quiz/${quizId}`, {
+        const res = await fetch(`${API_BASE_URL}/question/quiz/${quizId}`, {
             method: 'GET',
             headers: headers(),
         });
         if (!res.ok) throw new Error('Failed to fetch questions');
         return res.json();
     }
+
     static async updateQuestion(id, question) {
-        const res = await fetch(`${API_BASE_URL}/Question/${id}`, {
+        const res = await fetch(`${API_BASE_URL}/question/${id}`, {
             method: 'PUT',
             headers: headers(),
             body: JSON.stringify(question),
         });
         if (!res.ok) throw new Error('Failed to update question');
 
-        // only parse JSON if response body exists
+        // Handle empty response body from controller
         const text = await res.text();
         return text ? JSON.parse(text) : null;
     }
@@ -166,11 +191,15 @@ export class QuizAPI {
             headers: headers(),
         });
         if (!res.ok) throw new Error('Failed to delete question');
+
+        // Handle empty response body from controller
+        const text = await res.text();
+        return text ? JSON.parse(text) : null;
     }
 
     // ========================= ANSWER =========================
     static async getAnswersByQuestionId(questionId) {
-        const res = await fetch(`${API_BASE_URL}/Answer/question/${questionId}`, {
+        const res = await fetch(`${API_BASE_URL}/answer/question/${questionId}`, {
             headers: headers(),
         });
         if (!res.ok) throw new Error('Failed to fetch answers for question');
@@ -178,7 +207,7 @@ export class QuizAPI {
     }
 
     static async createAnswer(answer) {
-        const res = await fetch(`${API_BASE_URL}/Answer`, {
+        const res = await fetch(`${API_BASE_URL}/answer`, {
             method: 'POST',
             headers: headers(),
             body: JSON.stringify(answer),
@@ -187,26 +216,30 @@ export class QuizAPI {
         return res.json();
     }
 
-
     static async updateAnswer(id, answer) {
-        const res = await fetch(`${API_BASE_URL}/Answer/${id}`, {
+        const res = await fetch(`${API_BASE_URL}/answer/${id}`, {
             method: 'PUT',
             headers: headers(),
             body: JSON.stringify(answer),
         });
         if (!res.ok) throw new Error('Failed to update answer');
 
+        // Handle empty response body from controller
         const text = await res.text();
         return text ? JSON.parse(text) : null;
     }
 
     static async deleteAnswer(id) {
-        const res = await fetch(`${API_BASE_URL}/Answer/${id}`, {
+        const res = await fetch(`${API_BASE_URL}/answer/${id}`, {
             method: 'DELETE',
             headers: headers(),
         });
         if (!res.ok) throw new Error('Failed to delete answer');
+
+        // Handle empty response body from controller
+        const text = await res.text();
+        return text ? JSON.parse(text) : null;
     }
 }
-export default QuizAPI;
 
+export default QuizAPI;

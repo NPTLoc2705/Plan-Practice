@@ -34,8 +34,6 @@ namespace BusinessObject
         public virtual ICollection<OtpVerify> OtpVerifies { get; set; } = new List<OtpVerify>();
 
         public virtual ICollection<QuizResult> QuizResults { get; set; } = new List<QuizResult>();
-        
-        public virtual ICollection<Quiz.Quiz> CreatedQuizzes { get; set; } = new List<Quiz.Quiz>();
     }
 }
 

@@ -16,7 +16,7 @@ namespace DAL.QuizDAO
         {
             _context = context;
         }
-        public async Task CreateQuizAsync(Quiz quiz)
+        public async Task CreateQuizAsync(Quizs quiz)
         {
             _context.Quizzes.Add(quiz);
             await _context.SaveChangesAsync();
@@ -32,27 +32,27 @@ namespace DAL.QuizDAO
             }
         }
 
-        public async Task<Quiz?> GetQuizByIdAsync(int quizId)
+        public async Task<Quizs?> GetQuizByIdAsync(int quizId)
         {
             return await _context.Quizzes.FirstOrDefaultAsync(q => q.Id == quizId);
 
         }
 
-        public async Task<IEnumerable<Quiz>> GetTotalQuizzesAsync()
+        public async Task<IEnumerable<Quizs>> GetTotalQuizzesAsync()
         {
             return await _context.Quizzes.ToListAsync();
         }
 
-        public async Task UpdateQuizAsync(Quiz quiz)
+        public async Task UpdateQuizAsync(Quizs quiz)
         {
             _context.Update(quiz);
             await _context.SaveChangesAsync();
         }
 
-        public async Task<IEnumerable<Quiz>> GetQuizzesByTeacherAsync(int teacherId)
+        public async Task<IEnumerable<Quizs>> GetQuizzesByLessonPlan(int lessonId)
         {
             return await _context.Quizzes
-                .Where(q => q.CreatedBy == teacherId)
+                .Where(q => q.LessonPlannerId == lessonId)
                 .Include(q => q.QuizResults)
                 .Include(q => q.Questions)
                 .OrderByDescending(q => q.CreatedAt)

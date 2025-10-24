@@ -22,7 +22,7 @@ namespace DAL.Student
 
 
 
-        public async Task<Quiz> GetQuizWithQuestionsAndAnswersAsync(int quizId)
+        public async Task<Quizs> GetQuizWithQuestionsAndAnswersAsync(int quizId)
         {
             return await _context.Quizzes
                 .Include(q => q.Questions)

@@ -37,7 +37,7 @@ namespace Service.Method
             if (quiz == null)
                 throw new InvalidOperationException($"Quiz with ID {quizId} not found");
 
-             if (quiz.CreatedBy != teacherId)
+             if (quiz.LessonPlannerId != teacherId)
                  throw new UnauthorizedAccessException("You don't have permission to generate OTP for this quiz");
 
             // Generate unique OTP code

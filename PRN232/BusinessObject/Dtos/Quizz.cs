@@ -30,9 +30,10 @@ namespace BusinessObject.Dtos
         public int Id { get; set; }
         public string Title { get; set; }
         public string Description { get; set; }
-        
+        public DateTime CreatedAt { get; set; }
+        public int? LessonPlannerId { get; set; }
         public int TotalQuestion { get; set; }
-        public int CreatedBy { get; set; }
+        //public List<QuestionDto> Questions { get; set; }
     }
 
     public class QuizResultDto
@@ -41,8 +42,6 @@ namespace BusinessObject.Dtos
         public int UserId { get; set; }
         public int QuizId { get; set; }
         public int Score { get; set; }
-       
-        
     }
 
     public class UserAnswerDto

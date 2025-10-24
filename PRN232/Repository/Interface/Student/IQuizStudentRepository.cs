@@ -11,7 +11,7 @@ namespace Repository.Interface.Student
     {
 
 
-        Task<Quiz> GetQuizWithQuestionsAndAnswersAsync(int quizId);
+        Task<Quizs> GetQuizWithQuestionsAndAnswersAsync(int quizId);
 
     }
 }
