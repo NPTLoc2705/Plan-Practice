@@ -165,15 +165,15 @@ namespace PRN232.Controllers
                 var userId = GetCurrentUserId();
 
                 // check user have taken quiz
-                var hasAttempted = await _studentQuizService.HasUserAttemptedQuizAsync(userId, dto.QuizId);
-                if (hasAttempted)
-                {
-                    return BadRequest(new
-                    {
-                        success = false,
-                        message = "You have already taken this quiz. cannot submit again."
-                    });
-                }
+               // var hasAttempted = await _studentQuizService.HasUserAttemptedQuizAsync(userId, dto.QuizId);
+                //if (hasAttempted)
+                //{
+                //    return BadRequest(new
+                //    {
+                //        success = false,
+                //        message = "You have already taken this quiz. cannot submit again."
+                //    });
+                //}
 
                 var result = await _studentQuizService.SubmitQuizAsync(userId, dto);
 

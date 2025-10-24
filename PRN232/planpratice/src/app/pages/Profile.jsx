@@ -167,7 +167,7 @@ const Profile = () => {
                   <span className="font-semibold text-gray-700">Email:</span>{' '}
                   <span className="ml-1 text-gray-900">{user?.email || 'N/A'}</span>
                   <span className="ml-2 text-sm text-green-600">
-                    {user?.emailVerified ? '✓ Verified' : '✗ Not Verified'}
+                    {/* {user?.emailVerified ? '✓ Verified' : '✗ Not Verified'} */}
                   </span>
                 </div>
 
@@ -246,11 +246,11 @@ const Profile = () => {
 
             {/* Quick Actions Section */}
             <div>
-              <h3 className="text-lg font-bold text-gray-800 mb-4">
+              {/* <h3 className="text-lg font-bold text-gray-800 mb-4">
                 Quick Actions
-              </h3>
+              </h3> */}
               <div className="flex flex-wrap gap-4">
-                <button
+                {/* <button
                   onClick={() => navigate('/studyplan')}
                   className="px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition"
                 >
@@ -267,7 +267,7 @@ const Profile = () => {
                   className="px-6 py-3 bg-purple-600 text-white rounded-lg font-semibold hover:bg-purple-700 transition"
                 >
                   Take Quiz
-                </button>
+                </button> */}
               </div>
             </div>
           </div>

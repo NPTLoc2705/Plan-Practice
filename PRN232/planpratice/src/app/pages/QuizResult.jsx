@@ -91,10 +91,10 @@ if (error) return <div className={styles.error}>{error}</div>
       )}
 
       <div className={styles.resultActions}>
-        <button onClick={() => navigate('/quizzes')} className={styles.btnPrimary}>
-          Back to Quizzes
+        <button onClick={() => navigate('/student/quiz/otp')} className={styles.btnPrimary}>
+          Back to Take Quiz
         </button>
-        <button onClick={() => navigate('/history')} className={styles.btnSecondary}>
+        <button onClick={() => navigate('/student/history')} className={styles.btnSecondary}>
           View History
         </button>
       </div>

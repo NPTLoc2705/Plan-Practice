@@ -42,7 +42,7 @@ function QuizHistory() {
   }
 
   const viewResult = (resultId) => {
-    navigate(`/result/${resultId}`)
+    navigate(`/student/result/${resultId}`)
   }
 
 if (loading) return <div className={styles.loading}>Loading history...</div>

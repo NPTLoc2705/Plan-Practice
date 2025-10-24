@@ -58,7 +58,7 @@ const HeaderBar = () => {
     // Student-specific links
     if (isStudent) {
       links.push(
-        { path: '/student/quizzes', label: 'Quizzes', roles: ['student'] },
+    //    { path: '/student/quizzes', label: 'Quizzes', roles: ['student'] },
         { path: '/student/history', label: 'Quiz History', roles: ['student'] },
         { path: '/student/quiz/otp', label: 'Take Quiz (OTP)', roles: ['student'] },
       );
