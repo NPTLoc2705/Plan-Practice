@@ -66,6 +66,14 @@ namespace DAL.QuizDAO
                 .Include(qr => qr.User)
                 .ToListAsync();
         }
+
+        public async Task<IEnumerable<Quizs>> GetQuizzesByTeacherAsync(int teacherId)
+        {
+            return await _context.Quizzes
+                .Where(q => q.LessonPlanner.UserId == teacherId)
+                .Include(q => q.LessonPlanner)
+                .ToListAsync(); 
+        }
     }
 
 }

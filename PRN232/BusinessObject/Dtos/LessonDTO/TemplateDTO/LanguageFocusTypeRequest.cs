@@ -14,7 +14,7 @@ namespace BusinessObject.Dtos.LessonDTO.TemplateDTO
         [MaxLength(100)]
         public string Name { get; set; } // e.g., "Vocabulary", "Grammar", "Pronunciation"
 
-        public string Description { get; set; }
+        public string Description { get; set; } = "";
         public int DisplayOrder { get; set; }
     }
 }

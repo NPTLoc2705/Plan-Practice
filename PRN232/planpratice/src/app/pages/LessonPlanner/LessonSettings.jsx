@@ -156,7 +156,7 @@ const SETTINGS_CONFIG = [
     color: 'purple',
     fields: [
       { name: 'name', label: 'Skill Name', type: 'text', required: true, placeholder: 'e.g., Reading' },
-      { name: 'skillType', label: 'Skill Type', type: 'text', required: false, placeholder: 'e.g., Language' },
+      { name: 'skillTypeId', label: 'Skill Type', type: 'select-skilltype', required: true, placeholder: 'Select or create skill type' },
       { name: 'description', label: 'Description', type: 'textarea', required: true, placeholder: 'Describe the skill...' },
     ]
   },
@@ -239,11 +239,14 @@ export default function LessonSettings() {
   const [activeTab, setActiveTab] = useState('gradeLevel');
   const [data, setData] = useState({});
   const [gradeLevels, setGradeLevels] = useState([]);
+  const [skillTypes, setSkillTypes] = useState([]);
   const [loading, setLoading] = useState({});
   const [editingItem, setEditingItem] = useState(null);
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState({});
   const [message, setMessage] = useState({ type: '', text: '' });
+  const [showSkillTypeForm, setShowSkillTypeForm] = useState(false);
+  const [newSkillType, setNewSkillType] = useState({ name: '', description: '' });
 
   const currentConfig = SETTINGS_CONFIG.find(s => s.key === activeTab);
 
@@ -266,9 +269,23 @@ export default function LessonSettings() {
     loadGradeLevels();
   }, []);
 
+  // Load skill types for skill dropdown
+  useEffect(() => {
+    const loadSkillTypes = async () => {
+      try {
+        const token = getAuthToken();
+        const types = await fetchFromApi('/SkillType/my-skill-types', token);
+        setSkillTypes(types);
+      } catch (error) {
+        console.error('Failed to load skill types:', error);
+      }
+    };
+    loadSkillTypes();
+  }, []);
+
   const loadData = async (key) => {
     if (data[key]) return; // Already loaded
-    
+
     setLoading(prev => ({ ...prev, [key]: true }));
     try {
       const config = SETTINGS_CONFIG.find(s => s.key === key);
@@ -306,11 +323,11 @@ export default function LessonSettings() {
     try {
       const token = getAuthToken();
       await deleteFromApi(`${currentConfig.endpoint}/${id}`, token);
-      
+
       // Refresh data
       const result = await fetchFromApi(currentConfig.myEndpoint, token);
       setData(prev => ({ ...prev, [activeTab]: result }));
-      
+
       showMessage('success', 'Item deleted successfully');
     } catch (error) {
       showMessage('error', `Failed to delete: ${error.message}`);
@@ -319,10 +336,10 @@ export default function LessonSettings() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     try {
       const token = getAuthToken();
-      
+
       if (editingItem) {
         // Update existing
         await putToApi(`${currentConfig.endpoint}/${editingItem.id}`, formData, token);
@@ -332,11 +349,11 @@ export default function LessonSettings() {
         await postToApi(currentConfig.endpoint, formData, token);
         showMessage('success', 'Item created successfully');
       }
-      
+
       // Refresh data
       const result = await fetchFromApi(currentConfig.myEndpoint, token);
       setData(prev => ({ ...prev, [activeTab]: result }));
-      
+
       setShowForm(false);
       setFormData({});
       setEditingItem(null);
@@ -349,9 +366,40 @@ export default function LessonSettings() {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
+  const handleCreateSkillType = async () => {
+    if (!newSkillType.name.trim()) {
+      showMessage('error', 'Please enter a skill type name');
+      return;
+    }
+
+    try {
+      const token = getAuthToken();
+      const skillTypeData = {
+        name: newSkillType.name,
+        description: newSkillType.description.trim() || undefined
+      };
+      const result = await postToApi('/SkillType', skillTypeData, token);
+
+      // Refresh skill types
+      const types = await fetchFromApi('/SkillType/my-skill-types', token);
+      setSkillTypes(types);
+
+      // Set the newly created skill type as selected
+      setFormData(prev => ({ ...prev, skillTypeId: result.data.id }));
+
+      // Close the skill type form and clear inputs
+      setShowSkillTypeForm(false);
+      setNewSkillType({ name: '', description: '' });
+
+      showMessage('success', 'Skill type created successfully');
+    } catch (error) {
+      showMessage('error', `Failed to create skill type: ${error.message}`);
+    }
+  };
+
   const renderField = (field) => {
     const value = formData[field.name] || '';
-    
+
     if (field.type === 'select' && field.name === 'gradeLevelId') {
       return (
         <select
@@ -367,7 +415,86 @@ export default function LessonSettings() {
         </select>
       );
     }
-    
+
+    if (field.type === 'select-skilltype') {
+      return (
+        <div className="space-y-2">
+          <div className="flex gap-2">
+            <select
+              value={value}
+              onChange={(e) => handleInputChange(field.name, parseInt(e.target.value))}
+              className="flex-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+              required={field.required}
+            >
+              <option value="">Select Skill Type</option>
+              {skillTypes.map(type => (
+                <option key={type.id} value={type.id}>{type.name}</option>
+              ))}
+            </select>
+            <button
+              type="button"
+              onClick={() => setShowSkillTypeForm(!showSkillTypeForm)}
+              className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition flex items-center gap-2"
+              title="Create new skill type"
+            >
+              <Plus className="w-4 h-4" />
+              <span>New</span>
+            </button>
+          </div>
+
+          {showSkillTypeForm && (
+            <div className="p-4 border border-purple-200 bg-purple-50 rounded-lg space-y-3">
+              <label className="block text-sm font-semibold text-gray-700">
+                Create New Skill Type
+              </label>
+              <div className="space-y-3">
+                <input
+                  type="text"
+                  value={newSkillType.name}
+                  onChange={(e) => setNewSkillType({ ...newSkillType, name: e.target.value })}
+                  placeholder="e.g., Language, Social, Motor..."
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                  onKeyPress={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      e.preventDefault();
+                      handleCreateSkillType();
+                    }
+                  }}
+                />
+                <textarea
+                  value={newSkillType.description}
+                  onChange={(e) => setNewSkillType({ ...newSkillType, description: e.target.value })}
+                  placeholder="Description (optional)..."
+                  rows="2"
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                />
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={handleCreateSkillType}
+                    className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition flex items-center gap-2"
+                  >
+                    <Save className="w-4 h-4" />
+                    <span>Save</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowSkillTypeForm(false);
+                      setNewSkillType({ name: '', description: '' });
+                    }}
+                    className="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    }
+
     if (field.type === 'textarea') {
       return (
         <textarea
@@ -380,7 +507,7 @@ export default function LessonSettings() {
         />
       );
     }
-    
+
     return (
       <input
         type={field.type}
@@ -408,9 +535,8 @@ export default function LessonSettings() {
 
       {/* Message Banner */}
       {message.text && (
-        <div className={`mb-4 p-4 rounded-lg flex items-center space-x-2 animate-fade-in ${
-          message.type === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-        }`}>
+        <div className={`mb-4 p-4 rounded-lg flex items-center space-x-2 animate-fade-in ${message.type === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+          }`}>
           {message.type === 'success' ? (
             <CheckCircle2 className="w-5 h-5" />
           ) : (
@@ -432,11 +558,10 @@ export default function LessonSettings() {
                 <button
                   key={config.key}
                   onClick={() => setActiveTab(config.key)}
-                  className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-all ${
-                    isActive
-                      ? `bg-${config.color}-100 text-${config.color}-700 font-semibold`
-                      : 'text-gray-700 hover:bg-gray-100'
-                  }`}
+                  className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-all ${isActive
+                    ? `bg-${config.color}-100 text-${config.color}-700 font-semibold`
+                    : 'text-gray-700 hover:bg-gray-100'
+                    }`}
                 >
                   <Icon className="w-5 h-5" />
                   <span className="text-sm">{config.title}</span>
@@ -452,8 +577,8 @@ export default function LessonSettings() {
             {/* Header */}
             <div className="flex justify-between items-center mb-6 pb-4 border-b">
               <div className="flex items-center space-x-3">
-                {currentConfig && React.createElement(currentConfig.icon, { 
-                  className: `w-6 h-6 text-${currentConfig.color}-600` 
+                {currentConfig && React.createElement(currentConfig.icon, {
+                  className: `w-6 h-6 text-${currentConfig.color}-600`
                 })}
                 <h2 className="text-2xl font-bold text-gray-900">{currentConfig?.title}</h2>
               </div>
@@ -485,7 +610,7 @@ export default function LessonSettings() {
                       <X className="w-6 h-6" />
                     </button>
                   </div>
-                  
+
                   <form onSubmit={handleSubmit} className="p-6 space-y-4">
                     {currentConfig?.fields.map((field) => (
                       <div key={field.name}>
@@ -496,7 +621,7 @@ export default function LessonSettings() {
                         {renderField(field)}
                       </div>
                     ))}
-                    
+
                     <div className="flex justify-end space-x-3 pt-4">
                       <button
                         type="button"
@@ -550,6 +675,9 @@ export default function LessonSettings() {
                         )}
                         {item.gradeLevelName && (
                           <p className="text-sm text-gray-600">Grade: {item.gradeLevelName}</p>
+                        )}
+                        {item.skillTypeName && (
+                          <p className="text-sm text-gray-600">Type: {item.skillTypeName}</p>
                         )}
                         {item.shortCode && (
                           <p className="text-sm text-gray-600">Code: {item.shortCode}</p>
