@@ -2,6 +2,7 @@ using BusinessObject.Dtos;
 using BusinessObject.Quiz;
 using Repository.Interface;
 using Service.QuizzInterface;
+using Service.Interface;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,10 +14,12 @@ namespace Service.QuizzMethod
     public class QuizService : IQuizService
     {
         private readonly IQuizRepository _quizRepository;
+        private readonly ILessonPlannerService _lessonPlannerService;
 
-        public QuizService(IQuizRepository quizRepository)
+        public QuizService(IQuizRepository quizRepository, ILessonPlannerService lessonPlannerService)
         {
             _quizRepository = quizRepository ?? throw new ArgumentNullException(nameof(quizRepository));
+            _lessonPlannerService = lessonPlannerService ?? throw new ArgumentNullException(nameof(lessonPlannerService));
         }
 
         public async Task<IEnumerable<Quizs>> GetAllQuizzesAsync()
@@ -61,6 +64,7 @@ namespace Service.QuizzMethod
             if (teacherId <= 0)
                 throw new ArgumentException("Teacher ID must be greater than 0", nameof(teacherId));
 
+            // Get Quiz Statistics
             var teacherQuizzes = await _quizRepository.GetQuizzesByTeacherAsync(teacherId);
             var allQuizResults = new List<QuizResult>();
             
@@ -70,10 +74,23 @@ namespace Service.QuizzMethod
                 allQuizResults.AddRange(results);
             }
 
-            var totalTestsCreated = teacherQuizzes.Count();
-            var totalTestsTaken = allQuizResults.Count();
-            var averageScore = allQuizResults.Any() ? allQuizResults.Average(r => r.Score) : 0;
+            var totalQuizzesCreated = teacherQuizzes.Count();
+            var totalQuizzesTaken = allQuizResults.Count();
+            var averageQuizScore = allQuizResults.Any() ? allQuizResults.Average(r => r.Score) : 0;
 
+            // Get unique students who took quizzes
+            var uniqueStudents = allQuizResults.Select(r => r.UserId).Distinct().Count();
+
+            // Calculate quiz performance breakdown
+            var quizPerformance = new QuizPerformanceBreakdown
+            {
+                ExcellentCount = allQuizResults.Count(r => r.Score >= 90),
+                GoodCount = allQuizResults.Count(r => r.Score >= 70 && r.Score < 90),
+                AverageCount = allQuizResults.Count(r => r.Score >= 50 && r.Score < 70),
+                BelowAverageCount = allQuizResults.Count(r => r.Score < 50)
+            };
+
+            // Get recent quizzes
             var recentQuizzes = teacherQuizzes
                 .OrderByDescending(q => q.CreatedAt)
                 .Take(5)
@@ -86,12 +103,33 @@ namespace Service.QuizzMethod
                     AverageScore = q.QuizResults?.Any() == true ? q.QuizResults.Average(r => r.Score) : 0
                 }).ToList();
 
+            // Get Lesson Statistics
+            var teacherLessons = await _lessonPlannerService.GetLessonPlannersByUserIdAsync(teacherId);
+            var totalLessonsCreated = teacherLessons.Count;
+
+            // Get recent lessons
+            var recentLessons = teacherLessons
+                .OrderByDescending(l => l.CreatedAt)
+                .Take(5)
+                .Select(l => new RecentLessonDto
+                {
+                    Id = l.Id,
+                    Title = l.Title,
+                    //GradeLevel = l.GradeLevel?.Name ?? "N/A",
+                    CreatedAt = l.CreatedAt,
+                    UpdatedAt = l.UpdatedAt
+                }).ToList();
+
             return new TeacherDashboardDto
             {
-                TotalTestsCreated = totalTestsCreated,
-                TotalTestsTaken = totalTestsTaken,
-                AverageScore = averageScore,
-                RecentQuizzes = recentQuizzes
+                TotalQuizzesCreated = totalQuizzesCreated,
+                TotalQuizzesTaken = totalQuizzesTaken,
+                AverageQuizScore = averageQuizScore,
+                RecentQuizzes = recentQuizzes,
+                TotalLessonsCreated = totalLessonsCreated,
+                RecentLessons = recentLessons,
+                TotalStudentsEngaged = uniqueStudents,
+                QuizPerformance = quizPerformance
             };
         }
 

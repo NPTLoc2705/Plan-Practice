@@ -162,67 +162,67 @@ namespace PRN232.Controllers
             }
         }
 
-        //[HttpGet("teacher/me/dashboard")]
-        //[Authorize(Roles = "Teacher")]
-        //public async Task<ActionResult<BusinessObject.Dtos.TeacherDashboardDto>> GetTeacherDashboard()
-        //{
-        //    try
-        //    {
-        //        var idClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        //        if (!int.TryParse(idClaim, out var teacherId))
-        //        {
-        //            return Unauthorized(new { message = "gays" });
-        //        }
+        [HttpGet("teacher/me/dashboard")]
+        [Authorize(Roles = "Teacher")]
+        public async Task<ActionResult<BusinessObject.Dtos.TeacherDashboardDto>> GetTeacherDashboard()
+        {
+            try
+            {
+                var idClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (!int.TryParse(idClaim, out var teacherId))
+                {
+                    return Unauthorized(new { message = "Invalid user authentication" });
+                }
 
-        //        var dashboard = await _quizService.GetTeacherDashboardStatsAsync(teacherId);
-        //        return Ok(dashboard);
-        //    }
-        //    catch (ArgumentException ex)
-        //    {
-        //        return BadRequest(new { message = ex.Message });
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return StatusCode(500, new { message = "An error occurred while retrieving teacher dashboard", error = ex.Message });
-        //    }
-        //}
+                var dashboard = await _quizService.GetTeacherDashboardStatsAsync(teacherId);
+                return Ok(new { success = true, data = dashboard, message = "Dashboard data retrieved successfully" });
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "An error occurred while retrieving teacher dashboard", error = ex.Message });
+            }
+        }
 
-        //[HttpGet("teacher/me")]
-        //[Authorize(Roles = "Teacher")]
-        //public async Task<ActionResult<IEnumerable<QuizDto>>> GetQuizzesByTeacher()
-        //{
-        //    try
-        //    {
-        //        var idClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        //        if (!int.TryParse(idClaim, out var teacherId))
-        //        {
-        //            return Unauthorized(new { message = "gays" });
-        //        }
+        [HttpGet("teacher/me")]
+        [Authorize(Roles = "Teacher")]
+        public async Task<ActionResult<IEnumerable<QuizDto>>> GetQuizzesByTeacher()
+        {
+            try
+            {
+                var idClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (!int.TryParse(idClaim, out var teacherId))
+                {
+                    return Unauthorized(new { message = "Invalid user authentication" });
+                }
 
-        //        var quizzes = await _quizService.GetQuizzesByTeacherAsync(teacherId);
-        //        var quizDtos = quizzes.Select(q => new QuizDto
-        //        {
-        //            Id = q.Id,
-        //            Title = q.Title,
-        //            Description = q.Description,
-        //            LessonPlannerId = q.LessonPlannerId,
-        //            TotalQuestion = q.Questions?.Count ?? 0
-        //        });
-        //        return Ok(new
-        //        {
-        //            success = true,
-        //            data = quizDtos,
-        //            message = "Quizzes retrieved successfully"
-        //        });
-        //    }
-        //    catch (ArgumentException ex)
-        //    {
-        //        return BadRequest(new { message = ex.Message });
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return StatusCode(500, new { message = "An error occurred while retrieving teacher quizzes", error = ex.Message });
-        //    }
-        //}
+                var quizzes = await _quizService.GetQuizzesByTeacherAsync(teacherId);
+                var quizDtos = quizzes.Select(q => new QuizDto
+                {
+                    Id = q.Id,
+                    Title = q.Title,
+                    Description = q.Description,
+                    LessonPlannerId = q.LessonPlannerId,
+                    TotalQuestion = q.Questions?.Count ?? 0
+                });
+                return Ok(new
+                {
+                    success = true,
+                    data = quizDtos,
+                    message = "Quizzes retrieved successfully"
+                });
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "An error occurred while retrieving teacher quizzes", error = ex.Message });
+            }
+        }
     }
 }
