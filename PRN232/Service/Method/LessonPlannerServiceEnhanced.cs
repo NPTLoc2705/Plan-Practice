@@ -203,7 +203,6 @@ namespace Services
                 if (skillDto.SkillTemplateId.HasValue)
                 {
                     var template = await _context.SkillTemplates
-                        .Include(st => st.SkillType)
                         .FirstOrDefaultAsync(t => t.Id == skillDto.SkillTemplateId);
                     
                     if (template != null)
@@ -211,7 +210,6 @@ namespace Services
                         lessonSkill.SkillTemplateId = skillDto.SkillTemplateId;
                         lessonSkill.SnapshotName = template.Name;
                         lessonSkill.SnapshotDescription = template.Description;
-                        lessonSkill.SnapshotSkillType = template.SkillType?.Name;
                     }
                     // else: template doesn't exist, leave SkillTemplateId as null
                 }
@@ -342,7 +340,6 @@ namespace Services
                         {
                             activityItem.ActivityTemplateId = itemDto.ActivityTemplateId;
                             activityItem.SnapshotActivityName = activityTemplate.Name;
-                            activityItem.SnapshotActivityDescription = activityTemplate.Description;
                             activityItem.SnapshotActivityContent = activityTemplate.Content;
                         }
                         // else: template doesn't exist, leave ActivityTemplateId as null

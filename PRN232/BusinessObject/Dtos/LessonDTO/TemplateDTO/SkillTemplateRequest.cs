@@ -13,9 +13,6 @@ namespace BusinessObject.Dtos.LessonDTO.TemplateDTO
         public int UserId { get; set; }
 
         [Required]
-        public int SkillTypeId { get; set; }
-
-        [Required]
         [MaxLength(200)]
         public string Name { get; set; }
 

@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DAL.Migrations
 {
     [DbContext(typeof(PlantPraticeDbContext))]
-    [Migration("20251024123743_UpdateQuiz")]
-    partial class UpdateQuiz
+    [Migration("20251026101315_RemoveSkillType")]
+    partial class RemoveSkillType
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -435,9 +435,6 @@ namespace DAL.Migrations
                     b.Property<string>("SnapshotName")
                         .HasColumnType("text");
 
-                    b.Property<string>("SnapshotSkillType")
-                        .HasColumnType("text");
-
                     b.HasKey("Id");
 
                     b.HasIndex("LessonPlannerId");
@@ -461,10 +458,6 @@ namespace DAL.Migrations
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("text");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -698,49 +691,14 @@ namespace DAL.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
 
-                    b.Property<int>("SkillTypeId")
-                        .HasColumnType("integer");
-
                     b.Property<int>("UserId")
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("SkillTypeId");
 
                     b.HasIndex("UserId");
 
                     b.ToTable("SkillTemplates");
-                });
-
-            modelBuilder.Entity("BusinessObject.Lesson.Template.SkillType", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("SkillTypes");
                 });
 
             modelBuilder.Entity("BusinessObject.Lesson.Unit", b =>
@@ -1374,25 +1332,6 @@ namespace DAL.Migrations
                 });
 
             modelBuilder.Entity("BusinessObject.Lesson.Template.SkillTemplate", b =>
-                {
-                    b.HasOne("BusinessObject.Lesson.Template.SkillType", "SkillType")
-                        .WithMany()
-                        .HasForeignKey("SkillTypeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("BusinessObject.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("SkillType");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("BusinessObject.Lesson.Template.SkillType", b =>
                 {
                     b.HasOne("BusinessObject.User", "User")
                         .WithMany()

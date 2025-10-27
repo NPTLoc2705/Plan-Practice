@@ -61,7 +61,6 @@ namespace DAL
         public DbSet<LanguageFocusType> LanguageFocusTypes { get; set; }
         public DbSet<MethodTemplate> MethodTemplates { get; set; }
         public DbSet<InteractionPattern> InteractionPatterns { get; set; }
-        public DbSet<SkillType> SkillTypes { get; set; }
         public DbSet<PreparationType> PreparationTypes { get; set; }
         public DbSet<ActivityTemplate> ActivityTemplates { get; set; }
 

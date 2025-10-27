@@ -62,14 +62,6 @@ namespace BusinessObject.Lesson
         }
 
         /// <summary>
-        /// Get the skill type, using snapshot if the SkillTemplate is deleted
-        /// </summary>
-        public static string GetSkillType(this LessonSkill lessonSkill)
-        {
-            return lessonSkill.SkillTemplate?.SkillType?.Name ?? lessonSkill.SnapshotSkillType ?? "Unknown Skill Type";
-        }
-
-        /// <summary>
         /// Get the skill name, using snapshot if the SkillTemplate is deleted
         /// </summary>
         public static string GetSkillName(this LessonSkill lessonSkill)

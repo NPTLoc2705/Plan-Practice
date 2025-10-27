@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DAL.Migrations
 {
     [DbContext(typeof(PlantPraticeDbContext))]
-    [Migration("20251023162827_newotps")]
-    partial class newotps
+    [Migration("20251026091036_new")]
+    partial class @new
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -462,10 +462,6 @@ namespace DAL.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(200)
@@ -877,36 +873,6 @@ namespace DAL.Migrations
                     b.ToTable("Questions");
                 });
 
-            modelBuilder.Entity("BusinessObject.Quiz.Quiz", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int>("CreatedBy")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("Description")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CreatedBy");
-
-                    b.ToTable("Quizzes");
-                });
-
             modelBuilder.Entity("BusinessObject.Quiz.QuizResult", b =>
                 {
                     b.Property<int>("Id")
@@ -934,6 +900,36 @@ namespace DAL.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("QuizResults");
+                });
+
+            modelBuilder.Entity("BusinessObject.Quiz.Quizs", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<int?>("LessonPlannerId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("LessonPlannerId");
+
+                    b.ToTable("Quizzes");
                 });
 
             modelBuilder.Entity("BusinessObject.Quiz.UserAnswer", b =>
@@ -1437,7 +1433,7 @@ namespace DAL.Migrations
 
             modelBuilder.Entity("BusinessObject.Quiz.Question", b =>
                 {
-                    b.HasOne("BusinessObject.Quiz.Quiz", "Quiz")
+                    b.HasOne("BusinessObject.Quiz.Quizs", "Quiz")
                         .WithMany("Questions")
                         .HasForeignKey("QuizId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1446,20 +1442,9 @@ namespace DAL.Migrations
                     b.Navigation("Quiz");
                 });
 
-            modelBuilder.Entity("BusinessObject.Quiz.Quiz", b =>
-                {
-                    b.HasOne("BusinessObject.User", "Creator")
-                        .WithMany("CreatedQuizzes")
-                        .HasForeignKey("CreatedBy")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Creator");
-                });
-
             modelBuilder.Entity("BusinessObject.Quiz.QuizResult", b =>
                 {
-                    b.HasOne("BusinessObject.Quiz.Quiz", "Quiz")
+                    b.HasOne("BusinessObject.Quiz.Quizs", "Quiz")
                         .WithMany("QuizResults")
                         .HasForeignKey("QuizId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1474,6 +1459,16 @@ namespace DAL.Migrations
                     b.Navigation("Quiz");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("BusinessObject.Quiz.Quizs", b =>
+                {
+                    b.HasOne("BusinessObject.Lesson.LessonPlanner", "LessonPlanner")
+                        .WithMany("Quizzes")
+                        .HasForeignKey("LessonPlannerId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("LessonPlanner");
                 });
 
             modelBuilder.Entity("BusinessObject.Quiz.UserAnswer", b =>
@@ -1511,7 +1506,7 @@ namespace DAL.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("BusinessObject.Quiz.Quiz", "Quiz")
+                    b.HasOne("BusinessObject.Quiz.Quizs", "Quiz")
                         .WithMany()
                         .HasForeignKey("QuizId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1575,6 +1570,8 @@ namespace DAL.Migrations
 
                     b.Navigation("Preparations");
 
+                    b.Navigation("Quizzes");
+
                     b.Navigation("Skills");
                 });
 
@@ -1590,16 +1587,16 @@ namespace DAL.Migrations
                     b.Navigation("Answers");
                 });
 
-            modelBuilder.Entity("BusinessObject.Quiz.Quiz", b =>
+            modelBuilder.Entity("BusinessObject.Quiz.QuizResult", b =>
+                {
+                    b.Navigation("UserAnswers");
+                });
+
+            modelBuilder.Entity("BusinessObject.Quiz.Quizs", b =>
                 {
                     b.Navigation("Questions");
 
                     b.Navigation("QuizResults");
-                });
-
-            modelBuilder.Entity("BusinessObject.Quiz.QuizResult", b =>
-                {
-                    b.Navigation("UserAnswers");
                 });
 
             modelBuilder.Entity("BusinessObject.QuizOTP", b =>
@@ -1609,8 +1606,6 @@ namespace DAL.Migrations
 
             modelBuilder.Entity("BusinessObject.User", b =>
                 {
-                    b.Navigation("CreatedQuizzes");
-
                     b.Navigation("OtpVerifies");
 
                     b.Navigation("QuizResults");

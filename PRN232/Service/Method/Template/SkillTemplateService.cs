@@ -26,7 +26,6 @@ namespace Service.Method.Template
             {
                 Id = entity.Id,
                 UserId = entity.UserId,
-                SkillTypeId = entity.SkillTypeId,
                 Name = entity.Name,
                 Description = entity.Description,
                 DisplayOrder = entity.DisplayOrder,
@@ -39,7 +38,6 @@ namespace Service.Method.Template
             var entity = new SkillTemplate
             {
                 UserId = userId,
-                SkillTypeId = request.SkillTypeId,
                 Name = request.Name?.Trim() ?? throw new ArgumentNullException(nameof(request.Name)),
                 Description = request.Description?.Trim(),
                 DisplayOrder = request.DisplayOrder
@@ -71,7 +69,6 @@ namespace Service.Method.Template
                 throw new UnauthorizedAccessException("You can only update your own skill templates.");
             }
 
-            existing.SkillTypeId = request.SkillTypeId;
             existing.Name = request.Name?.Trim();
             existing.Description = request.Description?.Trim();
             existing.DisplayOrder = request.DisplayOrder;

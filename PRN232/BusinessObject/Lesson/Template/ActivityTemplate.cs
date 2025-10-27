@@ -20,8 +20,6 @@ namespace BusinessObject.Lesson.Template
         [MaxLength(200)]
         public string Name { get; set; } // e.g., "Listen and Read", "Group Discussion", "Vocabulary Practice"
 
-        public string Description { get; set; } // Brief description of the activity type
-
         [Required]
         public string Content { get; set; } // The actual activity content/instructions
 

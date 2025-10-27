@@ -27,7 +27,6 @@ namespace Service.Method.Template
                 Id = entity.Id,
                 UserId = entity.UserId,
                 Name = entity.Name,
-                Description = entity.Description,
                 Content = entity.Content,
                 CreatedAt = entity.CreatedAt
             };
@@ -39,7 +38,6 @@ namespace Service.Method.Template
             {
                 UserId = userId,
                 Name = request.Name?.Trim() ?? throw new ArgumentNullException(nameof(request.Name)),
-                Description = request.Description?.Trim(),
                 Content = request.Content?.Trim() ?? throw new ArgumentNullException(nameof(request.Content))
             };
             if (id.HasValue)
@@ -70,7 +68,6 @@ namespace Service.Method.Template
             }
 
             existing.Name = request.Name?.Trim();
-            existing.Description = request.Description?.Trim();
             existing.Content = request.Content?.Trim();
 
             var updated = await _activityTemplateRepo.UpdateAsync(existing);

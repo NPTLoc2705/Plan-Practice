@@ -63,10 +63,6 @@ namespace PRN232
 
             //LessonPlanner Related Shitzzz
 
-            builder.Services.AddScoped<SkillTypeDAO>();
-            builder.Services.AddScoped<ISkillTypeRepository, SkillTypeRepository>();
-            builder.Services.AddScoped<ISkillTypeService, SkillTypeService>();
-
             builder.Services.AddScoped<LessonPlannerDAO>();
             builder.Services.AddScoped<ILessonPlannerRepository, LessonPlannerRepository>();
             builder.Services.AddScoped<ILessonPlannerService, LessonPlannerServiceEnhanced>();
@@ -204,10 +200,6 @@ namespace PRN232
 
             // Authorization
             builder.Services.AddAuthorization();
-            builder.Services.AddOpenApi("v1", options =>
-            {
-                options.AddDocumentTransformer<BearerSecuritySchemeTransformer>();
-            });
 
             // Add Swagger services
             builder.Services.AddEndpointsApiExplorer();

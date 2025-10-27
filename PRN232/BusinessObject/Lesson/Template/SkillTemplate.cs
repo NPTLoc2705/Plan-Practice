@@ -16,10 +16,6 @@ namespace BusinessObject.Lesson.Template
         [ForeignKey("UserId")]
         public virtual User User { get; set; }
 
-        public int SkillTypeId { get; set; }
-        [ForeignKey("SkillTypeId")]
-        public virtual SkillType SkillType { get; set; }
-
         [Required]
         [MaxLength(200)]
         public string Name { get; set; }

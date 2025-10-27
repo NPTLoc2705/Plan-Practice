@@ -10,7 +10,6 @@ namespace BusinessObject.Dtos.LessonDTO.TemplateDTO
     {
         public int Id { get; set; }
         public int UserId { get; set; }
-        public int SkillTypeId { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
         public int DisplayOrder { get; set; }

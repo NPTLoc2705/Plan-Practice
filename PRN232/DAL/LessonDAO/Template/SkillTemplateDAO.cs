@@ -22,7 +22,6 @@ namespace DAL.LessonDAO.Template
             return _context.SkillTemplates
                 .Where(st => st.UserId == userId)
                 .Include(st => st.User)
-                .Include(st => st.SkillType)
                 .OrderBy(st => st.DisplayOrder)
                 .ThenBy(st => st.Name);
         }

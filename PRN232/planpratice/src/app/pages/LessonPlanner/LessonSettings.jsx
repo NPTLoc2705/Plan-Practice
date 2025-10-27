@@ -156,7 +156,6 @@ const SETTINGS_CONFIG = [
     color: 'purple',
     fields: [
       { name: 'name', label: 'Skill Name', type: 'text', required: true, placeholder: 'e.g., Reading' },
-      { name: 'skillType', label: 'Skill Type', type: 'text', required: false, placeholder: 'e.g., Language' },
       { name: 'description', label: 'Description', type: 'textarea', required: true, placeholder: 'Describe the skill...' },
     ]
   },
@@ -543,7 +542,7 @@ export default function LessonSettings() {
                     <div className="flex justify-between items-start">
                       <div className="flex-1">
                         <h4 className="font-bold text-gray-900">
-                          {item.name || item.skillType}
+                          {item.name}
                         </h4>
                         {item.level && (
                           <p className="text-sm text-gray-600">Level: {item.level}</p>

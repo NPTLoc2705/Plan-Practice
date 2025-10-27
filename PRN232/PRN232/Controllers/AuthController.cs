@@ -210,7 +210,7 @@ namespace PRN232.Controllers
                 return BadRequest(new { message = ex.Message });
             }
         }
-        [Route("/ update -teacher")]
+        [Route("/update-teacher")]
         [Authorize]
         [HttpPut]
         public async Task<IActionResult> UpdateTeacherRole(string email)
