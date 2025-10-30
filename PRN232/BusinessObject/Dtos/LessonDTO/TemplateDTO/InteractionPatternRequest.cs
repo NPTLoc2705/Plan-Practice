@@ -19,6 +19,6 @@ namespace BusinessObject.Dtos.LessonDTO.TemplateDTO
         [MaxLength(50)]
         public string ShortCode { get; set; } // e.g., "IW", "PW"
 
-        public string Description { get; set; }
+        public string Description { get; set; } = "";
     }
 }

@@ -18,7 +18,7 @@ const Landing = () => {
               Enable students to learn, practice, and excel in their studies.
             </p>
             <div className="flex flex-wrap gap-4">
-              <a href="#register" className="bg-white text-blue-600 font-semibold px-8 py-4 rounded-xl shadow hover:-translate-y-1 hover:shadow-lg transition text-lg">
+              <a href="/register" className="bg-white text-blue-600 font-semibold px-8 py-4 rounded-xl shadow hover:-translate-y-1 hover:shadow-lg transition text-lg">
                 Get Started Free
               </a>
               <a href="#features" className="bg-transparent border-2 border-white text-white font-semibold px-8 py-4 rounded-xl hover:bg-white hover:text-blue-600 transition text-lg">
@@ -153,10 +153,10 @@ const Landing = () => {
               Join thousands of teachers and students already using PlanPractice
             </p>
             <div className="flex flex-wrap gap-4 justify-center">
-              <a href="#register" className="bg-white text-blue-600 font-semibold px-8 py-4 rounded-xl shadow hover:-translate-y-1 hover:shadow-lg transition text-lg">
+              <a href="/register" className="bg-white text-blue-600 font-semibold px-8 py-4 rounded-xl shadow hover:-translate-y-1 hover:shadow-lg transition text-lg">
                 Start Learning Today
               </a>
-              <a href="#login" className="bg-transparent border-2 border-white text-white font-semibold px-8 py-4 rounded-xl hover:bg-white hover:text-blue-600 transition text-lg">
+              <a href="/login" className="bg-transparent border-2 border-white text-white font-semibold px-8 py-4 rounded-xl hover:bg-white hover:text-blue-600 transition text-lg">
                 Already have an account?
               </a>
             </div>
@@ -182,9 +182,9 @@ const Landing = () => {
           <div>
             <h4 className="text-lg font-semibold mb-4">Account</h4>
             <ul>
-              <li className="mb-2"><a href="#login" className="text-gray-400 hover:text-white transition">Login</a></li>
-              <li className="mb-2"><a href="#register" className="text-gray-400 hover:text-white transition">Sign Up</a></li>
-              <li className="mb-2"><a href="#profile" className="text-gray-400 hover:text-white transition">Profile</a></li>
+              <li className="mb-2"><a href="/login" className="text-gray-400 hover:text-white transition">Login</a></li>
+              <li className="mb-2"><a href="/register" className="text-gray-400 hover:text-white transition">Sign Up</a></li>
+              <li className="mb-2"><a href="/profile" className="text-gray-400 hover:text-white transition">Profile</a></li>
             </ul>
           </div>
         </div>
