@@ -243,40 +243,51 @@ namespace PRN232
         public async Task TransformAsync(OpenApiDocument document, OpenApiDocumentTransformerContext context, CancellationToken cancellationToken)
         {
             var authenticationSchemes = await _authenticationSchemeProvider.GetAllSchemesAsync();
-            if (authenticationSchemes.Any(authScheme => authScheme.Name == JwtBearerDefaults.AuthenticationScheme))
+            if (!authenticationSchemes.Any(authScheme => authScheme.Name == JwtBearerDefaults.AuthenticationScheme))
+                return;
+
+            var securityScheme = new OpenApiSecurityScheme
             {
-                var securityScheme = new OpenApiSecurityScheme
+                Type = SecuritySchemeType.Http,
+                Scheme = "bearer",
+                In = ParameterLocation.Header,
+                BearerFormat = "JWT",
+                Reference = new OpenApiReference
                 {
-                    Type = SecuritySchemeType.Http,
-                    Scheme = "bearer",
-                    In = ParameterLocation.Header,
-                    BearerFormat = "JWT",
-                    Reference = new OpenApiReference
-                    {
-                        Id = "Bearer",
-                        Type = ReferenceType.SecurityScheme
-                    }
-                };
+                    Id = "Bearer",
+                    Type = ReferenceType.SecurityScheme
+                }
+            };
 
-                document.Components ??= new OpenApiComponents();
-                document.Components.SecuritySchemes ??= new Dictionary<string, OpenApiSecurityScheme>();
-                document.Components.SecuritySchemes["Bearer"] = securityScheme;
+            document.Components ??= new OpenApiComponents();
+            document.Components.SecuritySchemes ??= new Dictionary<string, OpenApiSecurityScheme>();
+            document.Components.SecuritySchemes["Bearer"] = securityScheme;
 
-                // Modify to only apply security to endpoints with [Authorize]
-                foreach (var path in document.Paths)
+            // Add global security requirement OR per-endpoint based on [Authorize]
+            var securityRequirement = new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
                 {
-                    foreach (var operation in path.Value.Operations)
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            Array.Empty<string>()
+        }
+    };
+
+            foreach (var path in document.Paths)
+            {
+                foreach (var operation in path.Value.Operations)
+                {
+                    // Only apply to endpoints that require auth
+                    if (operation.Value.Extensions.TryGetValue("x-require-auth", out var auth) && auth.ToString() == "true")
                     {
-                        // Check if the operation has an Authorize attribute (simplified check)
-                        // You may need to customize this logic based on your needs
-                        if (operation.Value.Extensions.TryGetValue("x-require-auth", out var auth) && auth.ToString() == "true")
-                        {
-                            operation.Value.Security ??= new List<OpenApiSecurityRequirement>();
-                            operation.Value.Security.Add(new OpenApiSecurityRequirement
-                            {
-                                [securityScheme] = Array.Empty<string>()
-                            });
-                        }
+                        operation.Value.Security ??= new List<OpenApiSecurityRequirement>();
+                        operation.Value.Security.Add(securityRequirement);
                     }
                 }
             }

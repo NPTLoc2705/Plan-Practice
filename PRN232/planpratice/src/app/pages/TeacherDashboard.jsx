@@ -31,7 +31,7 @@ const TeacherDashboard = () => {
   };
 
   const handleUpdateLesson = (lessonId) => {
-    navigate(`LessonPlanner/${lessonId}`);
+    navigate(`LessonPlanner/edit/${lessonId}`);
   };
 
   const handleViewLesson = (lessonId) => {

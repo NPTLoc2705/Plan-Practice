@@ -155,13 +155,13 @@ export default function App() {
       subActivities: [
         { timeInMinutes: 17, activityTemplateId: '', customContent: '', interactionPatternId: '' },
         { timeInMinutes: 10, activityTemplateId: '', customContent: '', interactionPatternId: '' },
-      ]
-    }
-  ]);
-  const [message, setMessage] = useState('');
-  const contentRef = useRef(null);
-
-  // ... (all handler functions like addStage, removeStage, etc. remain the same)
+      ]
+    }
+  ]);
+  const [activityStageTemplates, setActivityStageTemplates] = useState([]);
+  const [selectedActivityStages, setSelectedActivityStages] = useState([]);
+  const [message, setMessage] = useState('');
+  const contentRef = useRef(null);  // ... (all handler functions like addStage, removeStage, etc. remain the same)
 
   const handleAddPreparation = (templateId) => {
     if (!templateId || selectedPreparations.some(p => p.id === parseInt(templateId))) return;
@@ -299,10 +299,33 @@ export default function App() {
         setIsLoadingClasses(false);
       }
     };
-    fetchClasses();
-  }, [selectedGradeId]);
+    fetchClasses();
+  }, [selectedGradeId]);
 
-  // ... (all other functions like handleAddItem, generateLessonContent, etc. remain the same)
+  // Load activity stage templates from localStorage
+  useEffect(() => {
+    const localStages = localStorage.getItem('activityStageTemplates');
+    if (localStages) {
+      setActivityStageTemplates(JSON.parse(localStages));
+    }
+  }, []);
+
+  // Update activities when selected stages change
+  useEffect(() => {
+    const updatedActivities = selectedActivityStages.map(stageId => {
+      const template = activityStageTemplates.find(t => t.id === parseInt(stageId));
+      if (template) {
+        return {
+          stageName: template.name,
+          subActivities: template.subActivities.map(sub => ({ ...sub }))
+        };
+      }
+      return null;
+    }).filter(Boolean);
+    setActivities(updatedActivities);
+  }, [selectedActivityStages, activityStageTemplates]);
+
+  // ... (all other functions like handleAddItem, generateLessonContent, etc. remain the same)
   const handleAddItem = (id, selectedItems, setSelectedItems, setItemToAdd) => {
     if (id && !selectedItems.includes(parseInt(id))) {
       setSelectedItems([...selectedItems, parseInt(id)]);
@@ -794,100 +817,92 @@ html += `<h1 style="text-align: center; color: #1f2937; font-weight: normal;">${
             </>
           )}
 
-          {currentStep === 6 && (
-            <div className="space-y-4">
-              <div className="flex items-center space-x-2 text-blue-600 mb-4">
-                <Users className="w-6 h-6" />
-                <h2 className="text-xl font-bold">Lesson Activities</h2>
-              </div>
-              
-              <div className="space-y-6 max-h-[60vh] overflow-y-auto pr-2">
-                {activities.map((stage, stageIndex) => (
-                  <div key={stageIndex} className="p-4 border-2 border-gray-200 rounded-lg bg-gray-50 space-y-4">
-                    <div className="flex justify-between items-center pb-2 border-b">
-                      <input 
-                        type="text"
-                        value={stage.stageName}
-                        onChange={(e) => updateStageName(stageIndex, e.target.value)}
-                        className="font-bold text-lg text-gray-800 p-1 rounded bg-transparent focus:bg-white"
-                      />
-                       <button onClick={() => removeStage(stageIndex)} className="text-red-500 hover:text-red-700 p-1 rounded-full hover:bg-red-100">
-                         <X className="w-4 h-4" />
-                       </button>
-                    </div>
+          {currentStep === 6 && (
+            <div className="space-y-4">
+              <div className="flex items-center space-x-2 text-blue-600 mb-4">
+                <Users className="w-6 h-6" />
+                <h2 className="text-xl font-bold">Lesson Activities</h2>
+              </div>
+              
+              <p className="text-sm text-gray-600 mb-4">
+                Select pre-configured activity stages from your templates. You can create and manage these templates in the Settings page.
+              </p>
 
-                    {stage.subActivities.map((sub, subIndex) => (
-                      <div key={subIndex} className="p-3 border rounded-md bg-white relative">
-                        <span className="absolute -left-2 top-2 text-xs bg-blue-500 text-white font-bold rounded-full h-5 w-5 flex items-center justify-center">{subIndex + 1}</span>
-                        <div className="space-y-2 pl-4">
-                            <div>
-                                <label className="block text-xs font-semibold text-gray-600 mb-1">Time (minutes)</label>
-                                <input type="number" min="0" value={sub.timeInMinutes} onChange={(e) => updateSubActivity(stageIndex, subIndex, 'timeInMinutes', parseInt(e.target.value) || 0)} className="w-full p-2 border border-gray-300 rounded text-sm" />
-                            </div>
-                            <div>
-                                <label className="block text-xs font-semibold text-gray-600 mb-1">Activity Template</label>
-                                <select 
-                                  value={sub.activityTemplateId} 
-                                  onChange={(e) => updateSubActivity(stageIndex, subIndex, 'activityTemplateId', e.target.value)} 
-                                  className="w-full p-2 border border-gray-300 rounded text-sm"
-                                >
-                                  <option value="">-- Select a template or use custom --</option>
-                                  {activityTemplates.map(template => (
-                                    <option key={template.id} value={template.id}>{template.name}</option>
-                                  ))}
-                                </select>
-                                {sub.activityTemplateId && activityTemplates.find(t => t.id === parseInt(sub.activityTemplateId)) && (
-                                  <div className="mt-2 p-2 bg-blue-50 border border-blue-200 rounded text-xs">
-                                    <strong>Template Content:</strong>
-                                    <p className="mt-1 whitespace-pre-wrap">{activityTemplates.find(t => t.id === parseInt(sub.activityTemplateId))?.content}</p>
-                                  </div>
-                                )}
-                            </div>
-                            {!sub.activityTemplateId && (
-                              <div>
-                                <label className="block text-xs font-semibold text-gray-600 mb-1">Custom Activity Content</label>
-                                <textarea 
-                                  rows="3" 
-                                  placeholder="Describe the activities..." 
-                                  value={sub.customContent} 
-                                  onChange={(e) => updateSubActivity(stageIndex, subIndex, 'customContent', e.target.value)} 
-                                  className="w-full p-2 border border-gray-300 rounded text-sm" 
-                                />
-                              </div>
-                            )}
-                            <div>
-                                <label className="block text-xs font-semibold text-gray-600 mb-1">Interaction Pattern</label>
-                                <select value={sub.interactionPatternId} onChange={(e) => updateSubActivity(stageIndex, subIndex, 'interactionPatternId', e.target.value)} className="w-full p-2 border border-gray-300 rounded text-sm">
-                                  <option value="">Select interaction</option>
-                                  {interactionPatterns.map(pattern => (
-                                    <option key={pattern.id} value={pattern.id}>{pattern.name} ({pattern.shortCode})</option>
-                                  ))}
-                                </select>
-                            </div>
-                        </div>
-                         {stage.subActivities.length > 0 && (
-                           <button onClick={() => removeSubActivity(stageIndex, subIndex)} className="absolute top-1 right-1 text-gray-400 hover:text-red-600">
-                             <X className="w-3 h-3" />
-                           </button>
-                         )}
-                      </div>
-                    ))}
-                    <button onClick={() => addSubActivity(stageIndex)} className="w-full text-xs py-1 px-2 bg-blue-100 text-blue-800 rounded hover:bg-blue-200 flex items-center justify-center space-x-1">
-                      <Plus className="w-3 h-3" />
-                      <span>Add Activity to this Stage</span>
-                    </button>
-                  </div>
-                ))}
-              </div>
-              
-              <button onClick={addStage} className="w-full py-2 px-4 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center justify-center space-x-2">
-                <Plus className="w-4 h-4" />
-                <span>Add New Stage</span>
-              </button>
-            </div>
-          )}
+              {activityStageTemplates.length === 0 ? (
+                <div className="text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+                  <Layers className="w-16 h-16 mx-auto mb-4 text-gray-400" />
+                  <p className="text-lg text-gray-600 font-semibold">No Activity Stage Templates Found</p>
+                  <p className="text-sm text-gray-500 mt-2">Go to Settings to create activity stage templates first.</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                    <h3 className="font-semibold text-blue-900 mb-3">Available Activity Stages</h3>
+                    <div className="space-y-2">
+                      {activityStageTemplates.map((template) => {
+                        const isSelected = selectedActivityStages.includes(template.id.toString());
+                        return (
+                          <label
+                            key={template.id}
+                            className={`flex items-start p-3 border-2 rounded-lg cursor-pointer transition-all ${
+                              isSelected
+                                ? 'border-blue-500 bg-blue-100'
+                                : 'border-gray-200 bg-white hover:border-blue-300'
+                            }`}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={isSelected}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  setSelectedActivityStages([...selectedActivityStages, template.id.toString()]);
+                                } else {
+                                  setSelectedActivityStages(selectedActivityStages.filter(id => id !== template.id.toString()));
+                                }
+                              }}
+                              className="mt-1 mr-3 w-4 h-4"
+                            />
+                            <div className="flex-1 min-w-0">
+                              <div className="font-semibold text-gray-900 truncate">{template.name}</div>
+                              <div className="text-xs text-gray-600 mt-1">
+                                {template.subActivities.length} {template.subActivities.length === 1 ? 'activity' : 'activities'} • 
+                                {template.subActivities.reduce((sum, sub) => sum + (sub.timeInMinutes || 0), 0)} minutes total
+                              </div>
+                              <div className="mt-2 space-y-1">
+                                {template.subActivities.map((sub, idx) => {
+                                  const actTemplate = activityTemplates.find(t => t.id === parseInt(sub.activityTemplateId));
+                                  const pattern = interactionPatterns.find(p => p.id === parseInt(sub.interactionPatternId));
+                                  return (
+                                    <div key={idx} className="text-xs text-gray-600 flex items-center gap-2 truncate">
+                                      <span className="inline-flex items-center justify-center w-5 h-5 bg-gray-200 rounded-full text-gray-700 font-bold flex-shrink-0">
+                                        {idx + 1}
+                                      </span>
+                                      <span className="flex-shrink-0">{sub.timeInMinutes} min</span>
+                                      {actTemplate && <span className="text-purple-600 truncate">• {actTemplate.name}</span>}
+                                      {pattern && <span className="text-cyan-600 flex-shrink-0">• {pattern.shortCode}</span>}
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          </label>
+                        );
+                      })}
+                    </div>
+                  </div>
 
-          <div className="flex justify-between mt-6 pt-4 border-t">
+                  {selectedActivityStages.length > 0 && (
+                    <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+                      <h3 className="font-semibold text-green-900 mb-2">Selected Stages ({selectedActivityStages.length})</h3>
+                      <p className="text-sm text-green-700">
+                        Your lesson will include: {activities.map(a => a.stageName).join(', ')}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}          <div className="flex justify-between mt-6 pt-4 border-t">
             <button onClick={handlePrevStep} disabled={currentStep === 1} className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition ${currentStep === 1 ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-gray-600 text-white hover:bg-gray-700'}`}>
               <ChevronLeft className="w-4 h-4" />
               <span>Previous</span>
