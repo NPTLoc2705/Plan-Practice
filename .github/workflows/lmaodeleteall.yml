@@ -19,6 +19,7 @@ jobs:
           dotnet-version: '8.0.x'
 
       - name: Check migration
+        working-directory: ./PRN232
         run: |
           MIGRATION_COUNT=$(find ./DAL/Migrations -type f -name "*.cs" | wc -l)
           
@@ -32,6 +33,7 @@ jobs:
           fi
 
       - name: Push new changes
+        working-directory: ./PRN232
         run: |
           if git diff --quiet; then
             echo "No changes to commit."
