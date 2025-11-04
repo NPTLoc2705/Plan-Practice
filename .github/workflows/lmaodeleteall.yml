@@ -23,14 +23,14 @@ jobs:
         run: |
           MIGRATION_COUNT=$(find ./DAL/Migrations -type f -name "*.cs" | wc -l)
           
-          if [ "$MIGRATION_COUNT" -gt 2 ]; then
-            echo "More than 2 migrations found — adding a new migration..."
+          if [ "$MIGRATION_COUNT" -gt 3 ]; then
+            echo "2 or more migrations found — adding a new migration..."
             dotnet tool install --global dotnet-ef
             echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
             rm -rf ./DAL/Migrations/*
             dotnet ef migrations add InitAgain -p ./DAL/ -s ./PRN232/
           else
-            echo "2 or fewer migrations found — skipping migration."
+            echo "1 or fewer migrations found — skipping migration."
           fi
 
       - name: Push new changes
