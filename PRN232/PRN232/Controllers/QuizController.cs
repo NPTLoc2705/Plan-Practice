@@ -84,7 +84,7 @@ namespace PRN232.Controllers
             {
                 if (!ModelState.IsValid)
                     return BadRequest(ModelState);
-                
+
                 var quiz = new Quizs
                 {
                     Title = quizDto.Title,

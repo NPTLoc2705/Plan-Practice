@@ -108,11 +108,12 @@ namespace DAL
                     .HasForeignKey(e => e.MethodTemplateId)
                     .OnDelete(DeleteBehavior.Restrict);
 
-                // Quiz relationship - One LessonPlanner can have many Quizzes
+                // Quiz relationship - One LessonPlanner can have many Quizzes (Required)
                 entity.HasMany(e => e.Quizzes)
                     .WithOne(q => q.LessonPlanner)
                     .HasForeignKey(q => q.LessonPlannerId)
-                    .OnDelete(DeleteBehavior.SetNull);
+                    .OnDelete(DeleteBehavior.Restrict)  // Changed from SetNull to Restrict
+                    .IsRequired();  // Added to make it required
             });
 
             // LessonPlannerDocument entity configuration
@@ -260,11 +261,12 @@ namespace DAL
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.Id).ValueGeneratedOnAdd();
 
-                // LessonPlanner relationship
+                // LessonPlanner relationship - Make it required (non-nullable)
                 entity.HasOne(q => q.LessonPlanner)
                     .WithMany(lp => lp.Quizzes)
                     .HasForeignKey(q => q.LessonPlannerId)
-                    .OnDelete(DeleteBehavior.SetNull);
+                    .OnDelete(DeleteBehavior.Restrict)  // Changed from SetNull to Restrict
+                    .IsRequired();  // Added to make it required
             });
 
             modelBuilder.Entity<Quizs>()

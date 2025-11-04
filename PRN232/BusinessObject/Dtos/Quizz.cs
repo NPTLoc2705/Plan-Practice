@@ -31,7 +31,7 @@ namespace BusinessObject.Dtos
         public string Title { get; set; }
         public string Description { get; set; }
         public DateTime CreatedAt { get; set; }
-        public int? LessonPlannerId { get; set; }
+        public int LessonPlannerId { get; set; }
         public int TotalQuestion { get; set; }
         //public List<QuestionDto> Questions { get; set; }
     }

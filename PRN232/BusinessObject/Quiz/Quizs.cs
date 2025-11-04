@@ -25,7 +25,7 @@ namespace BusinessObject.Quiz
         //public string? QuizCode { get; set; }
 
         // Foreign Key for LessonPlanner relationship
-        public int? LessonPlannerId { get; set; }
+        public int LessonPlannerId { get; set; }
 
         // Navigation property for LessonPlanner relationship
         [ForeignKey("LessonPlannerId")]
