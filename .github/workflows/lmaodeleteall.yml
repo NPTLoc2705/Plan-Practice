@@ -27,6 +27,7 @@ jobs:
             echo "More than 2 migrations found — adding a new migration..."
             dotnet tool install --global dotnet-ef
             echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
+            rm -rf ./DAL/Migrations/*
             dotnet ef migrations add InitAgain -p ./DAL/ -s ./PRN232/
           else
             echo "2 or fewer migrations found — skipping migration."
