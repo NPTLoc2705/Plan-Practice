@@ -1,0 +1,43 @@
+name: Deploy
+
+on:
+    push:
+        branches: ["main"]
+    pull_request:
+        branches: ["main"]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Check migration
+        run: |
+          MIGRATION_COUNT=$(find ./DAL/Migrations -type f -name "*.cs" | wc -l)
+          
+          if [ "$MIGRATION_COUNT" -gt 2 ]; then
+            echo "More than 2 migrations found — adding a new migration..."
+            dotnet tool install --global dotnet-ef
+            echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
+            dotnet ef migrations add InitAgain -p ./DAL/ -s ./PRN232/
+          else
+            echo "2 or fewer migrations found — skipping migration."
+          fi
+
+      - name: Push new changes
+        run: |
+          if git diff --quiet; then
+            echo "No changes to commit."
+          else
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@ur-mom.github.com"
+            git add . 
+            git commit -m "[BOT]: Auto Update EF migration"
+            git push
