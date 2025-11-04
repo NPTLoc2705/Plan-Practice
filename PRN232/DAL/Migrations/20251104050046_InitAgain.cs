@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DAL.Migrations
 {
     /// <inheritdoc />
-    public partial class @new : Migration
+    public partial class InitAgain : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -238,21 +238,22 @@ namespace DAL.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "SkillTypes",
+                name: "SkillTemplates",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     UserId = table.Column<int>(type: "integer", nullable: false),
-                    Name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    Name = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
                     Description = table.Column<string>(type: "text", nullable: false),
+                    DisplayOrder = table.Column<int>(type: "integer", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_SkillTypes", x => x.Id);
+                    table.PrimaryKey("PK_SkillTemplates", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_SkillTypes_Users_UserId",
+                        name: "FK_SkillTemplates_Users_UserId",
                         column: x => x.UserId,
                         principalTable: "Users",
                         principalColumn: "Id",
@@ -298,36 +299,6 @@ namespace DAL.Migrations
                         name: "FK_Units_GradeLevels_GradeLevelId",
                         column: x => x.GradeLevelId,
                         principalTable: "GradeLevels",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "SkillTemplates",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    UserId = table.Column<int>(type: "integer", nullable: false),
-                    SkillTypeId = table.Column<int>(type: "integer", nullable: false),
-                    Name = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
-                    Description = table.Column<string>(type: "text", nullable: false),
-                    DisplayOrder = table.Column<int>(type: "integer", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_SkillTemplates", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_SkillTemplates_SkillTypes_SkillTypeId",
-                        column: x => x.SkillTypeId,
-                        principalTable: "SkillTypes",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_SkillTemplates_Users_UserId",
-                        column: x => x.UserId,
-                        principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -522,6 +493,27 @@ namespace DAL.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "LessonPlannerDocuments",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    FilePath = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
+                    LessonPlannerId = table.Column<int>(type: "integer", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "timezone('utc', now())")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_LessonPlannerDocuments", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_LessonPlannerDocuments_LessonPlanners_LessonPlannerId",
+                        column: x => x.LessonPlannerId,
+                        principalTable: "LessonPlanners",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "LessonPreparations",
                 columns: table => new
                 {
@@ -559,7 +551,6 @@ namespace DAL.Migrations
                     SkillTemplateId = table.Column<int>(type: "integer", nullable: true),
                     CustomContent = table.Column<string>(type: "text", nullable: true),
                     DisplayOrder = table.Column<int>(type: "integer", nullable: false),
-                    SnapshotSkillType = table.Column<string>(type: "text", nullable: true),
                     SnapshotName = table.Column<string>(type: "text", nullable: true),
                     SnapshotDescription = table.Column<string>(type: "text", nullable: true)
                 },
@@ -588,7 +579,7 @@ namespace DAL.Migrations
                     Title = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
                     Description = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    LessonPlannerId = table.Column<int>(type: "integer", nullable: true)
+                    LessonPlannerId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -598,7 +589,7 @@ namespace DAL.Migrations
                         column: x => x.LessonPlannerId,
                         principalTable: "LessonPlanners",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.SetNull);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -892,6 +883,11 @@ namespace DAL.Migrations
                 column: "ObjectiveTemplateId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_LessonPlannerDocument_LessonPlannerId",
+                table: "LessonPlannerDocuments",
+                column: "LessonPlannerId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_LessonPlanners_ClassId",
                 table: "LessonPlanners",
                 column: "ClassId");
@@ -1012,18 +1008,8 @@ namespace DAL.Migrations
                 column: "LessonPlannerId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_SkillTemplates_SkillTypeId",
-                table: "SkillTemplates",
-                column: "SkillTypeId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_SkillTemplates_UserId",
                 table: "SkillTemplates",
-                column: "UserId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_SkillTypes_UserId",
-                table: "SkillTypes",
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
@@ -1075,6 +1061,9 @@ namespace DAL.Migrations
                 name: "LessonObjectives");
 
             migrationBuilder.DropTable(
+                name: "LessonPlannerDocuments");
+
+            migrationBuilder.DropTable(
                 name: "LessonPreparations");
 
             migrationBuilder.DropTable(
@@ -1121,9 +1110,6 @@ namespace DAL.Migrations
 
             migrationBuilder.DropTable(
                 name: "QuizResults");
-
-            migrationBuilder.DropTable(
-                name: "SkillTypes");
 
             migrationBuilder.DropTable(
                 name: "Questions");

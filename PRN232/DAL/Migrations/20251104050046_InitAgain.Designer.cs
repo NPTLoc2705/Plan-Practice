@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DAL.Migrations
 {
     [DbContext(typeof(PlantPraticeDbContext))]
-    [Migration("20251026091036_new")]
-    partial class @new
+    [Migration("20251104050046_InitAgain")]
+    partial class InitAgain
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -377,6 +377,35 @@ namespace DAL.Migrations
                     b.ToTable("LessonPlanners");
                 });
 
+            modelBuilder.Entity("BusinessObject.Lesson.LessonPlannerDocument", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValueSql("timezone('utc', now())");
+
+                    b.Property<string>("FilePath")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<int>("LessonPlannerId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("LessonPlannerId")
+                        .HasDatabaseName("IX_LessonPlannerDocument_LessonPlannerId");
+
+                    b.ToTable("LessonPlannerDocuments");
+                });
+
             modelBuilder.Entity("BusinessObject.Lesson.LessonPreparation", b =>
                 {
                     b.Property<int>("Id")
@@ -433,9 +462,6 @@ namespace DAL.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("SnapshotName")
-                        .HasColumnType("text");
-
-                    b.Property<string>("SnapshotSkillType")
                         .HasColumnType("text");
 
                     b.HasKey("Id");
@@ -694,49 +720,14 @@ namespace DAL.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
 
-                    b.Property<int>("SkillTypeId")
-                        .HasColumnType("integer");
-
                     b.Property<int>("UserId")
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("SkillTypeId");
 
                     b.HasIndex("UserId");
 
                     b.ToTable("SkillTemplates");
-                });
-
-            modelBuilder.Entity("BusinessObject.Lesson.Template.SkillType", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("SkillTypes");
                 });
 
             modelBuilder.Entity("BusinessObject.Lesson.Unit", b =>
@@ -917,7 +908,7 @@ namespace DAL.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)");
 
-                    b.Property<int?>("LessonPlannerId")
+                    b.Property<int>("LessonPlannerId")
                         .HasColumnType("integer");
 
                     b.Property<string>("Title")
@@ -1258,6 +1249,17 @@ namespace DAL.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("BusinessObject.Lesson.LessonPlannerDocument", b =>
+                {
+                    b.HasOne("BusinessObject.Lesson.LessonPlanner", "LessonPlanner")
+                        .WithMany()
+                        .HasForeignKey("LessonPlannerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("LessonPlanner");
+                });
+
             modelBuilder.Entity("BusinessObject.Lesson.LessonPreparation", b =>
                 {
                     b.HasOne("BusinessObject.Lesson.LessonPlanner", "LessonPlanner")
@@ -1371,25 +1373,6 @@ namespace DAL.Migrations
 
             modelBuilder.Entity("BusinessObject.Lesson.Template.SkillTemplate", b =>
                 {
-                    b.HasOne("BusinessObject.Lesson.Template.SkillType", "SkillType")
-                        .WithMany()
-                        .HasForeignKey("SkillTypeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("BusinessObject.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("SkillType");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("BusinessObject.Lesson.Template.SkillType", b =>
-                {
                     b.HasOne("BusinessObject.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
@@ -1466,7 +1449,8 @@ namespace DAL.Migrations
                     b.HasOne("BusinessObject.Lesson.LessonPlanner", "LessonPlanner")
                         .WithMany("Quizzes")
                         .HasForeignKey("LessonPlannerId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.Navigation("LessonPlanner");
                 });
