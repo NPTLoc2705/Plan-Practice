@@ -1,4 +1,4 @@
-name: Deploy
+name: lmaodeleteall
 
 on:
     push:
@@ -35,11 +35,12 @@ jobs:
       - name: Push new changes
         working-directory: ./PRN232
         run: |
-          if git diff --quiet; then
+          if ! git diff --quiet; then
             echo "No changes to commit."
           else
             git config user.name "github-actions[bot]"
             git config user.email "github-actions[bot]@ur-mom.github.com"
             git add . 
             git commit -m "[BOT]: Auto Update EF migration"
-            git push
+            git push origin main
+          fi
