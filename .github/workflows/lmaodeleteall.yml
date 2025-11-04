@@ -36,7 +36,7 @@ jobs:
       - name: Push new changes
         working-directory: ./PRN232
         run: |
-          if ! git diff --quiet; then
+          if git diff --quiet; then
             echo "No changes to commit."
           else
             git config user.name "github-actions[bot]"
