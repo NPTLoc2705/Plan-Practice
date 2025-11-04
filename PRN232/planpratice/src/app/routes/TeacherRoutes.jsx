@@ -5,6 +5,7 @@ import CreateQuiz from '../pages/CreateQuiz';
 import EditQuiz from '../pages/EditQuiz';
 import LessonPlanGenerator from '../pages/LessonPlanner/Lesson';
 import EditLesson from '../pages/LessonPlanner/EditLesson';
+import ViewLesson from '../pages/LessonPlanner/ViewLesson';
 import LessonSettings from '../pages/LessonPlanner/LessonSettings';
 import { AuthAPI } from '../components/APIService/AuthAPI';
 
@@ -50,6 +51,14 @@ export const TeacherRoutes = function () {
                 element={
                     <TeacherProtectedRoute>
                         <EditLesson />
+                    </TeacherProtectedRoute>
+                }
+            />
+            <Route
+                path="LessonPlanner/:id/view"
+                element={
+                    <TeacherProtectedRoute>
+                        <ViewLesson />
                     </TeacherProtectedRoute>
                 }
             />

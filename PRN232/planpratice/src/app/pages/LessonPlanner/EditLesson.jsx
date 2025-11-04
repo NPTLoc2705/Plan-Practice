@@ -234,7 +234,7 @@ export default function EditLesson() {
           subActivities: stage.activityItems.map(item => ({
             timeInMinutes: item.timeInMinutes,
             activityTemplateId: item.activityTemplateId || '',
-            customContent: !item.activityTemplateId ? item.content : '',
+            
             interactionPatternId: item.interactionPatternId || '',
           }))
         })) || [];
@@ -294,7 +294,7 @@ export default function EditLesson() {
   };
   
   const addStage = () => {
-    setActivities([...activities, { stageName: 'New Stage', subActivities: [{ timeInMinutes: 5, activityTemplateId: '', customContent: '', interactionPatternId: '' }] }]);
+    setActivities([...activities, { stageName: 'New Stage', subActivities: [{ timeInMinutes: 5, activityTemplateId: '', interactionPatternId: '' }] }]);
   };
 
   const removeStage = (stageIndex) => {
@@ -309,7 +309,7 @@ export default function EditLesson() {
 
   const addSubActivity = (stageIndex) => {
     const updatedActivities = [...activities];
-    updatedActivities[stageIndex].subActivities.push({ timeInMinutes: 5, activityTemplateId: '', customContent: '', interactionPatternId: '' });
+    updatedActivities[stageIndex].subActivities.push({ timeInMinutes: 5, activityTemplateId: '', interactionPatternId: '' });
     setActivities(updatedActivities);
   };
 
@@ -392,8 +392,8 @@ export default function EditLesson() {
         displayOrder: stageIndex + 1,
         activityItems: stage.subActivities.map((sub, subIndex) => {
           const activityContent = sub.activityTemplateId
-            ? activityTemplates.find(t => t.id === parseInt(sub.activityTemplateId))?.content || sub.customContent
-            : sub.customContent;
+            ? activityTemplates.find(t => t.id === parseInt(sub.activityTemplateId))?.content || ''
+            : '';
           return {
             timeInMinutes: sub.timeInMinutes || 0,
             content: activityContent,
@@ -410,13 +410,110 @@ export default function EditLesson() {
       const result = await putToApi(`/LessonPlanner/${lessonId}`, updateRequest, token);
       
       if (result.success) {
-        setMessage(`✅ Lesson updated successfully!`);
+        setMessage(`✅ Lesson updated successfully! Saving document version...`);
+        
+        // Automatically save document version after successful update
+        await saveDocumentVersion(token);
       } else {
         throw new Error(result.message || 'An unknown error occurred.');
       }
     } catch (err) {
       console.error('Failed to update lesson:', err);
       setMessage(`❌ Failed to update lesson: ${err.message}`);
+    }
+  };
+
+  // Save document version to server (called after update)
+  const saveDocumentVersion = async (token) => {
+    try {
+      if (!contentRef.current) return;
+
+      const htmlContent = contentRef.current.innerHTML;
+      const title = lessonTitle || 'Lesson_Plan';
+      const filename = `${title.replace(/\s/g, '_')}_v${Date.now()}.doc`;
+      const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"></head><body><div style="padding: 20px; font-family: Calibri, sans-serif; line-height: 1.6;">${htmlContent}</div></body></html>`;
+      const blob = new Blob(['\uFEFF', html], { type: 'application/msword;charset=utf-8' });
+      
+      const formData = new FormData();
+      formData.append('file', blob, filename);
+      formData.append('lessonPlannerId', lessonId);
+
+      const uploadResponse = await fetch(`${API_BASE_URL}/LessonPlanner/upload-document`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+        body: formData,
+      });
+
+      if (!uploadResponse.ok) {
+        console.error('Document save failed with status:', uploadResponse.status);
+        setMessage('✅ Lesson updated, but document version save failed.');
+        return;
+      }
+
+      const uploadResult = await uploadResponse.json();
+      
+      if (uploadResult.success) {
+        setMessage('✅ Lesson updated and document version saved!');
+      } else {
+        setMessage('✅ Lesson updated, but document version save failed.');
+      }
+    } catch (error) {
+      console.error('Failed to save document version:', error);
+      setMessage('✅ Lesson updated, but document version save failed.');
+    }
+  };
+
+  // Download and save document to server
+  const handleDownloadDocument = async () => {
+    if (!contentRef.current) return;
+
+    try {
+      const htmlContent = contentRef.current.innerHTML;
+      const title = lessonTitle || 'Lesson_Plan';
+      const filename = `${title.replace(/\s/g, '_')}.doc`;
+      const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"></head><body><div style="padding: 20px; font-family: Calibri, sans-serif; line-height: 1.6;">${htmlContent}</div></body></html>`;
+      const blob = new Blob(['\uFEFF', html], { type: 'application/msword;charset=utf-8' });
+      
+      // Download to user's computer
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      // Upload to server
+      const formData = new FormData();
+      formData.append('file', blob, filename);
+      formData.append('lessonPlannerId', lessonId);
+
+      const token = getAuthToken();
+      const uploadResponse = await fetch(`${API_BASE_URL}/LessonPlanner/upload-document`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+        body: formData,
+      });
+
+      if (!uploadResponse.ok) {
+        throw new Error(`Upload failed with status ${uploadResponse.status}`);
+      }
+
+      const uploadResult = await uploadResponse.json();
+      
+      if (uploadResult.success) {
+        setMessage('✅ Lesson plan downloaded and saved to server!');
+      } else {
+        setMessage('⚠️ Downloaded locally, but server save failed.');
+      }
+    } catch (error) {
+      console.error('Failed to save document to server:', error);
+      setMessage('⚠️ Downloaded locally, but server save failed: ' + error.message);
     }
   };
   
@@ -501,8 +598,8 @@ export default function EditLesson() {
                 stage.subActivities.forEach((subActivity, subIndex) => {
                     const pattern = interactionPatterns.find(p => p.id === parseInt(subActivity.interactionPatternId));
                     const activityContent = subActivity.activityTemplateId 
-                      ? activityTemplates.find(t => t.id === parseInt(subActivity.activityTemplateId))?.content || subActivity.customContent
-                      : subActivity.customContent;
+                      ? activityTemplates.find(t => t.id === parseInt(subActivity.activityTemplateId))?.content || ''
+            : '';
                     
                     html += `<tr>`;
                     if (subIndex === 0) {
@@ -671,7 +768,7 @@ export default function EditLesson() {
             </>
         )}
 
-        {currentStep === 6 && ( <div className="space-y-4"> <div className="flex items-center space-x-2 text-blue-600 mb-4"> <Users className="w-6 h-6" /> <h2 className="text-xl font-bold">Lesson Activities</h2> </div> <div className="space-y-6 max-h-[60vh] overflow-y-auto pr-2"> {activities.map((stage, stageIndex) => ( <div key={stageIndex} className="p-4 border-2 border-gray-200 rounded-lg bg-gray-50 space-y-4"> <div className="flex justify-between items-center pb-2 border-b"> <input type="text" value={stage.stageName} onChange={(e) => updateStageName(stageIndex, e.target.value)} className="font-bold text-lg text-gray-800 p-1 rounded bg-transparent focus:bg-white" /> <button onClick={() => removeStage(stageIndex)} className="text-red-500 hover:text-red-700 p-1 rounded-full hover:bg-red-100"> <X className="w-4 h-4" /> </button> </div> {stage.subActivities.map((sub, subIndex) => ( <div key={subIndex} className="p-3 border rounded-md bg-white relative"> <span className="absolute -left-2 top-2 text-xs bg-blue-500 text-white font-bold rounded-full h-5 w-5 flex items-center justify-center">{subIndex + 1}</span> <div className="space-y-2 pl-4"> <div> <label className="block text-xs font-semibold text-gray-600 mb-1">Time (minutes)</label> <input type="number" min="0" value={sub.timeInMinutes} onChange={(e) => updateSubActivity(stageIndex, subIndex, 'timeInMinutes', parseInt(e.target.value) || 0)} className="w-full p-2 border border-gray-300 rounded text-sm" /> </div> <div> <label className="block text-xs font-semibold text-gray-600 mb-1">Activity Template</label> <select value={sub.activityTemplateId} onChange={(e) => updateSubActivity(stageIndex, subIndex, 'activityTemplateId', e.target.value)} className="w-full p-2 border border-gray-300 rounded text-sm" > <option value="">-- Select a template or use custom --</option> {activityTemplates.map(template => ( <option key={template.id} value={template.id}>{template.name}</option> ))} </select> {sub.activityTemplateId && activityTemplates.find(t => t.id === parseInt(sub.activityTemplateId)) && ( <div className="mt-2 p-2 bg-blue-50 border border-blue-200 rounded text-xs"> <strong>Template Content:</strong> <p className="mt-1 whitespace-pre-wrap">{activityTemplates.find(t => t.id === parseInt(sub.activityTemplateId))?.content}</p> </div> )} </div> {!sub.activityTemplateId && ( <div> <label className="block text-xs font-semibold text-gray-600 mb-1">Custom Activity Content</label> <textarea rows="3" placeholder="Describe the activities..." value={sub.customContent} onChange={(e) => updateSubActivity(stageIndex, subIndex, 'customContent', e.target.value)} className="w-full p-2 border border-gray-300 rounded text-sm" /> </div> )} <div> <label className="block text-xs font-semibold text-gray-600 mb-1">Interaction Pattern</label> <select value={sub.interactionPatternId} onChange={(e) => updateSubActivity(stageIndex, subIndex, 'interactionPatternId', e.target.value)} className="w-full p-2 border border-gray-300 rounded text-sm"> <option value="">Select interaction</option> {interactionPatterns.map(pattern => ( <option key={pattern.id} value={pattern.id}>{pattern.name} ({pattern.shortCode})</option> ))} </select> </div> </div> {stage.subActivities.length > 0 && ( <button onClick={() => removeSubActivity(stageIndex, subIndex)} className="absolute top-1 right-1 text-gray-400 hover:text-red-600"> <X className="w-3 h-3" /> </button> )} </div> ))} <button onClick={() => addSubActivity(stageIndex)} className="w-full text-xs py-1 px-2 bg-blue-100 text-blue-800 rounded hover:bg-blue-200 flex items-center justify-center space-x-1"> <Plus className="w-3 h-3" /> <span>Add Activity to this Stage</span> </button> </div> ))} </div> <button onClick={addStage} className="w-full py-2 px-4 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center justify-center space-x-2"> <Plus className="w-4 h-4" /> <span>Add New Stage</span> </button> </div> )}
+        {currentStep === 6 && ( <div className="space-y-4"> <div className="flex items-center space-x-2 text-blue-600 mb-4"> <Users className="w-6 h-6" /> <h2 className="text-xl font-bold">Lesson Activities</h2> </div> <div className="space-y-6 max-h-[60vh] overflow-y-auto pr-2"> {activities.map((stage, stageIndex) => ( <div key={stageIndex} className="p-4 border-2 border-gray-200 rounded-lg bg-gray-50 space-y-4"> <div className="flex justify-between items-center pb-2 border-b"> <input type="text" value={stage.stageName} onChange={(e) => updateStageName(stageIndex, e.target.value)} className="font-bold text-lg text-gray-800 p-1 rounded bg-transparent focus:bg-white" /> <button onClick={() => removeStage(stageIndex)} className="text-red-500 hover:text-red-700 p-1 rounded-full hover:bg-red-100"> <X className="w-4 h-4" /> </button> </div> {stage.subActivities.map((sub, subIndex) => ( <div key={subIndex} className="p-3 border rounded-md bg-white relative"> <span className="absolute -left-2 top-2 text-xs bg-blue-500 text-white font-bold rounded-full h-5 w-5 flex items-center justify-center">{subIndex + 1}</span> <div className="space-y-2 pl-4"> <div> <label className="block text-xs font-semibold text-gray-600 mb-1">Time (minutes)</label> <input type="number" min="0" value={sub.timeInMinutes} onChange={(e) => updateSubActivity(stageIndex, subIndex, 'timeInMinutes', parseInt(e.target.value) || 0)} className="w-full p-2 border border-gray-300 rounded text-sm" /> </div> <div> <label className="block text-xs font-semibold text-gray-600 mb-1">Activity Template</label> <select value={sub.activityTemplateId} onChange={(e) => updateSubActivity(stageIndex, subIndex, 'activityTemplateId', e.target.value)} className="w-full p-2 border border-gray-300 rounded text-sm" > <option value="">-- Select an activity template --</option> {activityTemplates.map(template => ( <option key={template.id} value={template.id}>{template.name}</option> ))} </select> {sub.activityTemplateId && activityTemplates.find(t => t.id === parseInt(sub.activityTemplateId)) && ( <div className="mt-2 p-2 bg-blue-50 border border-blue-200 rounded text-xs"> <strong>Template Content:</strong> <p className="mt-1 whitespace-pre-wrap break-words line-clamp-3 overflow-hidden">{activityTemplates.find(t => t.id === parseInt(sub.activityTemplateId))?.content}</p> </div> )} </div> <div> <label className="block text-xs font-semibold text-gray-600 mb-1">Interaction Pattern</label> <select value={sub.interactionPatternId} onChange={(e) => updateSubActivity(stageIndex, subIndex, 'interactionPatternId', e.target.value)} className="w-full p-2 border border-gray-300 rounded text-sm"> <option value="">Select interaction</option> {interactionPatterns.map(pattern => ( <option key={pattern.id} value={pattern.id}>{pattern.name} ({pattern.shortCode})</option> ))} </select> </div> </div> {stage.subActivities.length > 0 && ( <button onClick={() => removeSubActivity(stageIndex, subIndex)} className="absolute top-1 right-1 text-gray-400 hover:text-red-600"> <X className="w-3 h-3" /> </button> )} </div> ))} <button onClick={() => addSubActivity(stageIndex)} className="w-full text-xs py-1 px-2 bg-blue-100 text-blue-800 rounded hover:bg-blue-200 flex items-center justify-center space-x-1"> <Plus className="w-3 h-3" /> <span>Add Activity to this Stage</span> </button> </div> ))} </div> <button onClick={addStage} className="w-full py-2 px-4 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center justify-center space-x-2"> <Plus className="w-4 h-4" /> <span>Add New Stage</span> </button> </div> )}
           <div className="flex justify-between mt-6 pt-4 border-t">
             <button onClick={handlePrevStep} disabled={currentStep === 1} className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition ${currentStep === 1 ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-gray-600 text-white hover:bg-gray-700'}`}>
               <ChevronLeft className="w-4 h-4" />
@@ -701,7 +798,7 @@ export default function EditLesson() {
                     <Copy className="w-4 h-4" />
                     <span>Copy text</span>
                 </button>
-                <button onClick={() => { if (contentRef.current) { const htmlContent = contentRef.current.innerHTML; const title = lessonTitle || 'Lesson_Plan'; const filename = `${title.replace(/\s/g, '_')}.doc`; const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"></head><body><div style="padding: 20px; font-family: Calibri, sans-serif; line-height: 1.6;">${htmlContent}</div></body></html>`; const blob = new Blob(['\uFEFF', html], { type: 'application/msword;charset=utf-8' }); const url = URL.createObjectURL(blob); const link = document.createElement('a'); link.href = url; link.download = filename; document.body.appendChild(link); link.click(); document.body.removeChild(link); URL.revokeObjectURL(url); setMessage('Lesson plan downloaded as .doc!'); } }} className="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 transition shadow-md">
+                <button onClick={handleDownloadDocument} className="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 transition shadow-md">
                     <Download className="w-4 h-4" />
                     <span>Download .doc</span>
                 </button>

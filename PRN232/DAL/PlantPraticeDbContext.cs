@@ -31,6 +31,7 @@ namespace DAL
         public DbSet<QuizResult> QuizResults { get; set; }
         public DbSet<UserAnswer> UserAnswers { get; set; }
         public DbSet<LessonPlanner> LessonPlanners { get; set; }
+        public DbSet<LessonPlannerDocument> LessonPlannerDocuments { get; set; }
         public DbSet<Class>Classes { get; set; }
         public DbSet<GradeLevel> GradeLevels { get; set; }
 
@@ -112,6 +113,28 @@ namespace DAL
                     .WithOne(q => q.LessonPlanner)
                     .HasForeignKey(q => q.LessonPlannerId)
                     .OnDelete(DeleteBehavior.SetNull);
+            });
+
+            // LessonPlannerDocument entity configuration
+            modelBuilder.Entity<LessonPlannerDocument>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Id).ValueGeneratedOnAdd();
+
+                entity.Property(e => e.FilePath)
+                    .HasMaxLength(500)
+                    .IsRequired();
+
+                entity.Property(e => e.CreatedAt)
+                    .HasDefaultValueSql("timezone('utc', now())");
+
+                entity.HasOne(e => e.LessonPlanner)
+                    .WithMany()
+                    .HasForeignKey(e => e.LessonPlannerId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasIndex(e => e.LessonPlannerId)
+                    .HasDatabaseName("IX_LessonPlannerDocument_LessonPlannerId");
             });
 
             // User entity configuration

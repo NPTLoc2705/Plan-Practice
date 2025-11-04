@@ -67,6 +67,10 @@ namespace PRN232
             builder.Services.AddScoped<ILessonPlannerRepository, LessonPlannerRepository>();
             builder.Services.AddScoped<ILessonPlannerService, LessonPlannerServiceEnhanced>();
 
+            builder.Services.AddScoped<LessonPlannerDocumentDAO>();
+            builder.Services.AddScoped<ILessonPlannerDocumentRepository, LessonPlannerDocumentRepository>();
+            builder.Services.AddScoped<ILessonPlannerDocumentService, LessonPlannerDocumentService>();
+
             builder.Services.AddScoped<GradeLevelDAO>();
             builder.Services.AddScoped<IGradeLevelRepository, GradeLevelRepository>();
             builder.Services.AddScoped<IGradeLevelService, GradeLevelService>();

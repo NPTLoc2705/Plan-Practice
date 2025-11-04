@@ -1,8 +1,11 @@
 ﻿using System;
+using System.IO;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using BusinessObject.Dtos.LessonDTO;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Service.Interface;
 
@@ -14,10 +17,17 @@ namespace API.Controllers
     public class LessonPlannerController : ControllerBase
     {
         private readonly ILessonPlannerService _lessonPlannerService;
+        private readonly ILessonPlannerDocumentService _documentService;
+        private readonly IWebHostEnvironment _environment;
 
-        public LessonPlannerController(ILessonPlannerService lessonPlannerService)
+        public LessonPlannerController(
+            ILessonPlannerService lessonPlannerService,
+            ILessonPlannerDocumentService documentService,
+            IWebHostEnvironment environment)
         {
             _lessonPlannerService = lessonPlannerService;
+            _documentService = documentService;
+            _environment = environment;
         }
 
         private int GetCurrentUserId()
@@ -116,6 +126,53 @@ namespace API.Controllers
         {
             var planners = await _lessonPlannerService.GetAllLessonPlannersAsync();
             return Ok(new { success = true, data = planners });
+        }
+
+        [HttpPost("upload-document")]
+        public async Task<IActionResult> UploadDocument([FromForm] IFormFile file, [FromForm] int lessonPlannerId)
+        {
+            if (file == null || file.Length == 0)
+            {
+                return BadRequest(new { success = false, message = "No file uploaded." });
+            }
+
+            try
+            {
+                // Create documents directory if it doesn't exist
+                var documentsPath = Path.Combine(_environment.ContentRootPath, "wwwroot", "documents");
+                if (!Directory.Exists(documentsPath))
+                {
+                    Directory.CreateDirectory(documentsPath);
+                }
+
+                // Save file to server
+                var fileName = file.FileName;
+                var filePath = Path.Combine(documentsPath, fileName);
+                
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await file.CopyToAsync(stream);
+                }
+
+                // Create document record in database
+                var documentRequest = new LessonPlannerDocumentRequest
+                {
+                    FilePath = $"/documents/{fileName}",
+                    LessonPlannerId = lessonPlannerId
+                };
+
+                var createdDocument = await _documentService.CreateDocumentAsync(documentRequest);
+
+                return Ok(new { 
+                    success = true, 
+                    data = createdDocument,
+                    message = "Document uploaded and saved successfully." 
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { success = false, message = $"Upload failed: {ex.Message}" });
+            }
         }
     }
 }
