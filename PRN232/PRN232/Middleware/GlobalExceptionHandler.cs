@@ -22,8 +22,8 @@ namespace PRN232.Middleware
 
             var (statusCode, message) = exception switch
             {
-                ArgumentException => (HttpStatusCode.BadRequest, exception.Message),
                 ArgumentNullException => (HttpStatusCode.BadRequest, exception.Message),
+                ArgumentException => (HttpStatusCode.BadRequest, exception.Message),
                 KeyNotFoundException => (HttpStatusCode.NotFound, exception.Message),
                 UnauthorizedAccessException => (HttpStatusCode.Forbidden, exception.Message),
                 _ => (HttpStatusCode.InternalServerError, "An unexpected error occurred. Please try again later.")
