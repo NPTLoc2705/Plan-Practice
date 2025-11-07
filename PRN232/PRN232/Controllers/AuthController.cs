@@ -210,13 +210,30 @@ namespace PRN232.Controllers
                 return BadRequest(new { message = ex.Message });
             }
         }
-        [Route("/update-teacher")]
-        [Authorize]
-        [HttpPut]
+
+        // Fixed: Changed from absolute route to relative route
+        [HttpPut("update-teacher")]
         public async Task<IActionResult> UpdateTeacherRole(string email)
         {
-            var user=await _userService.UpdateTeacherRole(email);
-            return Ok();
+            try
+            {
+                var user = await _userService.UpdateTeacherRole(email);
+                return Ok(new 
+                { 
+                    message = "Role updated to Teacher successfully",
+                    user = new
+                    {
+                        user.Id,
+                        user.Username,
+                        user.Email,
+                        user.Role
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
     }

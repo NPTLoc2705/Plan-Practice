@@ -77,6 +77,24 @@ class AuthAPI {
     return result;
   }
 
+  // Updated method - no token required for updating teacher role
+  static async updateTeacherRole(email) {
+      const response = await fetch(`${API_BASE_URL}/update-teacher?email=${encodeURIComponent(email)}`, {
+      method: 'PUT',
+      headers: { 
+        'Content-Type': 'application/json'
+        // Removed Authorization header since no token is needed
+      }
+    });
+    
+    if (!response.ok) {
+      const result = await response.json();
+      throw new Error(result.message || 'Failed to update teacher role');
+    }
+    
+    return await response.json();
+  }
+
   static async updateProfile(updateData) {
     const token = this.getToken();
     if (!token) {

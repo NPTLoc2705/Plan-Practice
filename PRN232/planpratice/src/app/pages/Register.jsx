@@ -1,6 +1,5 @@
-// src/routes/Register.jsx
 import { useState, useEffect } from 'react';
-import { Eye, EyeOff, Mail, Lock, User, UserPlus, Loader2, AlertCircle, CheckCircle, ArrowLeft } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, User, UserPlus, Loader2, AlertCircle, CheckCircle, ArrowLeft, GraduationCap, BookOpen } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { AuthAPI } from '../components/APIService/AuthAPI';
 import GoogleSignIn from '../components/Google/GoogleSignIn';
@@ -15,6 +14,7 @@ const Register = () => {
     confirmPassword: '',
     otp: ''
   });
+  const [selectedRole, setSelectedRole] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -75,13 +75,57 @@ const Register = () => {
         password: formData.password,
         otp: formData.otp
       });
-      setSuccess('Registration successful! Redirecting to login...');
-      setTimeout(() => navigate('/login'), 2000);
+      setSuccess('Registration verified successfully!');
+      setStep(3); // Move to role selection step
     } catch (err) {
       setError(err.message);
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleRoleSelection = async () => {
+    if (!selectedRole) {
+      setError('Please select a role');
+      return;
+    }
+
+    setLoading(true);
+    setError('');
+
+    try {
+      if (selectedRole === 'teacher') {
+        await AuthAPI.updateTeacherRole(formData.email);
+        setSuccess('Role updated to Teacher successfully! Redirecting to login...');
+      } else {
+        setSuccess('Registration completed successfully! Redirecting to login...');
+      }
+      
+      setTimeout(() => {
+        navigate('/login', {
+          state: {
+            message: `Registration successful! You can now log in as a ${selectedRole}.`,
+            email: formData.email
+          }
+        });
+      }, 2000);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSkipRoleSelection = () => {
+    setSuccess('Registration completed successfully! Redirecting to login...');
+    setTimeout(() => {
+      navigate('/login', {
+        state: {
+          message: 'Registration successful! You can now log in.',
+          email: formData.email
+        }
+      });
+    }, 1500);
   };
 
   const handleResendOTP = async () => {
@@ -118,17 +162,23 @@ const Register = () => {
             <div className="inline-flex items-center justify-center w-14 h-14 bg-purple-100 rounded-full mb-2">
               <UserPlus className="w-8 h-8 text-purple-600" />
             </div>
-            <h2 className="text-2xl font-bold text-gray-900">Create Account</h2>
+            <h2 className="text-2xl font-bold text-gray-900">
+              {step === 3 ? 'Choose Your Role' : 'Create Account'}
+            </h2>
             <p className="text-gray-500 text-sm">
-              {step === 1 ? 'Join our IELTS learning platform' : 'Verify your email address'}
+              {step === 1 && 'Join our IELTS learning platform'}
+              {step === 2 && 'Verify your email address'}
+              {step === 3 && 'Select how you\'d like to use our platform'}
             </p>
           </div>
 
           {/* Progress Bar */}
           <div className="flex items-center justify-center gap-2 mb-2">
             <div className={`flex items-center justify-center w-8 h-8 rounded-full font-bold text-white ${step >= 1 ? 'bg-purple-600' : 'bg-gray-300'}`}>1</div>
-            <div className={`w-16 h-1 rounded-full ${step >= 2 ? 'bg-purple-600' : 'bg-gray-200'}`}></div>
+            <div className={`w-12 h-1 rounded-full ${step >= 2 ? 'bg-purple-600' : 'bg-gray-200'}`}></div>
             <div className={`flex items-center justify-center w-8 h-8 rounded-full font-bold text-white ${step >= 2 ? 'bg-purple-600' : 'bg-gray-300'}`}>2</div>
+            <div className={`w-12 h-1 rounded-full ${step >= 3 ? 'bg-purple-600' : 'bg-gray-200'}`}></div>
+            <div className={`flex items-center justify-center w-8 h-8 rounded-full font-bold text-white ${step >= 3 ? 'bg-purple-600' : 'bg-gray-300'}`}>3</div>
           </div>
 
           {error && (
@@ -253,7 +303,7 @@ const Register = () => {
 
               <GoogleSignIn onSuccess={handleGoogleSuccess} onError={handleGoogleError} />
             </>
-          ) : (
+          ) : step === 2 ? (
             <div>
               <div className="text-center p-4 bg-purple-50 rounded-lg mb-4">
                 <p className="text-gray-700 mb-2">
@@ -310,9 +360,117 @@ const Register = () => {
                     Verifying...
                   </>
                 ) : (
-                  'Verify & Complete'
+                  'Verify & Continue'
                 )}
               </button>
+            </div>
+          ) : (
+            // Step 3: Role Selection
+            <div className="space-y-6">
+              <div className="space-y-4">
+                {/* Teacher Option */}
+                <div 
+                  className={`relative border-2 rounded-xl p-4 cursor-pointer transition-all duration-200 ${
+                    selectedRole === 'teacher' 
+                      ? 'border-purple-500 bg-purple-50' 
+                      : 'border-gray-300 hover:border-gray-400'
+                  }`}
+                  onClick={() => setSelectedRole('teacher')}
+                >
+                  <div className="flex items-start">
+                    <div className="flex items-center h-5">
+                      <input
+                        id="teacher"
+                        name="role"
+                        type="radio"
+                        value="teacher"
+                        checked={selectedRole === 'teacher'}
+                        onChange={(e) => setSelectedRole(e.target.value)}
+                        className="focus:ring-purple-500 h-4 w-4 text-purple-600 border-gray-300"
+                      />
+                    </div>
+                    <div className="ml-3">
+                      <label htmlFor="teacher" className="font-medium text-gray-900 cursor-pointer">
+                        Teacher
+                      </label>
+                      <p className="text-sm text-gray-500">
+                        Create and manage quizzes, track student progress
+                      </p>
+                    </div>
+                  </div>
+                  <div className="absolute top-4 right-4">
+                    <GraduationCap className="w-6 h-6 text-purple-500" />
+                  </div>
+                </div>
+
+                {/* Student Option */}
+                <div 
+                  className={`relative border-2 rounded-xl p-4 cursor-pointer transition-all duration-200 ${
+                    selectedRole === 'student' 
+                      ? 'border-purple-500 bg-purple-50' 
+                      : 'border-gray-300 hover:border-gray-400'
+                  }`}
+                  onClick={() => setSelectedRole('student')}
+                >
+                  <div className="flex items-start">
+                    <div className="flex items-center h-5">
+                      <input
+                        id="student"
+                        name="role"
+                        type="radio"
+                        value="student"
+                        checked={selectedRole === 'student'}
+                        onChange={(e) => setSelectedRole(e.target.value)}
+                        className="focus:ring-purple-500 h-4 w-4 text-purple-600 border-gray-300"
+                      />
+                    </div>
+                    <div className="ml-3">
+                      <label htmlFor="student" className="font-medium text-gray-900 cursor-pointer">
+                        Student
+                      </label>
+                      <p className="text-sm text-gray-500">
+                        Take quizzes and track your learning progress
+                      </p>
+                    </div>
+                  </div>
+                  <div className="absolute top-4 right-4">
+                    <BookOpen className="w-6 h-6 text-blue-500" />
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex space-x-4">
+                <button
+                  onClick={handleRoleSelection}
+                  disabled={!selectedRole || loading}
+                  className={`group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 ${
+                    !selectedRole || loading
+                      ? 'bg-gray-400 cursor-not-allowed'
+                      : 'bg-purple-600 hover:bg-purple-700'
+                  }`}
+                >
+                  {loading ? (
+                    <>
+                      <Loader2 className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" />
+                      Processing...
+                    </>
+                  ) : (
+                    'Complete Registration'
+                  )}
+                </button>
+
+                <button
+                  onClick={handleSkipRoleSelection}
+                  disabled={loading}
+                  className="group relative w-full flex justify-center py-2 px-4 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Skip for now
+                </button>
+              </div>
+
+              <p className="text-xs text-gray-500 text-center">
+                You can change your role later in your profile settings
+              </p>
             </div>
           )}
 
