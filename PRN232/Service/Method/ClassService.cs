@@ -36,9 +36,27 @@ namespace Service.Method
 
         private Class MapToEntity(ClassRequest request, int userId, int? id = null)
         {
+            // Validate name
+            if (string.IsNullOrWhiteSpace(request.Name))
+            {
+                throw new ArgumentException("Class name is required and cannot be empty.");
+            }
+
+            var trimmedName = request.Name.Trim();
+            if (trimmedName.Length > 200)
+            {
+                throw new ArgumentException("Class name must be 200 characters or less.");
+            }
+
+            // Validate gradeLevelId
+            if (request.GradeLevelId <= 0)
+            {
+                throw new ArgumentException("Valid grade level is required.");
+            }
+
             var entity = new Class
             {
-                Name = request.Name?.Trim() ?? throw new ArgumentNullException(nameof(request.Name)),
+                Name = trimmedName,
                 GradeLevelId = request.GradeLevelId
             };
             if (id.HasValue)

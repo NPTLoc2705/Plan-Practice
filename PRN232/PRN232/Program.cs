@@ -25,6 +25,7 @@ using Repository.Method.Template;
 using Service.Interface.Template;
 using Service.Method.Template;
 using System.Text.Json.Serialization;
+using PRN232.Middleware;
 
 namespace PRN232
 {
@@ -205,18 +206,23 @@ namespace PRN232
             // Authorization
             builder.Services.AddAuthorization();
 
+            // Add global exception handler
+            builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+            builder.Services.AddProblemDetails();
+
             // Add Swagger services
             builder.Services.AddEndpointsApiExplorer();
 
         
-                var app = builder.Build();
+            var app = builder.Build();
 
             // Configure the HTTP request pipeline.
-            if (app.Environment.IsDevelopment())
-            {
-                app.MapOpenApi();
-                app.MapScalarApiReference();
-            }
+            // Add exception handler middleware
+            app.UseExceptionHandler();
+            
+            app.MapOpenApi();
+            app.MapScalarApiReference();
+            
             app.UseHttpsRedirection();
 
             app.UseCors("AllowFrontend");

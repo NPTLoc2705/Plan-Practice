@@ -34,11 +34,35 @@ namespace Service.Method.Template
 
         private ActivityTemplate MapToEntity(ActivityTemplateRequest request, int userId, int? id = null)
         {
+            // Validate name
+            if (string.IsNullOrWhiteSpace(request.Name))
+            {
+                throw new ArgumentException("Activity template name is required and cannot be empty.");
+            }
+
+            var trimmedName = request.Name.Trim();
+            if (trimmedName.Length > 200)
+            {
+                throw new ArgumentException("Activity template name must be 200 characters or less.");
+            }
+
+            // Validate content
+            if (string.IsNullOrWhiteSpace(request.Content))
+            {
+                throw new ArgumentException("Activity template content is required and cannot be empty.");
+            }
+
+            var trimmedContent = request.Content.Trim();
+            if (trimmedContent.Length > 2000)
+            {
+                throw new ArgumentException("Activity template content must be 2000 characters or less.");
+            }
+
             var entity = new ActivityTemplate
             {
                 UserId = userId,
-                Name = request.Name?.Trim() ?? throw new ArgumentNullException(nameof(request.Name)),
-                Content = request.Content?.Trim() ?? throw new ArgumentNullException(nameof(request.Content))
+                Name = trimmedName,
+                Content = trimmedContent
             };
             if (id.HasValue)
             {

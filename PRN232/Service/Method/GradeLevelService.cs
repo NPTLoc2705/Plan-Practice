@@ -30,10 +30,28 @@ namespace Service.Method
         }
         private GradeLevel MapToEntity(GradeLevelRequest request, int userId, int? id = null)
         {
+            // Validate name
+            if (string.IsNullOrWhiteSpace(request.Name))
+            {
+                throw new ArgumentException("Grade level name is required and cannot be empty.");
+            }
+
+            var trimmedName = request.Name.Trim();
+            if (trimmedName.Length > 200)
+            {
+                throw new ArgumentException("Grade level name must be 200 characters or less.");
+            }
+
+            // Validate level
+            if (request.Level < 1 || request.Level > 12)
+            {
+                throw new ArgumentException("Grade level must be between 1 and 12.");
+            }
+
             var entity = new GradeLevel
             {
                 UserId = userId,
-                Name = request.Name?.Trim() ?? throw new ArgumentNullException(nameof(request.Name)),
+                Name = trimmedName,
                 Level = request.Level
             };
             if (id.HasValue)

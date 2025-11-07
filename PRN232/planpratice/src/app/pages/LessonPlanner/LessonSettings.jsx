@@ -337,6 +337,13 @@ export default function LessonSettings() {
     e.preventDefault();
 
     try {
+      // Validate input data
+      const validationError = validateFormData(formData, currentConfig);
+      if (validationError) {
+        showMessage('error', validationError);
+        return;
+      }
+
       const token = getAuthToken();
 
       if (editingItem) {
@@ -361,20 +368,95 @@ export default function LessonSettings() {
     }
   };
 
+  // Validation function
+  const validateFormData = (data, config) => {
+    // Check required fields
+    for (const field of config.fields) {
+      if (field.required && !data[field.name]) {
+        return `${field.label} is required`;
+      }
+
+      const value = data[field.name];
+
+      // Validate text fields
+      if (field.type === 'text' && value) {
+        const trimmedValue = value.trim();
+        if (trimmedValue.length === 0) {
+          return `${field.label} cannot be empty or whitespace only`;
+        }
+        if (trimmedValue.length > 200) {
+          return `${field.label} must be 200 characters or less`;
+        }
+      }
+
+      // Validate textarea fields
+      if (field.type === 'textarea' && value) {
+        const trimmedValue = value.trim();
+        if (field.required && trimmedValue.length === 0) {
+          return `${field.label} cannot be empty or whitespace only`;
+        }
+        if (trimmedValue.length > 2000) {
+          return `${field.label} must be 2000 characters or less`;
+        }
+      }
+
+      // Validate number fields (e.g., grade level)
+      if (field.type === 'number' && value !== undefined && value !== null && value !== '') {
+        const numValue = Number(value);
+        if (isNaN(numValue)) {
+          return `${field.label} must be a valid number`;
+        }
+        if (field.name === 'level') {
+          if (numValue < 1 || numValue > 12) {
+            return `${field.label} must be between 1 and 12`;
+          }
+          if (!Number.isInteger(numValue)) {
+            return `${field.label} must be a whole number`;
+          }
+        }
+        if (numValue < 0) {
+          return `${field.label} cannot be negative`;
+        }
+      }
+
+      // Validate short code (for interaction patterns)
+      if (field.name === 'shortCode' && value) {
+        const trimmedValue = value.trim();
+        if (trimmedValue.length > 10) {
+          return `${field.label} must be 10 characters or less`;
+        }
+      }
+    }
+
+    return null; // No validation errors
+  };
+
   const handleInputChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
   const handleCreateSkillType = async () => {
-    if (!newSkillType.name.trim()) {
-      showMessage('error', 'Please enter a skill type name');
+    const trimmedName = newSkillType.name.trim();
+    
+    if (!trimmedName) {
+      showMessage('error', 'Skill type name is required');
+      return;
+    }
+
+    if (trimmedName.length > 200) {
+      showMessage('error', 'Skill type name must be 200 characters or less');
+      return;
+    }
+
+    if (newSkillType.description && newSkillType.description.trim().length > 2000) {
+      showMessage('error', 'Description must be 2000 characters or less');
       return;
     }
 
     try {
       const token = getAuthToken();
       const skillTypeData = {
-        name: newSkillType.name,
+        name: trimmedName,
         description: newSkillType.description.trim() || undefined
       };
       const result = await postToApi('/SkillType', skillTypeData, token);
@@ -453,6 +535,7 @@ export default function LessonSettings() {
                   onChange={(e) => setNewSkillType({ ...newSkillType, name: e.target.value })}
                   placeholder="e.g., Language, Social, Motor..."
                   className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                  maxLength={200}
                   onKeyPress={(e) => {
                     if (e.key === 'Enter' && !e.shiftKey) {
                       e.preventDefault();
@@ -466,6 +549,7 @@ export default function LessonSettings() {
                   placeholder="Description (optional)..."
                   rows="2"
                   className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                  maxLength={2000}
                 />
                 <div className="flex gap-2">
                   <button
@@ -503,6 +587,7 @@ export default function LessonSettings() {
           rows="4"
           className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
           required={field.required}
+          maxLength={2000}
         />
       );
     }
@@ -511,10 +596,14 @@ export default function LessonSettings() {
       <input
         type={field.type}
         value={value}
-        onChange={(e) => handleInputChange(field.name, field.type === 'number' ? parseInt(e.target.value) : e.target.value)}
+        onChange={(e) => handleInputChange(field.name, field.type === 'number' ? parseInt(e.target.value) || '' : e.target.value)}
         placeholder={field.placeholder}
         className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
         required={field.required}
+        {...(field.type === 'text' && { maxLength: 200 })}
+        {...(field.type === 'number' && field.name === 'level' && { min: 1, max: 12, step: 1 })}
+        {...(field.type === 'number' && field.name !== 'level' && { min: 0 })}
+        {...(field.name === 'shortCode' && { maxLength: 10 })}
       />
     );
   };

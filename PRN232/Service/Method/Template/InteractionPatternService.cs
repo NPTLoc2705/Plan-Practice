@@ -35,12 +35,47 @@ namespace Service.Method.Template
 
         private InteractionPattern MapToEntity(InteractionPatternRequest request, int userId, int? id = null)
         {
+            // Validate name
+            if (string.IsNullOrWhiteSpace(request.Name))
+            {
+                throw new ArgumentException("Interaction pattern name is required and cannot be empty.");
+            }
+
+            var trimmedName = request.Name.Trim();
+            if (trimmedName.Length > 200)
+            {
+                throw new ArgumentException("Interaction pattern name must be 200 characters or less.");
+            }
+
+            // Validate shortCode
+            if (string.IsNullOrWhiteSpace(request.ShortCode))
+            {
+                throw new ArgumentException("Short code is required and cannot be empty.");
+            }
+
+            var trimmedShortCode = request.ShortCode.Trim();
+            if (trimmedShortCode.Length > 10)
+            {
+                throw new ArgumentException("Short code must be 10 characters or less.");
+            }
+
+            // Validate description (optional)
+            string trimmedDescription = null;
+            if (!string.IsNullOrWhiteSpace(request.Description))
+            {
+                trimmedDescription = request.Description.Trim();
+                if (trimmedDescription.Length > 2000)
+                {
+                    throw new ArgumentException("Description must be 2000 characters or less.");
+                }
+            }
+
             var entity = new InteractionPattern
             {
                 UserId = userId,
-                Name = request.Name?.Trim() ?? throw new ArgumentNullException(nameof(request.Name)),
-                ShortCode = request.ShortCode?.Trim(),
-                Description = request.Description?.Trim()
+                Name = trimmedName,
+                ShortCode = trimmedShortCode,
+                Description = trimmedDescription
             };
             if (id.HasValue)
             {
