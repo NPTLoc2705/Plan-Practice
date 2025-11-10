@@ -140,6 +140,8 @@ export default function App() {
   const [preparationToAdd, setPreparationToAdd] = useState('');
   const [methodTemplates, setMethodTemplates] = useState([]);
   const [selectedMethod, setSelectedMethod] = useState('');
+const [coinBalance, setCoinBalance] = useState(null);
+const [isCheckingCoins, setIsCheckingCoins] = useState(false);
   const [activityTemplates, setActivityTemplates] = useState([]);
   const [interactionPatterns, setInteractionPatterns] = useState([]);
   const [activities, setActivities] = useState([
@@ -215,6 +217,24 @@ export default function App() {
   // =================================================================
   // MODIFIED useEffect TO FETCH REAL DATA FROM ALL APIs
   // =================================================================
+useEffect(() => {
+  const fetchCoinBalance = async () => {
+    try {
+      const token = getAuthToken();
+      const response = await fetch(`${API_BASE_URL}/LessonPlanner/coin-balance`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const result = await response.json();
+      if (result.success) {
+        setCoinBalance(result.coinBalance);
+      }
+    } catch (error) {
+      console.error('Failed to fetch coin balance:', error);
+    }
+  };
+  
+  fetchCoinBalance();
+}, []);
   useEffect(() => {
     const fetchInitialData = async () => {
       setIsLoadingGrades(true);
@@ -434,98 +454,119 @@ html += `<h1 style="text-align: center; color: #1f2937; font-weight: normal;">${
     }
   };
   const handleSaveLesson = async () => {
-    setMessage('Saving lesson to backend...');
-    
-    // Build the request object matching LessonPlannerRequest DTO
-    const saveRequest = {
-      title: lessonTitle,
-      description: lessonDescription,
-      content: contentRef.current?.innerHTML || '',
-      classId: parseInt(selectedClassId),
-      dateOfPreparation: dateOfPreparation ? new Date(dateOfPreparation).toISOString() : null,
-      dateOfTeaching: dateOfTeaching ? new Date(dateOfTeaching).toISOString() : null,
-      lessonNumber: lessonNumber,
-      unitNumber: unitNumber,
-      unitName: unitName,
-      unitId: null, // Can be added later if needed
-      lessonDefinitionId: null, // Can be added later if needed
-      methodTemplateId: selectedMethod ? parseInt(selectedMethod) : null,
-      
-      // Objectives with display order
-      objectives: selectedObjectives.map((objId, index) => ({
-        id: 0,
-        objectiveTemplateId: objId,
-        displayOrder: index + 1
-      })),
-      
-      // Skills with display order
-      skills: selectedSkills.map((skillId, index) => ({
-        id: 0,
-        skillTemplateId: skillId,
-        displayOrder: index + 1
-      })),
-      
-      // Attitudes with display order
-      attitudes: selectedAttitudes.map((attId, index) => ({
-        id: 0,
-        attitudeTemplateId: attId,
-        displayOrder: index + 1
-      })),
-      
-      // Language Focus Items with display order
-      languageFocusItems: languageFocus
-        .filter(lf => lf.content && lf.content.trim())
-        .map((lf, index) => ({
-          id: 0,
-          languageFocusTypeId: lf.typeId ? parseInt(lf.typeId) : null,
-          content: lf.content,
-          displayOrder: index + 1
-        })),
-      
-      // Preparations with display order
-      preparations: selectedPreparations.map((prep, index) => ({
-        id: 0,
-        preparationTypeId: prep.id,
-        materials: prep.materials,
-        displayOrder: index + 1
-      })),
-      
-      // Activity Stages with items
-      activityStages: activities.map((stage, stageIndex) => ({
-        id: 0,
-        stageName: stage.stageName,
-        displayOrder: stageIndex + 1,
-        activityItems: stage.subActivities.map((subActivity, subIndex) => {
-          // Get content from template
-          const activityContent = subActivity.activityTemplateId 
-            ? activityTemplates.find(t => t.id === parseInt(subActivity.activityTemplateId))?.content || ''
-      : '';
-          
-          return {
-            id: 0,
-            timeInMinutes: subActivity.timeInMinutes || 0,
-            content: activityContent,
-            interactionPatternId: subActivity.interactionPatternId ? parseInt(subActivity.interactionPatternId) : null,
-            activityTemplateId: subActivity.activityTemplateId ? parseInt(subActivity.activityTemplateId) : null,
-            displayOrder: subIndex + 1
-          };
-        })
-      }))
-    };
-
-    try {
-      const token = getAuthToken();
-      const result = await postToApi('/LessonPlanner', saveRequest, token);
+  setIsCheckingCoins(true);
+  setMessage('Checking coin balance...');
+  
+  try {
+    const token = getAuthToken();
+    
+    // Check coin balance before proceeding
+    if (coinBalance !== null && coinBalance < 50) {
+      setMessage('❌ Insufficient coins! You need 50 coins to generate a lesson plan. Please purchase more coins.');
+      setIsCheckingCoins(false);
+      return;
+    }
+    
+    setMessage('Saving lesson to backend (50 coins will be deducted)...');
+    
+    // Build the request object matching LessonPlannerRequest DTO
+    const saveRequest = {
+      title: lessonTitle,
+      description: lessonDescription,
+      content: contentRef.current?.innerHTML || '',
+      classId: parseInt(selectedClassId),
+      dateOfPreparation: dateOfPreparation ? new Date(dateOfPreparation).toISOString() : null,
+      dateOfTeaching: dateOfTeaching ? new Date(dateOfTeaching).toISOString() : null,
+      lessonNumber: lessonNumber,
+      unitNumber: unitNumber,
+      unitName: unitName,
+      unitId: null,
+      lessonDefinitionId: null,
+      methodTemplateId: selectedMethod ? parseInt(selectedMethod) : null,
       
-      if (result.success) {
-        setSavedLessonId(result.data.id); // Store the lesson ID
-        setMessage(`✅ Lesson saved successfully! ID: ${result.data.id}`);
+      objectives: selectedObjectives.map((objId, index) => ({
+        id: 0,
+        objectiveTemplateId: objId,
+        displayOrder: index + 1
+      })),
+      
+      skills: selectedSkills.map((skillId, index) => ({
+        id: 0,
+        skillTemplateId: skillId,
+        displayOrder: index + 1
+      })),
+      
+      attitudes: selectedAttitudes.map((attId, index) => ({
+        id: 0,
+        attitudeTemplateId: attId,
+        displayOrder: index + 1
+      })),
+      
+      languageFocusItems: languageFocus
+        .filter(lf => lf.content && lf.content.trim())
+        .map((lf, index) => ({
+          id: 0,
+          languageFocusTypeId: lf.typeId ? parseInt(lf.typeId) : null,
+          content: lf.content,
+          displayOrder: index + 1
+        })),
+      
+      preparations: selectedPreparations.map((prep, index) => ({
+        id: 0,
+        preparationTypeId: prep.id,
+        materials: prep.materials,
+        displayOrder: index + 1
+      })),
+      
+      activityStages: activities.map((stage, stageIndex) => ({
+        id: 0,
+        stageName: stage.stageName,
+        displayOrder: stageIndex + 1,
+        activityItems: stage.subActivities.map((subActivity, subIndex) => {
+          const activityContent = subActivity.activityTemplateId 
+            ? activityTemplates.find(t => t.id === parseInt(subActivity.activityTemplateId))?.content || ''
+            : '';
+          
+          return {
+            id: 0,
+            timeInMinutes: subActivity.timeInMinutes || 0,
+            content: activityContent,
+            interactionPatternId: subActivity.interactionPatternId ? parseInt(subActivity.interactionPatternId) : null,
+            activityTemplateId: subActivity.activityTemplateId ? parseInt(subActivity.activityTemplateId) : null,
+            displayOrder: subIndex + 1
+          };
+        })
+      }))
+    };
+
+    const result = await postToApi('/LessonPlanner', saveRequest, token);
+    
+    if (result.success) {
+      setSavedLessonId(result.data.id);
+      
+      // Update coin balance from server response
+      if (result.newBalance !== undefined) {
+        setCoinBalance(result.newBalance);
+      } else {
+        // Fallback: deduct locally if server doesn't return new balance
+        setCoinBalance(coinBalance - 50);
       }
-    } catch (error) {
-      console.error('Failed to save lesson:', error);
+      
+      setMessage(`✅ Lesson saved successfully! ID: ${result.data.id} | 50 coins deducted. New balance: ${result.newBalance || (coinBalance - 50)} coins`);
+    }
+  } catch (error) {
+    console.error('Failed to save lesson:', error);
+    
+    // Check if it's an insufficient coins error
+    if (error.message && error.message.includes('Insufficient coins')) {
+      setMessage(`❌ ${error.message}`);
+    } else {
       setMessage(`❌ Failed to save lesson: ${error.message}`);
     }
-  };
+  } finally {
+    setIsCheckingCoins(false);
+  }
+};
 
   const handleDownloadAndSave = async () => {
     if (!contentRef.current) return;
@@ -591,22 +632,47 @@ html += `<h1 style="text-align: center; color: #1f2937; font-weight: normal;">${
   const ItemSelector = ({ title, templates, selectedIds, onAdd, onRemove, selectedValue, onSelectChange }) => { const availableItems = templates.filter(t => !selectedIds.includes(t.id)); return ( <div className="space-y-4"> <div className="flex items-center gap-2"> <select value={selectedValue} onChange={onSelectChange} className="w-full p-2 border border-gray-300 rounded-lg text-sm" disabled={availableItems.length === 0} > <option value="">{availableItems.length > 0 ? `Select a ${title.toLowerCase()}...` : `All ${title.toLowerCase()} added`}</option> {availableItems.map(item => ( <option key={item.id} value={item.id}>{item.name}</option> ))} </select> <button onClick={() => onAdd(selectedValue)} disabled={!selectedValue} className="px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed" > <Plus className="w-5 h-5" /> </button> </div> <div className="space-y-2"> {selectedIds.length > 0 ? ( selectedIds.map(id => { const item = templates.find(t => t.id === id); if (!item) return null; return ( <div key={id} className="flex items-center justify-between p-2 bg-gray-100 border rounded-lg animate-fade-in"> <div className="text-sm"> <p className="font-semibold">{item.name}</p> <p className="text-gray-600">{item.content || item.description}</p> </div> <button onClick={() => onRemove(id)} className="text-red-500 hover:text-red-700 p-1"> <X className="w-4 h-4" /> </button> </div> ); }) ) : ( <p className="text-sm text-gray-500 text-center py-2">No {title.toLowerCase()} added yet.</p> )} </div> </div> ); }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4 sm:p-8 font-['Inter']">
-      <header className="mb-8">
-        <h1 className="text-3xl font-extrabold text-gray-900 flex items-center">
-          <BookOpen className="w-8 h-8 mr-3 text-red-600" />
-          Create Lesson Plan
-        </h1>
-        <p className="text-gray-500 mt-1">Build your lesson plan step by step, or jump to any step.</p>
-      </header>
+  <div className="min-h-screen bg-gray-50 p-4 sm:p-8 font-['Inter']">
+    <header className="mb-8">
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-extrabold text-gray-900 flex items-center">
+            <BookOpen className="w-8 h-8 mr-3 text-red-600" />
+            Create Lesson Plan
+          </h1>
+          <p className="text-gray-500 mt-1">Build your lesson plan step by step, or jump to any step.</p>
+        </div>
+        {coinBalance !== null && (
+          <div className="flex items-center space-x-2 px-4 py-2 bg-yellow-100 border-2 border-yellow-400 rounded-lg">
+            <span className="text-2xl">🪙</span>
+            <div>
+              <p className="text-xs text-gray-600">Your Balance</p>
+              <p className="text-lg font-bold text-yellow-700">{coinBalance} coins</p>
+            </div>
+          </div>
+        )}
+      </div>
+    </header>
 
-      {message && (
-        <div className="mb-4 p-3 bg-indigo-100 text-indigo-800 rounded-lg shadow-sm text-sm font-medium animate-fade-in">
-          {message}
-        </div>
-      )}
+    {coinBalance !== null && coinBalance < 50 && (
+      <div className="mb-4 p-3 bg-red-100 text-red-800 rounded-lg shadow-sm text-sm font-medium flex items-center justify-between">
+        <span>⚠️ Low coin balance! You need 50 coins to generate a lesson plan.</span>
+        <button 
+          onClick={() => window.location.href = '/payment'}
+          className="ml-4 px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700"
+        >
+          Buy Coins
+        </button>
+      </div>
+    )}
 
-      <StepIndicator />
+    {message && (
+      <div className="mb-4 p-3 bg-indigo-100 text-indigo-800 rounded-lg shadow-sm text-sm font-medium animate-fade-in">
+        {message}
+      </div>
+    )}
+
+    <StepIndicator />
 
       <div className="flex flex-col lg:flex-row gap-8">
         <div className="lg:w-1/3 p-6 bg-white rounded-xl shadow-2xl h-fit sticky top-4">

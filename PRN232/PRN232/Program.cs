@@ -60,6 +60,7 @@ namespace PRN232
             builder.Services.AddOpenApi("v1", options =>
             {
                 options.AddDocumentTransformer<BearerSecuritySchemeTransformer>();
+
             });
 
             //LessonPlanner Related Shitzzz
@@ -132,6 +133,15 @@ namespace PRN232
             //Quiz otp
             builder.Services.AddScoped<QuizOTPDAO>();
             builder.Services.AddScoped<QuizOTPAccessDAO>();
+
+            //Payment and Package
+            builder.Services.AddScoped<PaymentDAO>();
+            builder.Services.AddScoped<PackageDAO>();
+            builder.Services.AddScoped<IPaymentRepo, PaymentRepo>();
+            builder.Services.AddScoped<IPackageRepo, PackageRepo>();
+            builder.Services.AddScoped<IPaymentService, PaymentService>();
+            builder.Services.AddScoped<IPackageService, PackageService>();
+            builder.Services.AddScoped<ICoinService, CoinService>();
 
 
 

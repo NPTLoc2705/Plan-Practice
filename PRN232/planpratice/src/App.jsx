@@ -7,7 +7,8 @@ import { TeacherRoutes } from './app/routes/TeacherRoutes';
 import { AdminRoutes } from './app/routes/AdminRoutes';
 import { AuthAPI } from './app/components/APIService/AuthAPI';
 import Landing from './app/pages/Landing.jsx';
-
+import PaymentSuccess from './app/pages/PaymentSuccess.jsx';
+import PaymentCancel from './app/pages/PaymentCancel.jsx';
 // Component to conditionally render HeaderBar
 const Layout = ({ children }) => {
     const location = useLocation();
@@ -40,6 +41,9 @@ function App() {
 
                     {/* Landing Page */}
                     <Route path="/" element={<Landing />} />
+
+ <Route path="/payment/success" element={<PaymentSuccess />} />
+                    <Route path="/payment/cancel" element={<PaymentCancel />} />
 
                     {/* Auto-redirect based on role */}
                     <Route 
