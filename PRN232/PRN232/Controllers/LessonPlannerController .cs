@@ -1,13 +1,14 @@
-﻿using System;
-using System.IO;
-using System.Security.Claims;
-using System.Threading.Tasks;
-using BusinessObject.Dtos.LessonDTO;
+﻿using BusinessObject.Dtos.LessonDTO;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Service.Interface;
+using Service.Method;
+using System;
+using System.IO;
+using System.Security.Claims;
+using System.Threading.Tasks;
 
 namespace API.Controllers
 {
@@ -19,15 +20,18 @@ namespace API.Controllers
         private readonly ILessonPlannerService _lessonPlannerService;
         private readonly ILessonPlannerDocumentService _documentService;
         private readonly IWebHostEnvironment _environment;
+        private readonly ICoinService _coinService;
 
         public LessonPlannerController(
             ILessonPlannerService lessonPlannerService,
             ILessonPlannerDocumentService documentService,
-            IWebHostEnvironment environment)
+            IWebHostEnvironment environment,
+            ICoinService coinService)
         {
             _lessonPlannerService = lessonPlannerService;
             _documentService = documentService;
             _environment = environment;
+            _coinService = coinService;
         }
 
         private int GetCurrentUserId()
@@ -39,6 +43,27 @@ namespace API.Controllers
             }
             return userId;
         }
+
+        [HttpGet("coin-balance")]
+        public async Task<IActionResult> GetCoinBalance()
+        {
+            try
+            {
+                var userId = GetCurrentUserId();
+                var balance = await _coinService.GetUserCoinBalance(userId);
+
+                return Ok(new
+                {
+                    success = true,
+                    coinBalance = balance
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { success = false, message = "Error getting coin balance" });
+            }
+        }
+
 
         [HttpGet("my-planners")]
         public async Task<IActionResult> GetMyLessonPlanners()

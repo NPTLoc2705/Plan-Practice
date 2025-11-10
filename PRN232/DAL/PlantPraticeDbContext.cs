@@ -1,6 +1,7 @@
 ﻿using BusinessObject;
 using BusinessObject.Lesson;
 using BusinessObject.Lesson.Template;
+using BusinessObject.Payments;
 using BusinessObject.Quiz;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -65,6 +66,12 @@ namespace DAL
         public DbSet<PreparationType> PreparationTypes { get; set; }
         public DbSet<ActivityTemplate> ActivityTemplates { get; set; }
 
+
+        // ============================================
+        // Payment
+        // ============================================
+        public DbSet<Payment> Payments { get; set; }
+        public DbSet<Package> Packages { get; set; }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
             => optionsBuilder.UseNpgsql(GetConnectionString());
 
@@ -154,6 +161,8 @@ namespace DAL
                      .HasConversion<string>()
                      .HasDefaultValue(UserRole.Student)
                      .HasMaxLength(20);
+                entity.Property(e => e.CoinBalance)
+               .HasDefaultValue(100);
 
                 entity.Property(e => e.EmailVerified).HasDefaultValue(false);
                 entity.Property(e => e.IsBanned).HasDefaultValue(false);
@@ -304,9 +313,81 @@ namespace DAL
                 .WithMany()
                 .HasForeignKey(ua => ua.AnswerId);
 
+
+            //Payment entity configuration
+            modelBuilder.Entity<Payment>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Id).ValueGeneratedOnAdd();
+                entity.Property(e => e.Amount)
+                  
+                    .IsRequired();
+                entity.Property(e => e.CreatedAt)
+                    .HasDefaultValueSql("timezone('utc', now())");
+                entity.HasOne(e => e.User)
+                    .WithMany(u => u.Payments)
+                    .HasForeignKey(e => e.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(e => e.Package)
+                    .WithMany(p => p.Payments)
+                    .HasForeignKey(e => e.PackageId)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
+
+
+            //Package entity configuration
+
+            modelBuilder.Entity<Package>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Id).ValueGeneratedOnAdd();
+                entity.Property(e => e.Name).IsRequired().HasMaxLength(100);
+                entity.Property(e => e.CoinAmount).IsRequired();
+                entity.Property(e => e.Price).IsRequired();
+                entity.Property(e => e.Description).HasMaxLength(500);
+                
+                 
+            });
+            SeedPackages(modelBuilder);
             OnModelCreatingPartial(modelBuilder);
         }
 
         partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
+            public static void SeedPackages(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Package>().HasData(
+                new Package
+                {
+                    Id = 1,
+                    Name = "Starter Pack",
+                    CoinAmount = 100,
+                    Price = 9900, // $9.99 or 99,000 VND
+                    Description = "Perfect for getting started with lesson creation",
+                    IsActive = true,
+                    
+                },
+                new Package
+                {
+                    Id = 2,
+                    Name = "Pro Creator",
+                    CoinAmount = 500,
+                    Price = 39900, // $39.99 or 399,000 VND
+                    Description = "For frequent lesson creators",
+                    IsActive = true,
+                   
+                },
+                new Package
+                {
+                    Id = 3,
+                    Name = "Power User",
+                    CoinAmount = 1000,
+                    Price = 69900, // $69.99 or 699,000 VND
+                    Description = "Maximum value for power users",
+                    IsActive = true,
+                   
+                }
+            );
+        }
     }
 }

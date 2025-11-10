@@ -3,6 +3,7 @@ using System;
 using DAL;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DAL.Migrations
 {
     [DbContext(typeof(PlantPraticeDbContext))]
-    partial class PlantPraticeDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251104171245_AddPackage")]
+    partial class AddPackage
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -836,8 +839,8 @@ namespace DAL.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
-                    b.Property<int>("Price")
-                        .HasColumnType("integer");
+                    b.Property<decimal>("Price")
+                        .HasColumnType("numeric");
 
                     b.HasKey("Id");
 
@@ -851,7 +854,7 @@ namespace DAL.Migrations
                             Description = "Perfect for getting started with lesson creation",
                             IsActive = true,
                             Name = "Starter Pack",
-                            Price = 9900
+                            Price = 9900m
                         },
                         new
                         {
@@ -860,7 +863,7 @@ namespace DAL.Migrations
                             Description = "For frequent lesson creators",
                             IsActive = true,
                             Name = "Pro Creator",
-                            Price = 39900
+                            Price = 39900m
                         },
                         new
                         {
@@ -869,7 +872,7 @@ namespace DAL.Migrations
                             Description = "Maximum value for power users",
                             IsActive = true,
                             Name = "Power User",
-                            Price = 69900
+                            Price = 69900m
                         });
                 });
 

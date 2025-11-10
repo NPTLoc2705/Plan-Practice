@@ -1,4 +1,5 @@
-﻿using BusinessObject.Quiz;
+﻿using BusinessObject.Payments;
+using BusinessObject.Quiz;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -25,6 +26,8 @@ namespace BusinessObject
         public string? Phone { get; set; }
         public UserRole Role { get; set; } = UserRole.Student;
 
+        public int CoinBalance { get; set; } = 0;
+
         public DateTime Createdat { get; set; } = DateTime.UtcNow;
 
         public bool EmailVerified { get; set; } = false;
@@ -34,6 +37,8 @@ namespace BusinessObject
         public virtual ICollection<OtpVerify> OtpVerifies { get; set; } = new List<OtpVerify>();
 
         public virtual ICollection<QuizResult> QuizResults { get; set; } = new List<QuizResult>();
+
+        public virtual ICollection<Payment> Payments { get; set; } = new List<Payment>();
     }
 }
 

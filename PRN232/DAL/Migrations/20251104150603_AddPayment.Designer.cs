@@ -3,6 +3,7 @@ using System;
 using DAL;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DAL.Migrations
 {
     [DbContext(typeof(PlantPraticeDbContext))]
-    partial class PlantPraticeDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251104150603_AddPayment")]
+    partial class AddPayment
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -825,52 +828,21 @@ namespace DAL.Migrations
 
                     b.Property<string>("Description")
                         .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)");
+                        .HasColumnType("text");
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("boolean");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
+                        .HasColumnType("text");
 
-                    b.Property<int>("Price")
-                        .HasColumnType("integer");
+                    b.Property<decimal>("Price")
+                        .HasColumnType("numeric");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Packages");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            CoinAmount = 100,
-                            Description = "Perfect for getting started with lesson creation",
-                            IsActive = true,
-                            Name = "Starter Pack",
-                            Price = 9900
-                        },
-                        new
-                        {
-                            Id = 2,
-                            CoinAmount = 500,
-                            Description = "For frequent lesson creators",
-                            IsActive = true,
-                            Name = "Pro Creator",
-                            Price = 39900
-                        },
-                        new
-                        {
-                            Id = 3,
-                            CoinAmount = 1000,
-                            Description = "Maximum value for power users",
-                            IsActive = true,
-                            Name = "Power User",
-                            Price = 69900
-                        });
+                    b.ToTable("Package");
                 });
 
             modelBuilder.Entity("BusinessObject.Payments.Payment", b =>
@@ -900,6 +872,9 @@ namespace DAL.Migrations
                     b.Property<int>("PackageId")
                         .HasColumnType("integer");
 
+                    b.Property<int?>("PackageId1")
+                        .HasColumnType("integer");
+
                     b.Property<DateTime?>("PaidAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -922,9 +897,11 @@ namespace DAL.Migrations
 
                     b.HasIndex("PackageId");
 
+                    b.HasIndex("PackageId1");
+
                     b.HasIndex("UserId");
 
-                    b.ToTable("Payments");
+                    b.ToTable("Payment");
                 });
 
             modelBuilder.Entity("BusinessObject.Quiz.Answer", b =>
@@ -1152,11 +1129,6 @@ namespace DAL.Migrations
 
                     b.Property<DateTime?>("BannedAt")
                         .HasColumnType("timestamp with time zone");
-
-                    b.Property<int>("CoinBalance")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasDefaultValue(100);
 
                     b.Property<DateTime>("Createdat")
                         .ValueGeneratedOnAdd()
@@ -1523,10 +1495,14 @@ namespace DAL.Migrations
             modelBuilder.Entity("BusinessObject.Payments.Payment", b =>
                 {
                     b.HasOne("BusinessObject.Payments.Package", "Package")
-                        .WithMany("Payments")
+                        .WithMany()
                         .HasForeignKey("PackageId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.HasOne("BusinessObject.Payments.Package", null)
+                        .WithMany("Payments")
+                        .HasForeignKey("PackageId1");
 
                     b.HasOne("BusinessObject.User", "User")
                         .WithMany("Payments")
