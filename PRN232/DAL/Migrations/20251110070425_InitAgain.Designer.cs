@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DAL.Migrations
 {
     [DbContext(typeof(PlantPraticeDbContext))]
-    [Migration("20251104171245_AddPackage")]
-    partial class AddPackage
+    [Migration("20251110070425_InitAgain")]
+    partial class InitAgain
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -839,8 +839,8 @@ namespace DAL.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
-                    b.Property<decimal>("Price")
-                        .HasColumnType("numeric");
+                    b.Property<int>("Price")
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 
@@ -854,7 +854,7 @@ namespace DAL.Migrations
                             Description = "Perfect for getting started with lesson creation",
                             IsActive = true,
                             Name = "Starter Pack",
-                            Price = 9900m
+                            Price = 9900
                         },
                         new
                         {
@@ -863,7 +863,7 @@ namespace DAL.Migrations
                             Description = "For frequent lesson creators",
                             IsActive = true,
                             Name = "Pro Creator",
-                            Price = 39900m
+                            Price = 39900
                         },
                         new
                         {
@@ -872,7 +872,7 @@ namespace DAL.Migrations
                             Description = "Maximum value for power users",
                             IsActive = true,
                             Name = "Power User",
-                            Price = 69900m
+                            Price = 69900
                         });
                 });
 

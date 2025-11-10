@@ -4,6 +4,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
+#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
+
 namespace DAL.Migrations
 {
     /// <inheritdoc />
@@ -12,6 +14,23 @@ namespace DAL.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.CreateTable(
+                name: "Packages",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    CoinAmount = table.Column<int>(type: "integer", nullable: false),
+                    Price = table.Column<int>(type: "integer", nullable: false),
+                    Description = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
+                    IsActive = table.Column<bool>(type: "boolean", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Packages", x => x.Id);
+                });
+
             migrationBuilder.CreateTable(
                 name: "Users",
                 columns: table => new
@@ -23,6 +42,7 @@ namespace DAL.Migrations
                     Password = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true),
                     Phone = table.Column<string>(type: "character varying(15)", maxLength: 15, nullable: true),
                     Role = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false, defaultValue: "Student"),
+                    CoinBalance = table.Column<int>(type: "integer", nullable: false, defaultValue: 100),
                     Createdat = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "timezone('utc', now())"),
                     EmailVerified = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false),
                     IsBanned = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false),
@@ -213,6 +233,40 @@ namespace DAL.Migrations
                         principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.SetNull);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Payments",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    UserId = table.Column<int>(type: "integer", nullable: false),
+                    OrderCode = table.Column<long>(type: "bigint", nullable: false),
+                    Amount = table.Column<int>(type: "integer", nullable: false),
+                    Description = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
+                    Status = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "timezone('utc', now())"),
+                    PaidAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    PaymentLinkId = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
+                    TransactionCode = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: true),
+                    PackageId = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Payments", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Payments_Packages_PackageId",
+                        column: x => x.PackageId,
+                        principalTable: "Packages",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Payments_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -792,6 +846,16 @@ namespace DAL.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.InsertData(
+                table: "Packages",
+                columns: new[] { "Id", "CoinAmount", "Description", "IsActive", "Name", "Price" },
+                values: new object[,]
+                {
+                    { 1, 100, "Perfect for getting started with lesson creation", true, "Starter Pack", 9900 },
+                    { 2, 500, "For frequent lesson creators", true, "Pro Creator", 39900 },
+                    { 3, 1000, "Maximum value for power users", true, "Power User", 69900 }
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_ActivityTemplates_UserId",
                 table: "ActivityTemplates",
@@ -958,6 +1022,16 @@ namespace DAL.Migrations
                 column: "ExpiredAt");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Payments_PackageId",
+                table: "Payments",
+                column: "PackageId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Payments_UserId",
+                table: "Payments",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_PreparationTypes_UserId",
                 table: "PreparationTypes",
                 column: "UserId");
@@ -1073,6 +1147,9 @@ namespace DAL.Migrations
                 name: "OtpVerifies");
 
             migrationBuilder.DropTable(
+                name: "Payments");
+
+            migrationBuilder.DropTable(
                 name: "QuizOTPAccesses");
 
             migrationBuilder.DropTable(
@@ -1101,6 +1178,9 @@ namespace DAL.Migrations
 
             migrationBuilder.DropTable(
                 name: "SkillTemplates");
+
+            migrationBuilder.DropTable(
+                name: "Packages");
 
             migrationBuilder.DropTable(
                 name: "QuizOTPs");
