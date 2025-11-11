@@ -270,41 +270,7 @@ namespace PRN232.Controllers
             }
         }
 
-        /// <summary>
-        /// Get access logs for an OTP
-        /// </summary>
-        [HttpGet("{otpId}/logs")]
-        [Authorize(Roles = "Teacher")]
-        [ProducesResponseType(typeof(IEnumerable<OTPAccessLogDto>), StatusCodes.Status200OK)]
-        public async Task<IActionResult> GetOTPAccessLogs(int otpId)
-        {
-            try
-            {
-                var teacherId = GetCurrentUserId();
-                var logs = await _otpService.GetOTPAccessLogsAsync(otpId, teacherId);
-
-                return Ok(new
-                {
-                    success = true,
-                    data = logs,
-                    count = logs.Count(),
-                    message = "Access logs retrieved successfully"
-                });
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                return Forbid(ex.Message);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"Error retrieving logs for OTP {otpId}");
-                return StatusCode(500, new
-                {
-                    success = false,
-                    message = "An error occurred while retrieving access logs"
-                });
-            }
-        }
+       
 
         // ===== STUDENT ENDPOINTS =====
 

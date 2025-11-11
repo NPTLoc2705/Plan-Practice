@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -106,5 +107,40 @@ namespace BusinessObject.Dtos.Quiz
         public int HighestScore { get; set; }
         public int YourBestScore { get; set; }
         public int YourAttempts { get; set; }
+    }
+
+    #region Quiz Generation Models
+    public class QuizGenerationResult
+    {
+        public List<GeneratedQuestion> Questions { get; set; } = new();
+    }
+
+    public class GeneratedQuestion
+    {
+        public string Content { get; set; }
+        public List<GeneratedAnswer> Answers { get; set; } = new();
+    }
+
+    public class GeneratedAnswer
+    {
+        public string Content { get; set; }
+        public bool IsCorrect { get; set; }
+    }
+    #endregion
+
+    public class GenerateQuizDto
+    {
+        [Required]
+        public int LessonPlannerId { get; set; }
+
+        [Required]
+        [StringLength(200, MinimumLength = 5)]
+        public string Title { get; set; }
+
+        [StringLength(500)]
+        public string Description { get; set; }
+
+        [Range(1, 20, ErrorMessage = "Number of questions must be between 1 and 20")]
+        public int NumberOfQuestions { get; set; } = 5;
     }
 }

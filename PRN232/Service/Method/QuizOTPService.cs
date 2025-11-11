@@ -14,18 +14,15 @@ namespace Service.Method
     public class QuizOTPService : IQuizOTPService
     {
         private readonly IQuizOTPRepository _otpRepository;
-        private readonly IQuizOTPAccessRepository _accessRepository;
         private readonly IQuizRepository _quizRepository;
         private readonly IUserRepository _userRepository;
 
         public QuizOTPService(
             IQuizOTPRepository otpRepository,
-            IQuizOTPAccessRepository accessRepository,
             IQuizRepository quizRepository,
             IUserRepository userRepository)
         {
             _otpRepository = otpRepository;
-            _accessRepository = accessRepository;
             _quizRepository = quizRepository;
             _userRepository = userRepository;
         }
@@ -177,22 +174,7 @@ namespace Service.Method
                 };
             }
 
-            // Check if student already used this OTP (optional - can allow multiple attempts)
-            var hasAccessed = await _accessRepository.HasStudentAccessedOTPAsync(otp.Id, studentId);
-            if (hasAccessed)
-            {
-                // You might want to allow re-access or block it based on business rules
-                // For now, let's allow re-access but log it
-            }
-
-            // Log access
-            var accessLog = new QuizOTPAccess
-            {
-                OTPId = otp.Id,
-                StudentId = studentId,
-                AccessedAt = DateTime.UtcNow
-            };
-            await _accessRepository.CreateAsync(accessLog);
+            
 
             // Update usage count
             otp.UsageCount++;
@@ -234,23 +216,7 @@ namespace Service.Method
             return validationResult.Quiz;
         }
 
-        public async Task<IEnumerable<OTPAccessLogDto>> GetOTPAccessLogsAsync(int otpId, int teacherId)
-        {
-            // Verify teacher owns this OTP
-            var otp = await _otpRepository.GetByIdAsync(otpId);
-            if (otp == null || otp.CreatedByTeacherId != teacherId)
-                throw new UnauthorizedAccessException("You don't have permission to view these logs");
-
-            var accessLogs = await _accessRepository.GetByOTPIdAsync(otpId);
-
-            return accessLogs.Select(log => new OTPAccessLogDto
-            {
-                Id = log.Id,
-                StudentName = log.Student?.Username ?? "Unknown",
-                StudentId = log.StudentId,
-                AccessedAt = log.AccessedAt
-            });
-        }
+        
 
         public async Task<int> CleanupExpiredOTPsAsync()
         {

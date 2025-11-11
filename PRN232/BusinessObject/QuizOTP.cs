@@ -43,6 +43,6 @@ namespace BusinessObject
         [ForeignKey("CreatedByTeacherId")]
         public virtual User CreatedByTeacher { get; set; }
 
-        public virtual ICollection<QuizOTPAccess> AccessLogs { get; set; } = new List<QuizOTPAccess>();
+        
     }
 }

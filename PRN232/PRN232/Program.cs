@@ -132,7 +132,6 @@ namespace PRN232
             builder.Services.AddScoped<UserAnswerStudentDAO>();
             //Quiz otp
             builder.Services.AddScoped<QuizOTPDAO>();
-            builder.Services.AddScoped<QuizOTPAccessDAO>();
 
             //Payment and Package
             builder.Services.AddScoped<PaymentDAO>();
@@ -172,7 +171,7 @@ namespace PRN232
 
             //Quiz OTP
             builder.Services.AddScoped<IQuizOTPRepository, QuizOTPRepository>();
-            builder.Services.AddScoped<IQuizOTPAccessRepository, QuizOTPAccessRepository>();
+         
 
 
             
@@ -185,9 +184,11 @@ namespace PRN232
             //  builder.Services.AddScoped<IStudentQuizService, StudentQuizService>();
             builder.Services.AddScoped<IStudentQuizService, StudentQuizService>();
             builder.Services.AddScoped<IQuizOTPService, QuizOTPService>();
+            builder.Services.AddScoped<IGeminiService, GeminiService>();
 
 
-           var jwtKey = builder.Configuration["Jwt:Key"];
+
+            var jwtKey = builder.Configuration["Jwt:Key"];
             var key = Encoding.ASCII.GetBytes(jwtKey);
 
             builder.Services.AddAuthentication(options =>
