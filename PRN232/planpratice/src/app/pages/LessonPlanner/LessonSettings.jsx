@@ -323,9 +323,15 @@ export default function LessonSettings() {
       const token = getAuthToken();
       await deleteFromApi(`${currentConfig.endpoint}/${id}`, token);
 
-      // Refresh data
+      // Refresh data for current tab
       const result = await fetchFromApi(currentConfig.myEndpoint, token);
       setData(prev => ({ ...prev, [activeTab]: result }));
+
+      // If we just deleted a grade level, refresh grade levels for class dropdown
+      if (activeTab === 'gradeLevel') {
+        const grades = await fetchFromApi('/GradeLevel/my-grade-levels', token);
+        setGradeLevels(grades);
+      }
 
       showMessage('success', 'Item deleted successfully');
     } catch (error) {
@@ -356,9 +362,15 @@ export default function LessonSettings() {
         showMessage('success', 'Item created successfully');
       }
 
-      // Refresh data
+      // Refresh data for current tab
       const result = await fetchFromApi(currentConfig.myEndpoint, token);
       setData(prev => ({ ...prev, [activeTab]: result }));
+
+      // If we just created/updated a grade level, refresh grade levels for class dropdown
+      if (activeTab === 'gradeLevel') {
+        const grades = await fetchFromApi('/GradeLevel/my-grade-levels', token);
+        setGradeLevels(grades);
+      }
 
       setShowForm(false);
       setFormData({});
