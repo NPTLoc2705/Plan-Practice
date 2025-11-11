@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DAL.Migrations
 {
     [DbContext(typeof(PlantPraticeDbContext))]
-    [Migration("20251110070425_InitAgain")]
+    [Migration("20251111015527_InitAgain")]
     partial class InitAgain
     {
         /// <inheritdoc />
@@ -1118,33 +1118,6 @@ namespace DAL.Migrations
                     b.ToTable("QuizOTPs");
                 });
 
-            modelBuilder.Entity("BusinessObject.QuizOTPAccess", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("AccessedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int>("OTPId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("StudentId")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("StudentId");
-
-                    b.HasIndex("OTPId", "StudentId")
-                        .HasDatabaseName("IX_QuizOTPAccess_OTP_Student");
-
-                    b.ToTable("QuizOTPAccesses");
-                });
-
             modelBuilder.Entity("BusinessObject.User", b =>
                 {
                     b.Property<int>("Id")
@@ -1640,25 +1613,6 @@ namespace DAL.Migrations
                     b.Navigation("Quiz");
                 });
 
-            modelBuilder.Entity("BusinessObject.QuizOTPAccess", b =>
-                {
-                    b.HasOne("BusinessObject.QuizOTP", "OTP")
-                        .WithMany("AccessLogs")
-                        .HasForeignKey("OTPId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("BusinessObject.User", "Student")
-                        .WithMany()
-                        .HasForeignKey("StudentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("OTP");
-
-                    b.Navigation("Student");
-                });
-
             modelBuilder.Entity("BusinessObject.Lesson.Class", b =>
                 {
                     b.Navigation("LessonPlanners");
@@ -1725,11 +1679,6 @@ namespace DAL.Migrations
                     b.Navigation("Questions");
 
                     b.Navigation("QuizResults");
-                });
-
-            modelBuilder.Entity("BusinessObject.QuizOTP", b =>
-                {
-                    b.Navigation("AccessLogs");
                 });
 
             modelBuilder.Entity("BusinessObject.User", b =>

@@ -787,33 +787,6 @@ namespace DAL.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "QuizOTPAccesses",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    OTPId = table.Column<int>(type: "integer", nullable: false),
-                    StudentId = table.Column<int>(type: "integer", nullable: false),
-                    AccessedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_QuizOTPAccesses", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_QuizOTPAccesses_QuizOTPs_OTPId",
-                        column: x => x.OTPId,
-                        principalTable: "QuizOTPs",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_QuizOTPAccesses_Users_StudentId",
-                        column: x => x.StudentId,
-                        principalTable: "Users",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "UserAnswers",
                 columns: table => new
                 {
@@ -1042,16 +1015,6 @@ namespace DAL.Migrations
                 column: "QuizId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_QuizOTPAccess_OTP_Student",
-                table: "QuizOTPAccesses",
-                columns: new[] { "OTPId", "StudentId" });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_QuizOTPAccesses_StudentId",
-                table: "QuizOTPAccesses",
-                column: "StudentId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_QuizOTP_Code_IsActive_ExpiresAt",
                 table: "QuizOTPs",
                 columns: new[] { "OTPCode", "IsActive", "ExpiresAt" });
@@ -1150,7 +1113,7 @@ namespace DAL.Migrations
                 name: "Payments");
 
             migrationBuilder.DropTable(
-                name: "QuizOTPAccesses");
+                name: "QuizOTPs");
 
             migrationBuilder.DropTable(
                 name: "UserAnswers");
@@ -1181,9 +1144,6 @@ namespace DAL.Migrations
 
             migrationBuilder.DropTable(
                 name: "Packages");
-
-            migrationBuilder.DropTable(
-                name: "QuizOTPs");
 
             migrationBuilder.DropTable(
                 name: "Answers");
