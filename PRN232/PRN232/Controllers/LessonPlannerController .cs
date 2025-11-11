@@ -21,6 +21,7 @@ namespace API.Controllers
         private readonly ILessonPlannerDocumentService _documentService;
         private readonly IWebHostEnvironment _environment;
         private readonly ICoinService _coinService;
+        private const int LessonGenerationCoinCost = 50;
 
         public LessonPlannerController(
             ILessonPlannerService lessonPlannerService,
@@ -95,12 +96,71 @@ namespace API.Controllers
                 return BadRequest(new { success = false, message = "Invalid data.", errors = ModelState });
             }
             var userId = GetCurrentUserId();
-            var created = await _lessonPlannerService.CreateLessonPlannerAsync(request, userId);
-            return CreatedAtAction(
-                nameof(GetById),
-                new { id = created.Id },
-                new { success = true, data = created, message = "Lesson planner created successfully." }
-            );
+            LessonPlannerResponse created = null;
+
+            try
+            {
+                var currentBalance = await _coinService.GetUserCoinBalance(userId);
+                if (currentBalance < LessonGenerationCoinCost)
+                {
+                    return BadRequest(new
+                    {
+                        success = false,
+                        message = $"Insufficient coins. You need {LessonGenerationCoinCost} coins to save a lesson plan.",
+                        coinBalance = currentBalance
+                    });
+                }
+
+                created = await _lessonPlannerService.CreateLessonPlannerAsync(request, userId);
+
+                var deductionSucceeded = await _coinService.DeductCoinsForLessonGeneration(userId);
+                if (!deductionSucceeded)
+                {
+                    await _lessonPlannerService.DeleteLessonPlannerAsync(created.Id, userId);
+                    var refreshedBalance = await _coinService.GetUserCoinBalance(userId);
+                    return BadRequest(new
+                    {
+                        success = false,
+                        message = "Unable to deduct coins. Please refresh your balance and try again.",
+                        coinBalance = refreshedBalance
+                    });
+                }
+
+                var newBalance = await _coinService.GetUserCoinBalance(userId);
+
+                return CreatedAtAction(
+                    nameof(GetById),
+                    new { id = created.Id },
+                    new
+                    {
+                        success = true,
+                        data = created,
+                        newBalance,
+                        message = "Lesson planner created successfully."
+                    }
+                );
+            }
+            catch (Exception ex)
+            {
+                if (created != null)
+                {
+                    try
+                    {
+                        await _lessonPlannerService.DeleteLessonPlannerAsync(created.Id, userId);
+                    }
+                    catch
+                    {
+                        // Suppress secondary errors during cleanup to surface the original failure.
+                    }
+                }
+
+                return StatusCode(500, new
+                {
+                    success = false,
+                    message = "An unexpected error occurred while creating the lesson planner.",
+                    detail = ex.Message
+                });
+            }
         }
 
         [HttpPut("{id}")]
