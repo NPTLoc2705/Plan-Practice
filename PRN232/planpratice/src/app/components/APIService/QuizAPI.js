@@ -240,6 +240,33 @@ export class QuizAPI {
         const text = await res.text();
         return text ? JSON.parse(text) : null;
     }
+
+    static async generateQuizWithAI(data) {
+        try {
+            const response = await fetch(`${API_BASE_URL}/quiz/generate-with-ai`, {
+                method: 'POST',
+                headers: headers(),
+                body: JSON.stringify(data),
+            });
+
+            if (!response.ok) {
+                const error = await response.json().catch(() => ({}));
+                throw new Error(error.message || error.error || 'Failed to generate quiz with AI');
+            }
+
+            const result = await response.json();
+
+            // Transform response to match expected format
+            return {
+                success: result.success !== false, // Default to true if not specified
+                data: result.data || result,
+                message: result.message || 'Quiz generated successfully with AI',
+            };
+        } catch (error) {
+            console.error('Error in generateQuizWithAI:', error);
+            throw error;
+        }
+    }
 }
 
 export default QuizAPI;

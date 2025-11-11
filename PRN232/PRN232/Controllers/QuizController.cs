@@ -1,4 +1,5 @@
 using BusinessObject.Dtos;
+using BusinessObject.Dtos.Quiz;
 using BusinessObject.Lesson;
 using BusinessObject.Quiz;
 using Microsoft.AspNetCore.Authorization;
@@ -222,6 +223,96 @@ namespace PRN232.Controllers
             catch (Exception ex)
             {
                 return StatusCode(500, new { message = "An error occurred while retrieving teacher quizzes", error = ex.Message });
+            }
+        }
+
+
+        //============================================AI============================================//
+
+        [Authorize]
+        [HttpPost("generate-with-ai")]
+        public async Task<IActionResult> CreateQuizWithAI([FromBody] GenerateQuizDto dto)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                    return BadRequest(new
+                    {
+                        success = false,
+                        message = "Invalid input data",
+                        errors = ModelState.Values
+                            .SelectMany(v => v.Errors)
+                            .Select(e => e.ErrorMessage)
+                    });
+
+                var quiz = await _quizService.CreateQuizWithAIAsync(
+                    dto.LessonPlannerId,
+                    dto.Title,
+                    dto.Description,
+                    dto.NumberOfQuestions
+                );
+
+                return CreatedAtAction(
+                    nameof(GetQuiz),
+                    new { id = quiz.Id },
+                    new
+                    {
+                        success = true,
+                        message = "Quiz generated successfully by AI",
+                        data = new
+                        {
+                            quiz.Id,
+                            quiz.Title,
+                            quiz.Description,
+                            quiz.CreatedAt,
+                            quiz.LessonPlannerId,
+                            questionsCount = quiz.Questions.Count,
+                            questions = quiz.Questions.Select(q => new
+                            {
+                                q.Id,
+                                q.Content,
+                                answersCount = q.Answers.Count,
+                                answers = q.Answers.Select(a => new
+                                {
+                                    a.Id,
+                                    a.Content,
+                                    a.IsCorrect
+                                })
+                            })
+                        }
+                    }
+                );
+            }
+            catch (ArgumentException ex)
+            {
+                // Input validation errors
+                return BadRequest(new
+                {
+                    success = false,
+                    message = "Invalid input",
+                    error = ex.Message
+                });
+            }
+            catch (InvalidOperationException ex)
+            {
+                // AI validation errors
+                return BadRequest(new
+                {
+                    success = false,
+                    message = "AI validation failed",
+                    error = ex.Message,
+                    hint = "The AI could not generate a valid quiz. Please check your lesson content or try again."
+                });
+            }
+            catch (Exception ex)
+            {
+                // Other errors (database, network, etc.)
+                return StatusCode(500, new
+                {
+                    success = false,
+                    message = "An error occurred while generating the quiz",
+                    error = ex.Message
+                });
             }
         }
     }

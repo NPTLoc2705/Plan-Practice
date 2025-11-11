@@ -259,7 +259,7 @@ const EditQuiz = () => {
                                 />
                             </div>
 
-                            <div>
+                            {/* <div>
                                 <label className="block text-sm font-semibold text-gray-700 mb-2">
                                     Lesson Planner ID
                                 </label>
@@ -271,7 +271,7 @@ const EditQuiz = () => {
                                     className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 focus:border-teal-500 focus:outline-none transition-colors"
                                     placeholder="Enter lesson planner ID..."
                                 />
-                            </div>
+                            </div> */}
                         </div>
 
                         <div>

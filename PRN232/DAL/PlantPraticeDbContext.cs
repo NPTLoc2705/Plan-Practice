@@ -38,7 +38,6 @@ namespace DAL
 
         public DbSet<QuizOTP> QuizOTPs { get; set; }
 
-        public DbSet<QuizOTPAccess> QuizOTPAccesses {  get; set; }
         //TEST
         public DbSet<Unit> Units { get; set; }
         public DbSet<LessonDefinition> LessonDefinitions { get; set; }
@@ -212,11 +211,7 @@ namespace DAL
                 entity.Property(e => e.UsageCount)
                     .HasDefaultValue(0);
 
-                // Quan hệ 1 QuizOTP - N QuizOTPAccess
-                entity.HasMany(e => e.AccessLogs)
-                    .WithOne(a => a.OTP)
-                    .HasForeignKey(a => a.OTPId)
-                    .OnDelete(DeleteBehavior.Cascade);
+               
 
                 // Quan hệ 1 User (teacher) - N QuizOTP
                 entity.HasOne(e => e.CreatedByTeacher)
@@ -236,32 +231,7 @@ namespace DAL
             });
 
 
-            // QuizOTPAccess entity configuration
-            modelBuilder.Entity<QuizOTPAccess>(entity =>
-            {
-                entity.HasKey(e => e.Id);
-                entity.Property(e => e.Id).ValueGeneratedOnAdd();
-
-         
-
-                // Quan hệ N QuizOTPAccess - 1 QuizOTP
-                entity.HasOne(e => e.OTP)
-                    .WithMany(o => o.AccessLogs)
-                    .HasForeignKey(e => e.OTPId)
-                    .OnDelete(DeleteBehavior.Cascade);
-
-                // Quan hệ N QuizOTPAccess - 1 User (Student)
-                entity.HasOne(e => e.Student)
-                    .WithMany() // nếu không có navigation trong User
-                    .HasForeignKey(e => e.StudentId)
-                    .OnDelete(DeleteBehavior.Cascade);
-
-                // Index giúp tìm theo OTP hoặc Student nhanh hơn
-                entity.HasIndex(e => new { e.OTPId, e.StudentId })
-                    .HasDatabaseName("IX_QuizOTPAccess_OTP_Student");
-
-               
-            });
+            
 
 
             // Quiz relationships

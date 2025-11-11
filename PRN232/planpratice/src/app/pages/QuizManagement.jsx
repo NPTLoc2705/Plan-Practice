@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { QuizAPI } from '../components/APIService/QuizAPI';
 import { LessonPlannerAPI } from '../components/APIService/LessonPlannerAPI';
-import { Plus, Edit, Trash2, FileQuestion, AlertCircle, CheckCircle, BookOpen, ChevronDown, Save } from 'lucide-react';
+import { Plus, Edit, Trash2, FileQuestion, AlertCircle, CheckCircle, BookOpen, ChevronDown, Save, Sparkles, Zap } from 'lucide-react';
 import './output.css';
 
 const QuizManagement = () => {
@@ -13,6 +13,14 @@ const QuizManagement = () => {
     const [error, setError] = useState(null);
     const [deleteSuccess, setDeleteSuccess] = useState('');
     const [dropdownOpen, setDropdownOpen] = useState(false);
+    
+    // ========== BỔ SUNG: AI STATE ==========
+    const [aiLoading, setAiLoading] = useState(false);
+    const [showAIModal, setShowAIModal] = useState(false);
+    const [aiQuestionCount, setAiQuestionCount] = useState(5);
+    const [aiQuizTitle, setAiQuizTitle] = useState('');
+    const [aiQuizDescription, setAiQuizDescription] = useState('');
+    
     const navigate = useNavigate();
 
     // Fetch lesson planners on component mount
@@ -22,7 +30,6 @@ const QuizManagement = () => {
                 const result = await LessonPlannerAPI.getMyLessonPlanners();
                 if (result.success && Array.isArray(result.data)) {
                     setLessonPlanners(result.data);
-                    // Auto-select first lesson planner if available
                     if (result.data.length > 0) {
                         setSelectedLessonPlanner(result.data[0]);
                     }
@@ -60,7 +67,61 @@ const QuizManagement = () => {
     const handleLessonPlannerSelect = (planner) => {
         setSelectedLessonPlanner(planner);
         setDropdownOpen(false);
-        setError(null); // Clear any previous errors
+        setError(null);
+        // Reset AI form when changing lesson planner
+        setAiQuizTitle('');
+        setAiQuizDescription('');
+    };
+
+    // ========== BỔ SUNG: AI GENERATION FUNCTION ==========
+    const handleAIGenerate = async () => {
+        if (!selectedLessonPlanner) {
+            setError('Please select a lesson planner first.');
+            return;
+        }
+
+        setAiLoading(true);
+        setError('');
+        setDeleteSuccess('');
+        setShowAIModal(false);
+
+        try {
+            const aiPayload = {
+                lessonPlannerId: selectedLessonPlanner.id,
+                title: aiQuizTitle || `AI Quiz for ${selectedLessonPlanner.title}`,
+                description: aiQuizDescription || 'Auto-generated quiz from lesson content',
+                numberOfQuestions: aiQuestionCount,
+            };
+
+            const response = await QuizAPI.generateQuizWithAI(aiPayload);
+
+            if (response.success && response.data) {
+                setDeleteSuccess(`✨ Successfully generated quiz with ${response.data.questionsCount || aiQuestionCount} questions!`);
+                
+                // Refresh quiz list
+                const updatedQuizzes = await QuizAPI.getQuizzesByLessonPlannerId(selectedLessonPlanner.id);
+                setQuizzes(updatedQuizzes);
+
+                // Reset form
+                setAiQuizTitle('');
+                setAiQuizDescription('');
+                setAiQuestionCount(5);
+
+                // Auto-dismiss success message after 5 seconds
+                setTimeout(() => setDeleteSuccess(''), 5000);
+
+                // Optional: Navigate to edit the newly created quiz
+                // navigate(`/teacher/quiz/edit/${response.data.id}`);
+            } else {
+                throw new Error(response.message || 'Failed to generate quiz');
+            }
+        } catch (err) {
+            console.error('Error generating quiz with AI:', err);
+            setError(err.message || 'Failed to generate quiz with AI. Please try again.');
+            setTimeout(() => setError(null), 5000);
+        } finally {
+            setAiLoading(false);
+        }
     };
 
     const handleEdit = (quizId) => {
@@ -82,7 +143,6 @@ const QuizManagement = () => {
     };
 
     const handleCreate = () => {
-        // Pass the selected lesson planner ID to the create page if needed
         const createUrl = selectedLessonPlanner
             ? `/teacher/quiz/create?lessonPlannerId=${selectedLessonPlanner.id}`
             : '/teacher/quiz/create';
@@ -114,13 +174,36 @@ const QuizManagement = () => {
                                 </p>
                             </div>
                         </div>
-                        <button
-                            onClick={handleCreate}
-                            disabled={!selectedLessonPlanner}
-                            className="px-6 py-3 bg-gradient-to-r from-teal-500 to-emerald-500 text-white rounded-xl hover:from-teal-600 hover:to-emerald-600 transition-all flex items-center gap-2 font-medium shadow-lg shadow-teal-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                            <Plus className="w-5 h-5" /> Create Quiz
-                        </button>
+                        
+                        {/* ========== BỔ SUNG: NÚT CREATE VÀ AI ========== */}
+                        <div className="flex gap-3">
+                            {/* Nút Generate with AI */}
+                            <button
+                                onClick={() => setShowAIModal(true)}
+                                disabled={!selectedLessonPlanner || aiLoading}
+                                className="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl hover:from-purple-600 hover:to-pink-600 transition-all flex items-center gap-2 font-medium shadow-lg shadow-purple-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                {aiLoading ? (
+                                    <>
+                                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                        Generating...
+                                    </>
+                                ) : (
+                                    <>
+                                        <Sparkles className="w-5 h-5" /> Generate with AI
+                                    </>
+                                )}
+                            </button>
+
+                            {/* Nút Create Manual */}
+                            <button
+                                onClick={handleCreate}
+                                disabled={!selectedLessonPlanner}
+                                className="px-6 py-3 bg-gradient-to-r from-teal-500 to-emerald-500 text-white rounded-xl hover:from-teal-600 hover:to-emerald-600 transition-all flex items-center gap-2 font-medium shadow-lg shadow-teal-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                <Plus className="w-5 h-5" /> Create Quiz
+                            </button>
+                        </div>
                     </div>
 
                     {/* Lesson Planner Selection */}
@@ -168,6 +251,20 @@ const QuizManagement = () => {
                         </div>
                     </div>
 
+                    {/* ========== AI LOADING STATE ========== */}
+                    {aiLoading && (
+                        <div className="mt-6 bg-purple-50 border-2 border-purple-200 rounded-xl p-6 flex items-center gap-4">
+                            <div className="relative">
+                                <Sparkles className="w-8 h-8 text-purple-500 animate-pulse" />
+                                <div className="absolute inset-0 w-8 h-8 border-4 border-purple-300 border-t-transparent rounded-full animate-spin" />
+                            </div>
+                            <div>
+                                <p className="text-purple-800 font-semibold">AI is generating your quiz...</p>
+                                <p className="text-purple-600 text-sm">This may take 5-15 seconds. Please wait.</p>
+                            </div>
+                        </div>
+                    )}
+
                     {/* Success Message */}
                     {deleteSuccess && (
                         <div className="mt-4 bg-emerald-50 border-l-4 border-emerald-500 rounded-lg p-4 flex items-center gap-3">
@@ -201,12 +298,20 @@ const QuizManagement = () => {
                         <FileQuestion className="w-20 h-20 mx-auto mb-4 text-gray-300" />
                         <h3 className="text-xl font-semibold text-gray-700 mb-2">No quizzes for this lesson planner</h3>
                         <p className="text-gray-500 mb-6">Create your first quiz for "{selectedLessonPlanner.title}"!</p>
-                        <button
-                            onClick={handleCreate}
-                            className="px-6 py-3 bg-gradient-to-r from-teal-500 to-emerald-500 text-white rounded-xl hover:from-teal-600 hover:to-emerald-600 transition-all inline-flex items-center gap-2 font-medium shadow-lg shadow-teal-200"
-                        >
-                            <Plus className="w-5 h-5" /> Create First Quiz
-                        </button>
+                        <div className="flex justify-center gap-3">
+                            <button
+                                onClick={() => setShowAIModal(true)}
+                                className="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl hover:from-purple-600 hover:to-pink-600 transition-all inline-flex items-center gap-2 font-medium shadow-lg shadow-purple-200"
+                            >
+                                <Sparkles className="w-5 h-5" /> Generate with AI
+                            </button>
+                            <button
+                                onClick={handleCreate}
+                                className="px-6 py-3 bg-gradient-to-r from-teal-500 to-emerald-500 text-white rounded-xl hover:from-teal-600 hover:to-emerald-600 transition-all inline-flex items-center gap-2 font-medium shadow-lg shadow-teal-200"
+                            >
+                                <Plus className="w-5 h-5" /> Create Manually
+                            </button>
+                        </div>
                     </div>
                 ) : (
                     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -287,17 +392,115 @@ const QuizManagement = () => {
                                     Quizzes in "{selectedLessonPlanner.title}": <span className="text-gray-800">{quizzes.length}</span>
                                 </span>
                             </div>
-                            <button
-                                onClick={handleCreate}
-                                className="text-teal-600 hover:text-teal-700 font-medium flex items-center gap-1.5"
-                            >
-                                <Plus className="w-4 h-4" />
-                                Add More
-                            </button>
+                            <div className="flex gap-3">
+                                <button
+                                    onClick={() => setShowAIModal(true)}
+                                    className="text-purple-600 hover:text-purple-700 font-medium flex items-center gap-1.5"
+                                >
+                                    <Sparkles className="w-4 h-4" />
+                                    Generate with AI
+                                </button>
+                                <button
+                                    onClick={handleCreate}
+                                    className="text-teal-600 hover:text-teal-700 font-medium flex items-center gap-1.5"
+                                >
+                                    <Plus className="w-4 h-4" />
+                                    Add Manually
+                                </button>
+                            </div>
                         </div>
                     </div>
                 )}
             </div>
+
+            {/* ========== AI MODAL ========== */}
+            {showAIModal && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                    <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-8 animate-in fade-in zoom-in duration-200">
+                        <div className="flex items-center gap-3 mb-6">
+                            <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center">
+                                <Zap className="w-6 h-6 text-white" />
+                            </div>
+                            <h3 className="text-2xl font-bold text-gray-800">Generate Quiz with AI</h3>
+                        </div>
+
+                        <div className="bg-purple-50 border-l-4 border-purple-500 rounded-lg p-4 mb-6">
+                            <p className="text-purple-800 text-sm">
+                                <strong>✨ AI will analyze:</strong> "{selectedLessonPlanner?.title}"
+                            </p>
+                            <p className="text-purple-700 text-xs mt-1">
+                                and automatically create quiz with questions & answers!
+                            </p>
+                        </div>
+
+                        <div className="space-y-4 mb-6">
+                            <div>
+                                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                    Quiz Title (Optional)
+                                </label>
+                                <input
+                                    type="text"
+                                    value={aiQuizTitle}
+                                    onChange={(e) => setAiQuizTitle(e.target.value)}
+                                    placeholder={`AI Quiz for ${selectedLessonPlanner?.title}`}
+                                    className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 focus:border-purple-500 focus:outline-none transition-colors"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                    Description (Optional)
+                                </label>
+                                <textarea
+                                    value={aiQuizDescription}
+                                    onChange={(e) => setAiQuizDescription(e.target.value)}
+                                    placeholder="Auto-generated quiz from lesson content"
+                                    rows={3}
+                                    className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 focus:border-purple-500 focus:outline-none transition-colors resize-none"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                    Number of Questions
+                                </label>
+                                <input
+                                    type="number"
+                                    min="1"
+                                    max="20"
+                                    value={aiQuestionCount}
+                                    onChange={(e) => setAiQuestionCount(parseInt(e.target.value) || 5)}
+                                    className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 focus:border-purple-500 focus:outline-none transition-colors text-lg font-semibold text-center"
+                                />
+                                <p className="text-xs text-gray-500 mt-2 text-center">Choose between 1-20 questions</p>
+                            </div>
+                        </div>
+
+                        <div className="flex gap-3">
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setShowAIModal(false);
+                                    setAiQuizTitle('');
+                                    setAiQuizDescription('');
+                                    setAiQuestionCount(5);
+                                }}
+                                className="flex-1 px-4 py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-all font-medium"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                type="button"
+                                onClick={handleAIGenerate}
+                                className="flex-1 px-4 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl hover:from-purple-600 hover:to-pink-600 transition-all flex items-center justify-center gap-2 font-medium shadow-lg shadow-purple-200"
+                            >
+                                <Sparkles className="w-5 h-5" />
+                                Generate Now
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

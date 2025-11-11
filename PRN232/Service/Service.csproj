@@ -7,6 +7,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Google.GenAI" Version="0.4.0" />
+    <PackageReference Include="Google_GenerativeAI" Version="3.4.0" />
     <PackageReference Include="MailKit" Version="4.13.0" />
     <PackageReference Include="payOS" Version="1.0.9" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.14.0" />

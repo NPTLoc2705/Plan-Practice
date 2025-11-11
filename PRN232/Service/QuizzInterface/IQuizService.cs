@@ -18,6 +18,10 @@ namespace Service.QuizzInterface
         Task<TeacherDashboardDto> GetTeacherDashboardStatsAsync(int teacherId);
         Task<IEnumerable<Quizs>> GetQuizzesByTeacherAsync(int teacherId);
 
+        //=========================AI====================================//
+
+        Task<Quizs> CreateQuizWithAIAsync(int lessonPlannerId, string title, string description, int numberOfQuestions);
+
 
     }
 }

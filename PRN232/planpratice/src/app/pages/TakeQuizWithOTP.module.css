@@ -178,6 +178,7 @@
   transition: all 0.2s ease;
   font-weight: 500;
   background: white;
+  color: black
 }
 
 .answerOption:hover {
