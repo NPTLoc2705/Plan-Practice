@@ -1,3 +1,4 @@
+using BusinessObject;
 using BusinessObject.Dtos;
 using BusinessObject.Dtos.Quiz;
 using BusinessObject.Lesson;
@@ -5,6 +6,7 @@ using BusinessObject.Quiz;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MimeKit;
+using Service.Interface;
 using Service.QuizzInterface;
 using System;
 using System.Collections.Generic;
@@ -19,10 +21,13 @@ namespace PRN232.Controllers
     public class QuizController : ControllerBase
     {
         private readonly IQuizService _quizService;
+        private readonly ICoinService _coinService;
+        private const int AIGenerationCoinCost = 50;
 
-        public QuizController(IQuizService quizService)
+        public QuizController(IQuizService quizService, ICoinService coin)
         {
             _quizService = quizService;
+            _coinService = coin;
         }
 
         [HttpGet]
@@ -233,84 +238,132 @@ namespace PRN232.Controllers
         [HttpPost("generate-with-ai")]
         public async Task<IActionResult> CreateQuizWithAI([FromBody] GenerateQuizDto dto)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(new
+                {
+                    success = false,
+                    message = "Invalid input data",
+                    errors = ModelState.Values
+                        .SelectMany(v => v.Errors)
+                        .Select(e => e.ErrorMessage)
+                });
+            }
+
+            var idClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (!int.TryParse(idClaim, out var userId))
+            {
+                return Unauthorized(new { message = "Invalid user authentication" });
+            }
+
             try
             {
-                if (!ModelState.IsValid)
+                var currentBalance = await _coinService.GetUserCoinBalance(userId);
+                if (currentBalance < AIGenerationCoinCost)
+                {
                     return BadRequest(new
                     {
                         success = false,
-                        message = "Invalid input data",
-                        errors = ModelState.Values
-                            .SelectMany(v => v.Errors)
-                            .Select(e => e.ErrorMessage)
+                        message = $"Insufficient coins. You need {AIGenerationCoinCost} coins to generate AI quiz.",
+                        coinBalance = currentBalance
                     });
+                }
 
-                var quiz = await _quizService.CreateQuizWithAIAsync(
-                    dto.LessonPlannerId,
-                    dto.Title,
-                    dto.Description,
-                    dto.NumberOfQuestions
-                );
-
-                return CreatedAtAction(
-                    nameof(GetQuiz),
-                    new { id = quiz.Id },
-                    new
+                var deductionSucceeded = await _coinService.DeductCoinsForLessonGeneration(userId);
+                if (!deductionSucceeded)
+                {
+                    var refreshedBalance = await _coinService.GetUserCoinBalance(userId);
+                    return BadRequest(new
                     {
-                        success = true,
-                        message = "Quiz generated successfully by AI",
-                        data = new
+                        success = false,
+                        message = "Unable to deduct coins. Please refresh your balance and try again.",
+                        coinBalance = refreshedBalance
+                    });
+                }
+
+             //   QuizResponse quiz = null;
+
+                try
+                {
+                   var  quiz = await _quizService.CreateQuizWithAIAsync(
+                        dto.LessonPlannerId,
+                        dto.Title,
+                        dto.Description,
+                        dto.NumberOfQuestions
+                    );
+
+                    var newBalance = await _coinService.GetUserCoinBalance(userId);
+
+                    return CreatedAtAction(
+                        nameof(GetQuiz),
+                        new { id = quiz.Id },
+                        new
                         {
-                            quiz.Id,
-                            quiz.Title,
-                            quiz.Description,
-                            quiz.CreatedAt,
-                            quiz.LessonPlannerId,
-                            questionsCount = quiz.Questions.Count,
-                            questions = quiz.Questions.Select(q => new
+                            success = true,
+                            message = "Quiz generated successfully by AI.",
+                            newBalance,
+                            data = new
                             {
-                                q.Id,
-                                q.Content,
-                                answersCount = q.Answers.Count,
-                                answers = q.Answers.Select(a => new
+                                quiz.Id,
+                                quiz.Title,
+                                quiz.Description,
+                                quiz.CreatedAt,
+                                quiz.LessonPlannerId,
+                                questionsCount = quiz.Questions.Count,
+                                questions = quiz.Questions.Select(q => new
                                 {
-                                    a.Id,
-                                    a.Content,
-                                    a.IsCorrect
+                                    q.Id,
+                                    q.Content,
+                                    answersCount = q.Answers.Count,
+                                    answers = q.Answers.Select(a => new
+                                    {
+                                        a.Id,
+                                        a.Content,
+                                        a.IsCorrect
+                                    })
                                 })
-                            })
+                            }
                         }
-                    }
-                );
-            }
-            catch (ArgumentException ex)
-            {
-                // Input validation errors
-                return BadRequest(new
+                    );
+                }
+                catch (InvalidOperationException ex)
                 {
-                    success = false,
-                    message = "Invalid input",
-                    error = ex.Message
-                });
-            }
-            catch (InvalidOperationException ex)
-            {
-                // AI validation errors
-                return BadRequest(new
+                    await _coinService.RefundCoins(userId, AIGenerationCoinCost);
+                    return BadRequest(new
+                    {
+                        success = false,
+                        message = "AI validation failed.",
+                        error = ex.Message,
+                        hint = "The AI could not generate a valid quiz. Please check your lesson content or try again."
+                    });
+                }
+                catch (ArgumentException ex)
                 {
-                    success = false,
-                    message = "AI validation failed",
-                    error = ex.Message,
-                    hint = "The AI could not generate a valid quiz. Please check your lesson content or try again."
-                });
+                    await _coinService.RefundCoins(userId, AIGenerationCoinCost);
+                    return BadRequest(new
+                    {
+                        success = false,
+                        message = "Invalid input.",
+                        error = ex.Message
+                    });
+                }
+                catch (Exception ex)
+                {
+                    await _coinService.RefundCoins(userId, AIGenerationCoinCost);
+                    return StatusCode(500, new
+                    {
+                        success = false,
+                        message = "An unexpected error occurred while generating the quiz.",
+                        error = ex.Message
+                    });
+                }
             }
             catch (Exception ex)
             {
-                // Other errors (database, network, etc.)
                 return StatusCode(500, new
                 {
                     success = false,
-                    message = "An error occurred while generating the quiz",
+                    message = "An error occurred before generating the quiz.",
                     error = ex.Message
                 });
             }

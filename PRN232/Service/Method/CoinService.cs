@@ -55,7 +55,31 @@ namespace Service.Method
                 throw;
             }
         }
+        public async Task<bool> RefundCoins(int userId, int amount)
+        {
+            try
+            {
+                var user = await _userRepo.GetUserById(userId);
+                if (user == null)
+                {
+                    _logger.LogWarning("Cannot refund: User not found: UserId={UserId}", userId);
+                    return false;
+                }
 
+                user.CoinBalance += amount;
+                await _userRepo.UpdateAsync(user);
+
+                _logger.LogInformation("Coins refunded: UserId={UserId}, Amount={Amount}, NewBalance={NewBalance}",
+                    userId, amount, user.CoinBalance);
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error refunding coins for UserId={UserId}, Amount={Amount}", userId, amount);
+                throw;
+            }
+        }
         public async Task<int> GetUserCoinBalance(int userId)
         {
             try
