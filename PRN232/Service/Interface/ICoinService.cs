@@ -10,5 +10,6 @@ namespace Service.Interface
     {
         Task<bool> DeductCoinsForLessonGeneration(int userId);
         Task<int> GetUserCoinBalance(int userId);
+        Task<bool> RefundCoins(int userId, int amount);
     }
 }
