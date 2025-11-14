@@ -125,25 +125,51 @@ export default function App() {
   const [objectiveTemplates, setObjectiveTemplates] = useState([]);
   const [selectedObjectives, setSelectedObjectives] = useState([]);
   const [objectiveToAdd, setObjectiveToAdd] = useState('');
+  const [newObjectiveName, setNewObjectiveName] = useState('');
+  const [newObjectiveContent, setNewObjectiveContent] = useState('');
+  const [showNewObjectiveForm, setShowNewObjectiveForm] = useState(false);
+  
   const [skillTemplates, setSkillTemplates] = useState([]);
   const [selectedSkills, setSelectedSkills] = useState([]);
   const [skillToAdd, setSkillToAdd] = useState('');
+  const [newSkillName, setNewSkillName] = useState('');
+  const [newSkillDescription, setNewSkillDescription] = useState('');
+  const [showNewSkillForm, setShowNewSkillForm] = useState(false);
+  
   const [attitudeTemplates, setAttitudeTemplates] = useState([]);
   const [selectedAttitudes, setSelectedAttitudes] = useState([]);
   const [attitudeToAdd, setAttitudeToAdd] = useState('');
+  const [newAttitudeContent, setNewAttitudeContent] = useState('');
+  const [showNewAttitudeForm, setShowNewAttitudeForm] = useState(false);
+  
   const [languageFocusTypes, setLanguageFocusTypes] = useState([]);
   const [languageFocus, setLanguageFocus] = useState([
     { typeId: null, content: '' },
   ]);
+  const [newLanguageFocusTypeName, setNewLanguageFocusTypeName] = useState('');
+  const [showNewLanguageFocusTypeForm, setShowNewLanguageFocusTypeForm] = useState(false);
+  
   const [preparationTemplates, setPreparationTemplates] = useState([]);
   const [selectedPreparations, setSelectedPreparations] = useState([]);
   const [preparationToAdd, setPreparationToAdd] = useState('');
+  const [newPreparationName, setNewPreparationName] = useState('');
+  const [newPreparationDescription, setNewPreparationDescription] = useState('');
+  const [showNewPreparationForm, setShowNewPreparationForm] = useState(false);
+  
   const [methodTemplates, setMethodTemplates] = useState([]);
   const [selectedMethod, setSelectedMethod] = useState('');
   const [coinBalance, setCoinBalance] = useState(null);
   const [isCheckingCoins, setIsCheckingCoins] = useState(false);
+  
   const [activityTemplates, setActivityTemplates] = useState([]);
+  const [newActivityName, setNewActivityName] = useState('');
+  const [newActivityContent, setNewActivityContent] = useState('');
+  const [showNewActivityForm, setShowNewActivityForm] = useState(false);
+  
   const [interactionPatterns, setInteractionPatterns] = useState([]);
+  const [newInteractionName, setNewInteractionName] = useState('');
+  const [newInteractionShortCode, setNewInteractionShortCode] = useState('');
+  const [showNewInteractionForm, setShowNewInteractionForm] = useState(false);
   const [activities, setActivities] = useState([
     {
       stageName: 'Warm up',
@@ -178,6 +204,25 @@ export default function App() {
     setSelectedObjectives(selectedObjectives.filter(id => id !== objId));
   };
 
+  const handleCreateNewObjective = () => {
+    if (!newObjectiveName.trim() || !newObjectiveContent.trim()) {
+      setMessage('❌ Please fill in both name and content for the new objective');
+      return;
+    }
+    const newId = Math.max(...objectiveTemplates.map(o => o.id), 0) + 1;
+    const newObjective = {
+      id: newId,
+      name: newObjectiveName.trim(),
+      content: newObjectiveContent.trim()
+    };
+    setObjectiveTemplates([...objectiveTemplates, newObjective]);
+    setSelectedObjectives([...selectedObjectives, newId]);
+    setNewObjectiveName('');
+    setNewObjectiveContent('');
+    setShowNewObjectiveForm(false);
+    setMessage('✅ New objective created and added!');
+  };
+
   // Step 3: Add Skill
   const handleAddSkill = (templateId) => {
     if (!templateId || selectedSkills.includes(parseInt(templateId))) return;
@@ -189,6 +234,25 @@ export default function App() {
     setSelectedSkills(selectedSkills.filter(id => id !== skillId));
   };
 
+  const handleCreateNewSkill = () => {
+    if (!newSkillName.trim() || !newSkillDescription.trim()) {
+      setMessage('❌ Please fill in both name and description for the new skill');
+      return;
+    }
+    const newId = Math.max(...skillTemplates.map(s => s.id), 0) + 1;
+    const newSkill = {
+      id: newId,
+      name: newSkillName.trim(),
+      description: newSkillDescription.trim()
+    };
+    setSkillTemplates([...skillTemplates, newSkill]);
+    setSelectedSkills([...selectedSkills, newId]);
+    setNewSkillName('');
+    setNewSkillDescription('');
+    setShowNewSkillForm(false);
+    setMessage('✅ New skill created and added!');
+  };
+
   // Step 4: Add Attitude
   const handleAddAttitude = (templateId) => {
     if (!templateId || selectedAttitudes.includes(parseInt(templateId))) return;
@@ -198,6 +262,24 @@ export default function App() {
 
   const handleRemoveAttitude = (attId) => {
     setSelectedAttitudes(selectedAttitudes.filter(id => id !== attId));
+  };
+
+  const handleCreateNewAttitude = () => {
+    if (!newAttitudeContent.trim()) {
+      setMessage('❌ Please fill in content for the new attitude');
+      return;
+    }
+    const newId = Math.max(...attitudeTemplates.map(a => a.id), 0) + 1;
+    const newAttitude = {
+      id: newId,
+      name: `Custom Attitude ${newId}`,
+      content: newAttitudeContent.trim()
+    };
+    setAttitudeTemplates([...attitudeTemplates, newAttitude]);
+    setSelectedAttitudes([...selectedAttitudes, newId]);
+    setNewAttitudeContent('');
+    setShowNewAttitudeForm(false);
+    setMessage('✅ New attitude created and added!');
   };
 
   // Step 4: Add Language Focus Item
@@ -216,6 +298,22 @@ export default function App() {
     setLanguageFocus(updated);
   };
 
+  const handleCreateNewLanguageFocusType = () => {
+    if (!newLanguageFocusTypeName.trim()) {
+      setMessage('❌ Please fill in name for the new language focus type');
+      return;
+    }
+    const newId = Math.max(...languageFocusTypes.map(t => t.id), 0) + 1;
+    const newType = {
+      id: newId,
+      name: newLanguageFocusTypeName.trim()
+    };
+    setLanguageFocusTypes([...languageFocusTypes, newType]);
+    setNewLanguageFocusTypeName('');
+    setShowNewLanguageFocusTypeForm(false);
+    setMessage('✅ New language focus type created!');
+  };
+
   // Step 5: Add Preparation
   const handleAddPreparation = (templateId) => {
     if (!templateId || selectedPreparations.some(p => p.id === parseInt(templateId))) return;
@@ -232,6 +330,28 @@ export default function App() {
 
   const handleRemovePreparation = (templateId) => {
     setSelectedPreparations(selectedPreparations.filter(p => p.id !== templateId));
+  };
+
+  const handleCreateNewPreparation = () => {
+    if (!newPreparationName.trim() || !newPreparationDescription.trim()) {
+      setMessage('❌ Please fill in both name and description for the new preparation');
+      return;
+    }
+    const newId = Math.max(...preparationTemplates.map(p => p.id), 0) + 1;
+    const newPreparation = {
+      id: newId,
+      name: newPreparationName.trim(),
+      description: newPreparationDescription.trim()
+    };
+    setPreparationTemplates([...preparationTemplates, newPreparation]);
+    setSelectedPreparations([
+      ...selectedPreparations,
+      { id: newId, name: newPreparation.name, materials: newPreparation.description }
+    ]);
+    setNewPreparationName('');
+    setNewPreparationDescription('');
+    setShowNewPreparationForm(false);
+    setMessage('✅ New preparation created and added!');
   };
 
   // Step 6: Add Stage
@@ -280,6 +400,44 @@ export default function App() {
     const updatedActivities = [...activities];
     updatedActivities[stageIndex].subActivities[subIndex][field] = value;
     setActivities(updatedActivities);
+  };
+
+  // Step 6: Create new Activity Template
+  const handleCreateNewActivity = () => {
+    if (!newActivityName.trim() || !newActivityContent.trim()) {
+      setMessage('❌ Please fill in both name and content for the new activity');
+      return;
+    }
+    const newId = Math.max(...activityTemplates.map(a => a.id), 0) + 1;
+    const newActivity = {
+      id: newId,
+      name: newActivityName.trim(),
+      content: newActivityContent.trim()
+    };
+    setActivityTemplates([...activityTemplates, newActivity]);
+    setNewActivityName('');
+    setNewActivityContent('');
+    setShowNewActivityForm(false);
+    setMessage('✅ New activity template created!');
+  };
+
+  // Step 6: Create new Interaction Pattern
+  const handleCreateNewInteraction = () => {
+    if (!newInteractionName.trim() || !newInteractionShortCode.trim()) {
+      setMessage('❌ Please fill in both name and short code for the new interaction pattern');
+      return;
+    }
+    const newId = Math.max(...interactionPatterns.map(i => i.id), 0) + 1;
+    const newInteraction = {
+      id: newId,
+      name: newInteractionName.trim(),
+      shortCode: newInteractionShortCode.trim()
+    };
+    setInteractionPatterns([...interactionPatterns, newInteraction]);
+    setNewInteractionName('');
+    setNewInteractionShortCode('');
+    setShowNewInteractionForm(false);
+    setMessage('✅ New interaction pattern created!');
   };
 
 
@@ -551,23 +709,33 @@ export default function App() {
         unitName: unitName,
         unitId: null,
         lessonDefinitionId: null,
-        methodTemplateId: selectedMethod ? parseInt(selectedMethod) : null,
+        ...(selectedMethod && {
+          methodTemplateId: parseInt(selectedMethod),
+          methodName: methodTemplates.find(m => m.id === parseInt(selectedMethod))?.name,
+          methodDescription: methodTemplates.find(m => m.id === parseInt(selectedMethod))?.description,
+        }),
 
         objectives: selectedObjectives.map((objId, index) => ({
           id: 0,
           objectiveTemplateId: objId,
+          name: objectiveTemplates.find(t => t.id === objId)?.name || '',
+          customContent: objectiveTemplates.find(t => t.id === objId)?.content || '',
           displayOrder: index + 1
         })),
 
         skills: selectedSkills.map((skillId, index) => ({
           id: 0,
           skillTemplateId: skillId,
+          name: skillTemplates.find(t => t.id === skillId)?.name || '',
+          description: skillTemplates.find(t => t.id === skillId)?.description || '',
           displayOrder: index + 1
         })),
 
         attitudes: selectedAttitudes.map((attId, index) => ({
           id: 0,
           attitudeTemplateId: attId,
+          name: attitudeTemplates.find(t => t.id === attId)?.name || '',
+          customContent: attitudeTemplates.find(t => t.id === attId)?.content || '',
           displayOrder: index + 1
         })),
 
@@ -577,12 +745,14 @@ export default function App() {
             id: 0,
             languageFocusTypeId: lf.typeId ? parseInt(lf.typeId) : null,
             content: lf.content,
+            name: lf.typeId ? languageFocusTypes.find(t => t.id === parseInt(lf.typeId))?.name || '' : 'Other',
             displayOrder: index + 1
           })),
 
         preparations: selectedPreparations.map((prep, index) => ({
           id: 0,
           preparationTypeId: prep.id,
+          name: prep.name,
           materials: prep.materials,
           displayOrder: index + 1
         })),
@@ -601,7 +771,11 @@ export default function App() {
               timeInMinutes: subActivity.timeInMinutes || 0,
               content: activityContent,
               interactionPatternId: subActivity.interactionPatternId ? parseInt(subActivity.interactionPatternId) : null,
+              interactionPatternName: subActivity.interactionPatternId ? interactionPatterns.find(p => p.id === parseInt(subActivity.interactionPatternId))?.name || '' : '',
+              interactionPatternShortCode: subActivity.interactionPatternId ? interactionPatterns.find(p => p.id === parseInt(subActivity.interactionPatternId))?.shortCode || '' : '',
               activityTemplateId: subActivity.activityTemplateId ? parseInt(subActivity.activityTemplateId) : null,
+              activityTemplateName: subActivity.activityTemplateId ? activityTemplates.find(t => t.id === parseInt(subActivity.activityTemplateId))?.name || '' : '',
+              activityTemplateContent: subActivity.activityTemplateId ? activityTemplates.find(t => t.id === parseInt(subActivity.activityTemplateId))?.content || '' : '',
               displayOrder: subIndex + 1
             };
           })
@@ -698,7 +872,73 @@ export default function App() {
   // ... (all JSX rendering code from return() is unchanged)
   const RichTextToolbar = () => (<div className="flex flex-wrap items-center p-3 border-b bg-gray-100 rounded-t-xl sticky top-0 z-10"> <button className="ml-auto flex items-center space-x-2 px-3 py-1.5 text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition shadow" onClick={handleSaveLesson}> <Save className="w-4 h-4" /> <span className="text-sm font-medium">Save Lesson</span> </button> </div>);
   const StepIndicator = () => (<div className="flex items-center justify-center mb-8"> {[1, 2, 3, 4, 5, 6].map((step) => (<React.Fragment key={step}> <div className={`flex flex-col items-center cursor-pointer ${step <= currentStep ? 'text-blue-600' : 'text-gray-400'}`} onClick={() => setCurrentStep(step)}> <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold transition-all duration-300 ${step < currentStep ? 'bg-green-500 text-white' : step === currentStep ? 'bg-blue-600 text-white scale-110' : 'bg-gray-300'}`}> {step < currentStep ? <CheckCircle2 className="w-6 h-6" /> : step} </div> <span className="text-xs mt-1 hidden sm:block"> {['Basic', 'Objectives', 'Skills', 'Attitudes', 'Prep', 'Activities'][step - 1]} </span> </div> {step < 6 && <div className={`h-1 w-12 sm:w-20 transition-all duration-500 ${step < currentStep ? 'bg-green-500' : 'bg-gray-300'}`} />} </React.Fragment>))} </div>);
-  const ItemSelector = ({ title, templates, selectedIds, onAdd, onRemove, selectedValue, onSelectChange }) => { const availableItems = templates.filter(t => !selectedIds.includes(t.id)); return (<div className="space-y-4"> <div className="flex items-center gap-2"> <select value={selectedValue} onChange={onSelectChange} className="w-full p-2 border border-gray-300 rounded-lg text-sm" disabled={availableItems.length === 0} > <option value="">{availableItems.length > 0 ? `Select a ${title.toLowerCase()}...` : `All ${title.toLowerCase()} added`}</option> {availableItems.map(item => (<option key={item.id} value={item.id}>{item.name}</option>))} </select> <button onClick={() => onAdd(selectedValue)} disabled={!selectedValue} className="px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed" > <Plus className="w-5 h-5" /> </button> </div> <div className="space-y-2"> {selectedIds.length > 0 ? (selectedIds.map(id => { const item = templates.find(t => t.id === id); if (!item) return null; return (<div key={id} className="flex items-center justify-between p-2 bg-gray-100 border rounded-lg animate-fade-in"> <div className="text-sm"> <p className="font-semibold">{item.name}</p> <p className="text-gray-600">{item.content || item.description}</p> </div> <button onClick={() => onRemove(id)} className="text-red-500 hover:text-red-700 p-1"> <X className="w-4 h-4" /> </button> </div>); })) : (<p className="text-sm text-gray-500 text-center py-2">No {title.toLowerCase()} added yet.</p>)} </div> </div>); }
+  
+  const ItemSelector = ({ title, templates, selectedIds, onAdd, onRemove, selectedValue, onSelectChange, showCreateForm, setShowCreateForm, createFormContent, onCreateNew }) => { 
+    const availableItems = templates.filter(t => !selectedIds.includes(t.id)); 
+    
+    return (
+      <div className="space-y-4"> 
+        <div className="flex items-center gap-2"> 
+          <select value={selectedValue} onChange={onSelectChange} className="w-full p-2 border border-gray-300 rounded-lg text-sm" disabled={availableItems.length === 0} > 
+            <option value="">{availableItems.length > 0 ? `Select a ${title.toLowerCase()}...` : `All ${title.toLowerCase()} added`}</option> 
+            {availableItems.map(item => (<option key={item.id} value={item.id}>{item.name}</option>))} 
+          </select> 
+          <button onClick={() => onAdd(selectedValue)} disabled={!selectedValue} className="px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed flex-shrink-0" > 
+            <Plus className="w-5 h-5" /> 
+          </button> 
+        </div>
+        
+        {/* Create New Button */}
+        {onCreateNew && (
+          <div>
+            {!showCreateForm ? (
+              <button
+                onClick={() => setShowCreateForm(true)}
+                className="w-full py-2 px-4 bg-green-100 text-green-800 rounded-lg hover:bg-green-200 flex items-center justify-center space-x-2"
+              >
+                <Plus className="w-4 h-4" />
+                <span>Create New {title}</span>
+              </button>
+            ) : (
+              <div className="p-4 border-2 border-green-300 rounded-lg bg-green-50 space-y-3">
+                {createFormContent}
+                <div className="flex gap-2">
+                  <button
+                    onClick={onCreateNew}
+                    className="flex-1 px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                  >
+                    Create & Add
+                  </button>
+                  <button
+                    onClick={() => setShowCreateForm(false)}
+                    className="px-3 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+        
+        <div className="space-y-2"> 
+          {selectedIds.length > 0 ? (selectedIds.map(id => { 
+            const item = templates.find(t => t.id === id); 
+            if (!item) return null; 
+            return (<div key={id} className="flex items-center justify-between p-2 bg-gray-100 border rounded-lg animate-fade-in"> 
+              <div className="text-sm"> 
+                <p className="font-semibold">{item.name}</p> 
+                <p className="text-gray-600">{item.content || item.description}</p> 
+              </div> 
+              <button onClick={() => onRemove(id)} className="text-red-500 hover:text-red-700 p-1"> 
+                <X className="w-4 h-4" /> 
+              </button> 
+            </div>); 
+          })) : (<p className="text-sm text-gray-500 text-center py-2">No {title.toLowerCase()} added yet.</p>)} 
+        </div> 
+      </div>
+    ); 
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 p-4 sm:p-8 font-['Inter']">
@@ -823,6 +1063,33 @@ export default function App() {
                     onRemove={handleRemoveObjective}
                     selectedValue={objectiveToAdd}
                     onSelectChange={(e) => setObjectiveToAdd(e.target.value)}
+                    showCreateForm={showNewObjectiveForm}
+                    setShowCreateForm={setShowNewObjectiveForm}
+                    onCreateNew={handleCreateNewObjective}
+                    createFormContent={
+                      <>
+                        <div>
+                          <label className="block text-sm font-semibold text-gray-700 mb-1">Objective Name</label>
+                          <input
+                            type="text"
+                            placeholder="e.g., Knowledge, Skills, Attitude"
+                            value={newObjectiveName}
+                            onChange={(e) => setNewObjectiveName(e.target.value)}
+                            className="w-full p-2 border border-gray-300 rounded-lg text-sm"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-semibold text-gray-700 mb-1">Content</label>
+                          <textarea
+                            rows="3"
+                            placeholder="Describe the objective..."
+                            value={newObjectiveContent}
+                            onChange={(e) => setNewObjectiveContent(e.target.value)}
+                            className="w-full p-2 border border-gray-300 rounded-lg text-sm"
+                          />
+                        </div>
+                      </>
+                    }
                   />
                 </div>
               )}
@@ -840,6 +1107,33 @@ export default function App() {
                     onRemove={handleRemoveSkill}
                     selectedValue={skillToAdd}
                     onSelectChange={(e) => setSkillToAdd(e.target.value)}
+                    showCreateForm={showNewSkillForm}
+                    setShowCreateForm={setShowNewSkillForm}
+                    onCreateNew={handleCreateNewSkill}
+                    createFormContent={
+                      <>
+                        <div>
+                          <label className="block text-sm font-semibold text-gray-700 mb-1">Skill Name</label>
+                          <input
+                            type="text"
+                            placeholder="e.g., Critical Thinking, Communication"
+                            value={newSkillName}
+                            onChange={(e) => setNewSkillName(e.target.value)}
+                            className="w-full p-2 border border-gray-300 rounded-lg text-sm"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-semibold text-gray-700 mb-1">Description</label>
+                          <textarea
+                            rows="3"
+                            placeholder="Describe the skill..."
+                            value={newSkillDescription}
+                            onChange={(e) => setNewSkillDescription(e.target.value)}
+                            className="w-full p-2 border border-gray-300 rounded-lg text-sm"
+                          />
+                        </div>
+                      </>
+                    }
                   />
                 </div>
               )}
@@ -860,11 +1154,67 @@ export default function App() {
                       onRemove={handleRemoveAttitude}
                       selectedValue={attitudeToAdd}
                       onSelectChange={(e) => setAttitudeToAdd(e.target.value)}
+                      showCreateForm={showNewAttitudeForm}
+                      setShowCreateForm={setShowNewAttitudeForm}
+                      onCreateNew={handleCreateNewAttitude}
+                      createFormContent={
+                        <>
+                          <div>
+                            <label className="block text-sm font-semibold text-gray-700 mb-1">Attitude Content</label>
+                            <textarea
+                              rows="3"
+                              placeholder="Describe the attitude to be developed..."
+                              value={newAttitudeContent}
+                              onChange={(e) => setNewAttitudeContent(e.target.value)}
+                              className="w-full p-2 border border-gray-300 rounded-lg text-sm"
+                            />
+                          </div>
+                        </>
+                      }
                     />
                   </div>
 
                   <div className="mt-6">
                     <h3 className="font-bold text-gray-700 mb-3">Language Focus</h3>
+                    
+                    {/* Create new language focus type */}
+                    {!showNewLanguageFocusTypeForm ? (
+                      <button
+                        onClick={() => setShowNewLanguageFocusTypeForm(true)}
+                        className="w-full mb-3 py-2 px-4 bg-purple-100 text-purple-800 rounded-lg hover:bg-purple-200 flex items-center justify-center space-x-2"
+                      >
+                        <Plus className="w-4 h-4" />
+                        <span>Create New Language Focus Type</span>
+                      </button>
+                    ) : (
+                      <div className="mb-3 p-4 border-2 border-purple-300 rounded-lg bg-purple-50 space-y-3">
+                        <div>
+                          <label className="block text-sm font-semibold text-gray-700 mb-1">Type Name</label>
+                          <input
+                            type="text"
+                            placeholder="e.g., Grammar, Vocabulary, Pronunciation"
+                            value={newLanguageFocusTypeName}
+                            onChange={(e) => setNewLanguageFocusTypeName(e.target.value)}
+                            className="w-full p-2 border border-gray-300 rounded-lg text-sm"
+                          />
+                        </div>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={handleCreateNewLanguageFocusType}
+                            className="flex-1 px-3 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
+                          >
+                            Create Type
+                          </button>
+                          <button
+                            onClick={() => setShowNewLanguageFocusTypeForm(false)}
+                            className="px-3 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400"
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                    
                     <div className="space-y-3">
                       {languageFocus.map((lf, idx) => (
                         <div key={idx} className="flex gap-2 items-start">
@@ -878,7 +1228,7 @@ export default function App() {
                               {languageFocusTypes.map(type => (
                                 <option key={type.id} value={type.id}>{type.name}</option>
                               ))}
-                            </select>
+                              </select>
                             <textarea
                               rows="2"
                               placeholder="Enter content..."
@@ -934,11 +1284,59 @@ export default function App() {
                         <button
                           onClick={() => handleAddPreparation(preparationToAdd)}
                           disabled={!preparationToAdd}
-                          className="px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:bg-gray-300"
+                          className="px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:bg-gray-300 flex-shrink-0"
                         >
                           <Plus className="w-5 h-5" />
                         </button>
                       </div>
+
+                      {/* Create new preparation type */}
+                      {!showNewPreparationForm ? (
+                        <button
+                          onClick={() => setShowNewPreparationForm(true)}
+                          className="w-full py-2 px-4 bg-green-100 text-green-800 rounded-lg hover:bg-green-200 flex items-center justify-center space-x-2"
+                        >
+                          <Plus className="w-4 h-4" />
+                          <span>Create New Preparation Type</span>
+                        </button>
+                      ) : (
+                        <div className="p-4 border-2 border-green-300 rounded-lg bg-green-50 space-y-3">
+                          <div>
+                            <label className="block text-sm font-semibold text-gray-700 mb-1">Preparation Name</label>
+                            <input
+                              type="text"
+                              placeholder="e.g., Textbooks, Worksheets, Video"
+                              value={newPreparationName}
+                              onChange={(e) => setNewPreparationName(e.target.value)}
+                              className="w-full p-2 border border-gray-300 rounded-lg text-sm"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-semibold text-gray-700 mb-1">Materials/Description</label>
+                            <textarea
+                              rows="3"
+                              placeholder="List the materials needed..."
+                              value={newPreparationDescription}
+                              onChange={(e) => setNewPreparationDescription(e.target.value)}
+                              className="w-full p-2 border border-gray-300 rounded-lg text-sm"
+                            />
+                          </div>
+                          <div className="flex gap-2">
+                            <button
+                              onClick={handleCreateNewPreparation}
+                              className="flex-1 px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                            >
+                              Create & Add
+                            </button>
+                            <button
+                              onClick={() => setShowNewPreparationForm(false)}
+                              className="px-3 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400"
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        </div>
+                      )}
 
                       {/* List of selected preparations (NOW NON-EDITABLE) */}
                       <div className="space-y-3">
@@ -985,6 +1383,102 @@ export default function App() {
                 <Users className="w-6 h-6" />
                 <h2 className="text-xl font-bold">Lesson Activities</h2>
               </div>
+
+              {/* Create new Activity Template */}
+              {!showNewActivityForm ? (
+                <button
+                  onClick={() => setShowNewActivityForm(true)}
+                  className="w-full py-2 px-4 bg-blue-100 text-blue-800 rounded-lg hover:bg-blue-200 flex items-center justify-center space-x-2"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>Create New Activity Template</span>
+                </button>
+              ) : (
+                <div className="p-4 border-2 border-blue-300 rounded-lg bg-blue-50 space-y-3">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">Activity Name</label>
+                    <input
+                      type="text"
+                      placeholder="e.g., Group Discussion, Presentation"
+                      value={newActivityName}
+                      onChange={(e) => setNewActivityName(e.target.value)}
+                      className="w-full p-2 border border-gray-300 rounded-lg text-sm"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">Activity Content</label>
+                    <textarea
+                      rows="4"
+                      placeholder="Describe the activity in detail..."
+                      value={newActivityContent}
+                      onChange={(e) => setNewActivityContent(e.target.value)}
+                      className="w-full p-2 border border-gray-300 rounded-lg text-sm"
+                    />
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={handleCreateNewActivity}
+                      className="flex-1 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                    >
+                      Create Template
+                    </button>
+                    <button
+                      onClick={() => setShowNewActivityForm(false)}
+                      className="px-3 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Create new Interaction Pattern */}
+              {!showNewInteractionForm ? (
+                <button
+                  onClick={() => setShowNewInteractionForm(true)}
+                  className="w-full py-2 px-4 bg-purple-100 text-purple-800 rounded-lg hover:bg-purple-200 flex items-center justify-center space-x-2"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>Create New Interaction Pattern</span>
+                </button>
+              ) : (
+                <div className="p-4 border-2 border-purple-300 rounded-lg bg-purple-50 space-y-3">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">Pattern Name</label>
+                    <input
+                      type="text"
+                      placeholder="e.g., Pair Work, Group Work"
+                      value={newInteractionName}
+                      onChange={(e) => setNewInteractionName(e.target.value)}
+                      className="w-full p-2 border border-gray-300 rounded-lg text-sm"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">Short Code</label>
+                    <input
+                      type="text"
+                      placeholder="e.g., T-Ss, Ss-Ss, Ind"
+                      value={newInteractionShortCode}
+                      onChange={(e) => setNewInteractionShortCode(e.target.value)}
+                      className="w-full p-2 border border-gray-300 rounded-lg text-sm"
+                    />
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={handleCreateNewInteraction}
+                      className="flex-1 px-3 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
+                    >
+                      Create Pattern
+                    </button>
+                    <button
+                      onClick={() => setShowNewInteractionForm(false)}
+                      className="px-3 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              )}
 
               <div className="space-y-6 max-h-[60vh] overflow-y-auto pr-2">
                 {activities.map((stage, stageIndex) => (

@@ -186,6 +186,8 @@ export default function EditLesson() {
         setActivityTemplates(activityTempsData);
         setAllClasses(allClassesData);
 
+        //2. Populate lesson data into form state
+
         // 2. Populate form state from the fetched lesson plan (`lessonToEdit`)
         setLessonTitle(lessonToEdit.title || '');
         setLessonDescription(lessonToEdit.description || '');
@@ -222,7 +224,7 @@ export default function EditLesson() {
             const template = preparationsData.find(t => t.id === prep.preparationTypeId);
             return {
                 id: prep.preparationTypeId,
-                name: template?.name || 'Unknown Type',
+                name: template?.name || prep.name || 'Unknown Type',
                 materials: prep.materials,
             };
         }) || [];
