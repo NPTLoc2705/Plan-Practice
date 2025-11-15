@@ -464,11 +464,12 @@ export default function EditLesson() {
       unitName: unitName,
       unitId: null, // This can be extended if unit management is linked
       lessonDefinitionId: null, // Same as above
-      ...(!selectedMethod ? {
+      ...((typeof selectedMethod === 'string' && selectedMethod.startsWith('custom_')) ? {
         methodTemplateId: null,
         methodName: methodTemplates.find(m => m.id === selectedMethod)?.name,
         methodDescription: methodTemplates.find(m => m.id === selectedMethod)?.description
       } : {
+        methodTemplateId: parseInt(selectedMethod)
       }),
       objectives: selectedObjectives.map((objId, index) => {
         // Handle custom items (string IDs starting with 'custom_')
@@ -544,20 +545,22 @@ export default function EditLesson() {
         displayOrder: stageIndex + 1,
         activityItems: stage.subActivities.map((sub, subIndex) => {
           const activityContent = sub.activityTemplateId
-            ? activityTemplates.find(t => t.id === parseInt(sub.activityTemplateId))?.content || ''
+            ? activityTemplates.find(t => t.id.toString() === sub.activityTemplateId.toString())?.content || ''
             : '';
 
           return {
             timeInMinutes: sub.timeInMinutes || 0,
             content: activityContent,
-            ...(!sub.interactionPatternId ? {
+            // If using template, sub.activityTemplateId is numeric; if custom, it's a string starting with 'custom_'
+            ...((typeof sub.interactionPatternId === 'string' && sub.interactionPatternId.startsWith('custom_')) ? {
               interactionPatternId: null,
-              interactionPatternName: interactionPatterns.find(p => p.id === sub.interactionPatternId)?.name,
-              interactionPatternsShortCode: interactionPatterns.find(p => p.id === sub.interactionPatternId)?.shortCode,
+              interactionPatternName: interactionPatterns.find(p => p.id.toString() === sub.interactionPatternId.toString())?.name,
+              interactionPatternShortCode: interactionPatterns.find(p => p.id.toString() === sub.interactionPatternId.toString())?.shortCode,
             } : { interactionPatternId: parseInt(sub.interactionPatternId) }),
-            ...(!sub.activityTemplateId ? {
+            // Same to this
+            ...((typeof sub.activityTemplateId === 'string' && sub.activityTemplateId.startsWith('custom_')) ? {
               activityTemplateId: null,
-              activityTemplateName: activityTemplates.find(t => t.id === parseInt(sub.activityTemplateId))?.name,
+              activityTemplateName: activityTemplates.find(t => t.id.toString() === sub.activityTemplateId.toString())?.name,
               activityTemplateContent: activityContent,
             } : { activityTemplateId: parseInt(sub.activityTemplateId) }),
             displayOrder: subIndex + 1
@@ -695,7 +698,7 @@ export default function EditLesson() {
     if (selectedObjectives.length > 0) {
       html += `<h3 style="color: #dc2626; margin-top: 20px;">A. Objectives:</h3>`;
       selectedObjectives.forEach((objId, idx) => {
-        const template = objectiveTemplates.find(t => t.id === objId);
+        const template = objectiveTemplates.find(t => t.id.toString() === objId.toString());
         if (template) {
           html += `<p><strong>${idx + 1}. ${template.name}:</strong> ${template.content}</p>`;
         }
@@ -707,7 +710,7 @@ export default function EditLesson() {
       html += `<p><strong>1. Language focus:</strong></p><ul style="list-style-position: inside; padding-left: 10px;">`;
       languageFocus.forEach(lf => {
         if (lf.content && lf.content.trim()) {
-          const typeName = lf.typeId ? languageFocusTypes.find(t => t.id.toString() === lf.typeId)?.name : 'Other';
+          const typeName = lf.typeId ? languageFocusTypes.find(t => t.id.toString() === lf.typeId.toString())?.name : 'Other';
           html += `<li><strong>${typeName || 'Other'}:</strong> ${lf.content}</li>`;
         }
       });
@@ -716,7 +719,7 @@ export default function EditLesson() {
     if (selectedSkills.length > 0) {
       html += `<p><strong>2. Skills:</strong></p><ul style="list-style-position: inside; padding-left: 10px;">`;
       selectedSkills.forEach(skillId => {
-        const skill = skillTemplates.find(t => t.id === skillId);
+        const skill = skillTemplates.find(t => t.id.toString() === skillId.toString());
         if (skill) {
           html += `<li><strong>${skill.name}:</strong> ${skill.description}</li>`;
         }
@@ -726,7 +729,7 @@ export default function EditLesson() {
     if (selectedAttitudes.length > 0) {
       html += `<p><strong>3. Attitudes:</strong></p><ul style="list-style-position: inside; padding-left: 10px;">`;
       selectedAttitudes.forEach(attId => {
-        const att = attitudeTemplates.find(t => t.id === attId);
+        const att = attitudeTemplates.find(t => t.id.toString() === attId.toString());
         if (att) {
           html += `<li>${att.content}</li>`;
         }
@@ -806,7 +809,7 @@ export default function EditLesson() {
         <div className="space-y-2">
           {selectedIds.length > 0 ? (
             selectedIds.map(id => {
-              const item = templates.find(t => t.id === id);
+              const item = templates.find(t => t.id.toString() === id.toString());
               if (!item) return null;
               return (
                 <div key={id} className={`flex items-center justify-between p-2 border rounded-lg animate-fade-in ${item.isCustom ? 'bg-amber-50 border-amber-200' : 'bg-gray-100'}`}>
@@ -969,11 +972,11 @@ export default function EditLesson() {
               {/* ... Other steps (3, 4, 5, 6) are identical to CreateLesson.jsx */}
               {currentStep === 3 && (<div className="space-y-4"> <div className="flex items-center space-x-2 text-blue-600 mb-4"> <Brain className="w-6 h-6" /> <h2 className="text-xl font-bold">Skills Development</h2> </div> <ItemSelector title="Skill" templates={skillTemplates} selectedIds={selectedSkills} onAdd={(id) => handleAddItem(id, selectedSkills, setSelectedSkills, setSkillToAdd)} onRemove={(id) => handleRemoveItem(id, selectedSkills, setSelectedSkills)} selectedValue={skillToAdd} onSelectChange={(e) => setSkillToAdd(e.target.value)} /> </div>)}
               {currentStep === 4 && (<div className="space-y-6"> <div className="flex items-center space-x-2 text-blue-600 mb-2"> <Heart className="w-6 h-6" /> <h2 className="text-xl font-bold">Attitudes & Language</h2> </div> <div> <h3 className="font-bold text-gray-700 mb-3">Attitudes</h3> <ItemSelector title="Attitude" templates={attitudeTemplates} selectedIds={selectedAttitudes} onAdd={(id) => handleAddItem(id, selectedAttitudes, setSelectedAttitudes, setAttitudeToAdd)} onRemove={(id) => handleRemoveItem(id, selectedAttitudes, setSelectedAttitudes)} selectedValue={attitudeToAdd} onSelectChange={(e) => setAttitudeToAdd(e.target.value)} /> </div> <div className="mt-6"> <h3 className="font-bold text-gray-700 mb-3">Language Focus</h3> <div className="space-y-3"> {languageFocus.map((lf, idx) => (<div key={idx} className="flex gap-2 items-start"> <div className="flex-1"> <select value={lf.typeId || ''} onChange={(e) => { const updated = [...languageFocus]; updated[idx].typeId = e.target.value; setLanguageFocus(updated); }} className="w-full p-2 border border-gray-300 rounded-lg text-sm mb-1" > <option value="">Select type...</option> {languageFocusTypes.map(type => (<option key={type.id} value={type.id}>{type.name}</option>))} </select> <textarea rows="2" placeholder="Enter content..." value={lf.content} onChange={(e) => { const updated = [...languageFocus]; updated[idx].content = e.target.value; setLanguageFocus(updated); }} className="w-full p-2 border border-gray-300 rounded-lg text-sm" /> </div> <button onClick={() => { const updated = languageFocus.filter((_, i) => i !== idx); setLanguageFocus(updated.length > 0 ? updated : [{ typeId: null, content: '' }]); }} className="text-red-500 hover:text-red-700 p-1 mt-1" > <X className="w-4 h-4" /> </button> </div>))} <button onClick={() => setLanguageFocus([...languageFocus, { typeId: null, content: '' }])} className="w-full py-2 px-4 bg-green-100 text-green-800 rounded-lg hover:bg-green-200 flex items-center justify-center space-x-2" > <Plus className="w-4 h-4" /> <span>Add Language Focus Item</span> </button> </div> </div> </div>)}
-              {currentStep === 5 && (<div className="space-y-6"> <div className="flex items-center space-x-2 text-blue-600 mb-2"> <Book className="w-6 h-6" /> <h2 className="text-xl font-bold">Preparations & Methods</h2> </div> <div> <h3 className="font-bold text-gray-700 mb-3">Preparations</h3> <div className="space-y-4"> <div className="flex items-center gap-2"> <select value={preparationToAdd} onChange={(e) => setPreparationToAdd(e.target.value)} className="w-full p-2 border border-gray-300 rounded-lg text-sm" > <option value="">Select a preparation type...</option> {preparationTemplates.filter(t => !selectedPreparations.some(p => p.id === t.id)).map(template => (<option key={template.id} value={template.id}>{template.name}</option>))} </select> <button onClick={() => handleAddPreparation(preparationToAdd)} disabled={!preparationToAdd} className="px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:bg-gray-300" > <Plus className="w-5 h-5" /> </button> </div> <div className="space-y-3"> {selectedPreparations.map((prep) => (<div key={prep.id} className="p-3 bg-gray-50 border rounded-lg"> <div className="flex justify-between items-center mb-1"> <label className="block text-sm font-semibold text-gray-700">{prep.name}</label> <button onClick={() => handleRemovePreparation(prep.id)} className="text-red-500 hover:text-red-700 p-1"> <X className="w-4 h-4" /> </button> </div> <p className="text-sm text-gray-800 p-2 bg-white border rounded-md whitespace-pre-wrap"> {prep.materials} </p> </div>))} </div> </div> </div> <div className="mt-6"> <h3 className="font-bold text-gray-700 mb-3">Teaching Method</h3> <select value={selectedMethod} onChange={(e) => setSelectedMethod(e.target.value)} className="w-full p-3 border border-gray-300 rounded-lg"> <option value="">Select a teaching method</option> {methodTemplates.map(method => (<option key={method.id} value={method.id}>{method.name}</option>))} </select> {selectedMethod && (<p className="text-sm text-gray-600 mt-2 p-2 bg-gray-50 rounded-md"> {methodTemplates.find(m => m.id.toString() === selectedMethod)?.description} </p>)} </div> </div>)}
+              {currentStep === 5 && (<div className="space-y-6"> <div className="flex items-center space-x-2 text-blue-600 mb-2"> <Book className="w-6 h-6" /> <h2 className="text-xl font-bold">Preparations & Methods</h2> </div> <div> <h3 className="font-bold text-gray-700 mb-3">Preparations</h3> <div className="space-y-4"> <div className="flex items-center gap-2"> <select value={preparationToAdd} onChange={(e) => setPreparationToAdd(e.target.value)} className="w-full p-2 border border-gray-300 rounded-lg text-sm" > <option value="">Select a preparation type...</option> {preparationTemplates.filter(t => !selectedPreparations.some(p => p.id.toString() === t.id.toString())).map(template => (<option key={template.id} value={template.id}>{template.name}</option>))} </select> <button onClick={() => handleAddPreparation(preparationToAdd)} disabled={!preparationToAdd} className="px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:bg-gray-300" > <Plus className="w-5 h-5" /> </button> </div> <div className="space-y-3"> {selectedPreparations.map((prep) => (<div key={prep.id} className="p-3 bg-gray-50 border rounded-lg"> <div className="flex justify-between items-center mb-1"> <label className="block text-sm font-semibold text-gray-700">{prep.name}</label> <button onClick={() => handleRemovePreparation(prep.id)} className="text-red-500 hover:text-red-700 p-1"> <X className="w-4 h-4" /> </button> </div> <p className="text-sm text-gray-800 p-2 bg-white border rounded-md whitespace-pre-wrap"> {prep.materials} </p> </div>))} </div> </div> </div> <div className="mt-6"> <h3 className="font-bold text-gray-700 mb-3">Teaching Method</h3> <select value={selectedMethod} onChange={(e) => setSelectedMethod(e.target.value)} className="w-full p-3 border border-gray-300 rounded-lg"> <option value="">Select a teaching method</option> {methodTemplates.map(method => (<option key={method.id} value={method.id}>{method.name}</option>))} </select> {selectedMethod && (<p className="text-sm text-gray-600 mt-2 p-2 bg-gray-50 rounded-md"> {methodTemplates.find(m => m.id.toString() === selectedMethod)?.description} </p>)} </div> </div>)}
             </>
           )}
 
-          {currentStep === 6 && (<div className="space-y-4"> <div className="flex items-center space-x-2 text-blue-600 mb-4"> <Users className="w-6 h-6" /> <h2 className="text-xl font-bold">Lesson Activities</h2> </div> <div className="space-y-6 max-h-[60vh] overflow-y-auto pr-2"> {activities.map((stage, stageIndex) => (<div key={stageIndex} className="p-4 border-2 border-gray-200 rounded-lg bg-gray-50 space-y-4"> <div className="flex justify-between items-center pb-2 border-b"> <input type="text" value={stage.stageName} onChange={(e) => updateStageName(stageIndex, e.target.value)} className="font-bold text-lg text-gray-800 p-1 rounded bg-transparent focus:bg-white" /> <button onClick={() => removeStage(stageIndex)} className="text-red-500 hover:text-red-700 p-1 rounded-full hover:bg-red-100"> <X className="w-4 h-4" /> </button> </div> {stage.subActivities.map((sub, subIndex) => (<div key={subIndex} className="p-3 border rounded-md bg-white relative"> <span className="absolute -left-2 top-2 text-xs bg-blue-500 text-white font-bold rounded-full h-5 w-5 flex items-center justify-center">{subIndex + 1}</span> <div className="space-y-2 pl-4"> <div> <label className="block text-xs font-semibold text-gray-600 mb-1">Time (minutes)</label> <input type="number" min="0" value={sub.timeInMinutes} onChange={(e) => updateSubActivity(stageIndex, subIndex, 'timeInMinutes', parseInt(e.target.value) || 0)} className="w-full p-2 border border-gray-300 rounded text-sm" /> </div> <div> <label className="block text-xs font-semibold text-gray-600 mb-1">Activity Template</label> <select value={sub.activityTemplateId} onChange={(e) => updateSubActivity(stageIndex, subIndex, 'activityTemplateId', e.target.value)} className="w-full p-2 border border-gray-300 rounded text-sm" > <option value="">-- Select an activity template --</option> {activityTemplates.map(template => (<option key={template.id} value={template.id}>{template.name}</option>))} </select> {sub.activityTemplateId && activityTemplates.find(t => t.id.toString() === sub.activityTemplateId) && (<div className="mt-2 p-2 bg-blue-50 border border-blue-200 rounded text-xs"> <strong>Template Content:</strong> <p className="mt-1 whitespace-pre-wrap break-words line-clamp-3 overflow-hidden">{activityTemplates.find(t => t.id.toString() === sub.activityTemplateId)?.content}</p> </div>)} </div> <div> <label className="block text-xs font-semibold text-gray-600 mb-1">Interaction Pattern</label> <select value={sub.interactionPatternId} onChange={(e) => updateSubActivity(stageIndex, subIndex, 'interactionPatternId', e.target.value)} className="w-full p-2 border border-gray-300 rounded text-sm"> <option value="">Select interaction</option> {interactionPatterns.map(pattern => (<option key={pattern.id} value={pattern.id}>{pattern.name} ({pattern.shortCode})</option>))} </select> </div> </div> {stage.subActivities.length > 0 && (<button onClick={() => removeSubActivity(stageIndex, subIndex)} className="absolute top-1 right-1 text-gray-400 hover:text-red-600"> <X className="w-3 h-3" /> </button>)} </div>))} <button onClick={() => addSubActivity(stageIndex)} className="w-full text-xs py-1 px-2 bg-blue-100 text-blue-800 rounded hover:bg-blue-200 flex items-center justify-center space-x-1"> <Plus className="w-3 h-3" /> <span>Add Activity to this Stage</span> </button> </div>))} </div> <button onClick={addStage} className="w-full py-2 px-4 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center justify-center space-x-2"> <Plus className="w-4 h-4" /> <span>Add New Stage</span> </button> </div>)}
+          {currentStep === 6 && (<div className="space-y-4"> <div className="flex items-center space-x-2 text-blue-600 mb-4"> <Users className="w-6 h-6" /> <h2 className="text-xl font-bold">Lesson Activities</h2> </div> <div className="space-y-6 max-h-[60vh] overflow-y-auto pr-2"> {activities.map((stage, stageIndex) => (<div key={stageIndex} className="p-4 border-2 border-gray-200 rounded-lg bg-gray-50 space-y-4"> <div className="flex justify-between items-center pb-2 border-b"> <input type="text" value={stage.stageName} onChange={(e) => updateStageName(stageIndex, e.target.value)} className="font-bold text-lg text-gray-800 p-1 rounded bg-transparent focus:bg-white" /> <button onClick={() => removeStage(stageIndex)} className="text-red-500 hover:text-red-700 p-1 rounded-full hover:bg-red-100"> <X className="w-4 h-4" /> </button> </div> {stage.subActivities.map((sub, subIndex) => (<div key={subIndex} className="p-3 border rounded-md bg-white relative"> <span className="absolute -left-2 top-2 text-xs bg-blue-500 text-white font-bold rounded-full h-5 w-5 flex items-center justify-center">{subIndex + 1}</span> <div className="space-y-2 pl-4"> <div> <label className="block text-xs font-semibold text-gray-600 mb-1">Time (minutes)</label> <input type="number" min="0" value={sub.timeInMinutes} onChange={(e) => updateSubActivity(stageIndex, subIndex, 'timeInMinutes', parseInt(e.target.value) || 0)} className="w-full p-2 border border-gray-300 rounded text-sm" /> </div> <div> <label className="block text-xs font-semibold text-gray-600 mb-1">Activity Template</label> <select value={sub.activityTemplateId} onChange={(e) => updateSubActivity(stageIndex, subIndex, 'activityTemplateId', e.target.value)} className="w-full p-2 border border-gray-300 rounded text-sm" > <option value="">-- Select an activity template --</option> {activityTemplates.map(template => (<option key={template.id} value={template.id}>{template.name}</option>))} </select> {sub.activityTemplateId && activityTemplates.find(t => t.id.toString() === sub.activityTemplateId.toString()) && (<div className="mt-2 p-2 bg-blue-50 border border-blue-200 rounded text-xs"> <strong>Template Content:</strong> <p className="mt-1 whitespace-pre-wrap break-words line-clamp-3 overflow-hidden">{activityTemplates.find(t => t.id.toString() === sub.activityTemplateId.toString())?.content}</p> </div>)} </div> <div> <label className="block text-xs font-semibold text-gray-600 mb-1">Interaction Pattern</label> <select value={sub.interactionPatternId} onChange={(e) => updateSubActivity(stageIndex, subIndex, 'interactionPatternId', e.target.value)} className="w-full p-2 border border-gray-300 rounded text-sm"> <option value="">Select interaction</option> {interactionPatterns.map(pattern => (<option key={pattern.id} value={pattern.id}>{pattern.name} ({pattern.shortCode})</option>))} </select> </div> </div> {stage.subActivities.length > 0 && (<button onClick={() => removeSubActivity(stageIndex, subIndex)} className="absolute top-1 right-1 text-gray-400 hover:text-red-600"> <X className="w-3 h-3" /> </button>)} </div>))} <button onClick={() => addSubActivity(stageIndex)} className="w-full text-xs py-1 px-2 bg-blue-100 text-blue-800 rounded hover:bg-blue-200 flex items-center justify-center space-x-1"> <Plus className="w-3 h-3" /> <span>Add Activity to this Stage</span> </button> </div>))} </div> <button onClick={addStage} className="w-full py-2 px-4 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center justify-center space-x-2"> <Plus className="w-4 h-4" /> <span>Add New Stage</span> </button> </div>)}
           <div className="flex justify-between mt-6 pt-4 border-t">
             <button onClick={handlePrevStep} disabled={currentStep === 1} className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition ${currentStep === 1 ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-gray-600 text-white hover:bg-gray-700'}`}>
               <ChevronLeft className="w-4 h-4" />
