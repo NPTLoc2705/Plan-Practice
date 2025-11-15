@@ -23,7 +23,7 @@ jobs:
         run: |
           MIGRATION_COUNT=$(find ./DAL/Migrations -type f -name "*.cs" | wc -l)
           
-          if [ "$MIGRATION_COUNT" -gt 3 ]; then
+          if [ "$MIGRATION_COUNT" -gt 5 ]; then
             echo "2 or more migrations found — adding a new migration..."
             dotnet tool install --global dotnet-ef
             echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
