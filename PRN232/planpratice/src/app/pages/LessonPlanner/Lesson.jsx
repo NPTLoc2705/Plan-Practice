@@ -105,6 +105,76 @@ const postToApi = async (endpoint, data, token) => {
   return result;
 };
 
+// =================================================================
+// ITEM SELECTOR COMPONENT (defined outside to prevent re-renders)
+// =================================================================
+const ItemSelector = ({ title, templates, selectedIds, onAdd, onRemove, selectedValue, onSelectChange, showCreateForm, setShowCreateForm, createFormContent, onCreateNew }) => { 
+  const availableItems = templates.filter(t => !selectedIds.includes(t.id)); 
+  
+  return (
+    <div className="space-y-4"> 
+      <div className="flex items-center gap-2"> 
+        <select value={selectedValue} onChange={onSelectChange} className="w-full p-2 border border-gray-300 rounded-lg text-sm" disabled={availableItems.length === 0} > 
+          <option value="">{availableItems.length > 0 ? `Select a ${title.toLowerCase()}...` : `All ${title.toLowerCase()} added`}</option> 
+          {availableItems.map(item => (<option key={item.id} value={item.id}>{item.name}</option>))} 
+        </select> 
+        <button onClick={() => onAdd(selectedValue)} disabled={!selectedValue} className="px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed flex-shrink-0" > 
+          <Plus className="w-5 h-5" /> 
+        </button> 
+      </div>
+      
+      {/* Create New Button */}
+      {onCreateNew && (
+        <div>
+          {!showCreateForm ? (
+            <button
+              onClick={() => setShowCreateForm(true)}
+              className="w-full py-2 px-4 bg-green-100 text-green-800 rounded-lg hover:bg-green-200 flex items-center justify-center space-x-2"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Create New {title}</span>
+            </button>
+          ) : (
+            <div className="p-4 border-2 border-green-300 rounded-lg bg-green-50 space-y-3">
+              {createFormContent}
+              <div className="flex gap-2">
+                <button
+                  onClick={onCreateNew}
+                  className="flex-1 px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                >
+                  Create & Add
+                </button>
+                <button
+                  onClick={() => setShowCreateForm(false)}
+                  className="px-3 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+      
+      <div className="space-y-2"> 
+        {selectedIds.length > 0 ? (selectedIds.map(id => { 
+          const item = templates.find(t => t.id === id); 
+          if (!item) return null; 
+          return (<div key={id} className="flex items-center justify-between p-2 bg-gray-100 border rounded-lg animate-fade-in"> 
+            <div className="text-sm"> 
+              <p className="font-semibold">{item.name}</p> 
+              <p className="text-gray-600">{item.content || item.description}</p> 
+            </div> 
+            <button onClick={() => onRemove(id)} className="text-red-500 hover:text-red-700 p-1"> 
+              <X className="w-4 h-4" /> 
+            </button> 
+          </div>); 
+        })) : (<p className="text-sm text-gray-500 text-center py-2">No {title.toLowerCase()} added yet.</p>)} 
+      </div> 
+    </div>
+  ); 
+};
+
 export default function App() {
   // ... (all other state declarations remain the same)
   const [currentStep, setCurrentStep] = useState(1);
@@ -158,6 +228,9 @@ export default function App() {
   
   const [methodTemplates, setMethodTemplates] = useState([]);
   const [selectedMethod, setSelectedMethod] = useState('');
+  const [newMethodName, setNewMethodName] = useState('');
+  const [newMethodDescription, setNewMethodDescription] = useState('');
+  const [showNewMethodForm, setShowNewMethodForm] = useState(false);
   const [coinBalance, setCoinBalance] = useState(null);
   const [isCheckingCoins, setIsCheckingCoins] = useState(false);
   
@@ -352,6 +425,26 @@ export default function App() {
     setNewPreparationDescription('');
     setShowNewPreparationForm(false);
     setMessage('✅ New preparation created and added!');
+  };
+
+  // Step 5: Create new method
+  const handleCreateNewMethod = () => {
+    if (!newMethodName.trim() || !newMethodDescription.trim()) {
+      setMessage('❌ Please fill in both name and description for the new method');
+      return;
+    }
+    const newId = Math.max(...methodTemplates.map(m => m.id), 0) + 1;
+    const newMethod = {
+      id: newId,
+      name: newMethodName.trim(),
+      description: newMethodDescription.trim()
+    };
+    setMethodTemplates([...methodTemplates, newMethod]);
+    setSelectedMethod(newId.toString());
+    setNewMethodName('');
+    setNewMethodDescription('');
+    setShowNewMethodForm(false);
+    setMessage('✅ New teaching method created and selected!');
   };
 
   // Step 6: Add Stage
@@ -873,73 +966,6 @@ export default function App() {
   const RichTextToolbar = () => (<div className="flex flex-wrap items-center p-3 border-b bg-gray-100 rounded-t-xl sticky top-0 z-10"> <button className="ml-auto flex items-center space-x-2 px-3 py-1.5 text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition shadow" onClick={handleSaveLesson}> <Save className="w-4 h-4" /> <span className="text-sm font-medium">Save Lesson</span> </button> </div>);
   const StepIndicator = () => (<div className="flex items-center justify-center mb-8"> {[1, 2, 3, 4, 5, 6].map((step) => (<React.Fragment key={step}> <div className={`flex flex-col items-center cursor-pointer ${step <= currentStep ? 'text-blue-600' : 'text-gray-400'}`} onClick={() => setCurrentStep(step)}> <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold transition-all duration-300 ${step < currentStep ? 'bg-green-500 text-white' : step === currentStep ? 'bg-blue-600 text-white scale-110' : 'bg-gray-300'}`}> {step < currentStep ? <CheckCircle2 className="w-6 h-6" /> : step} </div> <span className="text-xs mt-1 hidden sm:block"> {['Basic', 'Objectives', 'Skills', 'Attitudes', 'Prep', 'Activities'][step - 1]} </span> </div> {step < 6 && <div className={`h-1 w-12 sm:w-20 transition-all duration-500 ${step < currentStep ? 'bg-green-500' : 'bg-gray-300'}`} />} </React.Fragment>))} </div>);
   
-  const ItemSelector = ({ title, templates, selectedIds, onAdd, onRemove, selectedValue, onSelectChange, showCreateForm, setShowCreateForm, createFormContent, onCreateNew }) => { 
-    const availableItems = templates.filter(t => !selectedIds.includes(t.id)); 
-    
-    return (
-      <div className="space-y-4"> 
-        <div className="flex items-center gap-2"> 
-          <select value={selectedValue} onChange={onSelectChange} className="w-full p-2 border border-gray-300 rounded-lg text-sm" disabled={availableItems.length === 0} > 
-            <option value="">{availableItems.length > 0 ? `Select a ${title.toLowerCase()}...` : `All ${title.toLowerCase()} added`}</option> 
-            {availableItems.map(item => (<option key={item.id} value={item.id}>{item.name}</option>))} 
-          </select> 
-          <button onClick={() => onAdd(selectedValue)} disabled={!selectedValue} className="px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed flex-shrink-0" > 
-            <Plus className="w-5 h-5" /> 
-          </button> 
-        </div>
-        
-        {/* Create New Button */}
-        {onCreateNew && (
-          <div>
-            {!showCreateForm ? (
-              <button
-                onClick={() => setShowCreateForm(true)}
-                className="w-full py-2 px-4 bg-green-100 text-green-800 rounded-lg hover:bg-green-200 flex items-center justify-center space-x-2"
-              >
-                <Plus className="w-4 h-4" />
-                <span>Create New {title}</span>
-              </button>
-            ) : (
-              <div className="p-4 border-2 border-green-300 rounded-lg bg-green-50 space-y-3">
-                {createFormContent}
-                <div className="flex gap-2">
-                  <button
-                    onClick={onCreateNew}
-                    className="flex-1 px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
-                  >
-                    Create & Add
-                  </button>
-                  <button
-                    onClick={() => setShowCreateForm(false)}
-                    className="px-3 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-        )}
-        
-        <div className="space-y-2"> 
-          {selectedIds.length > 0 ? (selectedIds.map(id => { 
-            const item = templates.find(t => t.id === id); 
-            if (!item) return null; 
-            return (<div key={id} className="flex items-center justify-between p-2 bg-gray-100 border rounded-lg animate-fade-in"> 
-              <div className="text-sm"> 
-                <p className="font-semibold">{item.name}</p> 
-                <p className="text-gray-600">{item.content || item.description}</p> 
-              </div> 
-              <button onClick={() => onRemove(id)} className="text-red-500 hover:text-red-700 p-1"> 
-                <X className="w-4 h-4" /> 
-              </button> 
-            </div>); 
-          })) : (<p className="text-sm text-gray-500 text-center py-2">No {title.toLowerCase()} added yet.</p>)} 
-        </div> 
-      </div>
-    ); 
-  }
-
   return (
     <div className="min-h-screen bg-gray-50 p-4 sm:p-8 font-['Inter']">
       <header className="mb-8">
@@ -1370,6 +1396,48 @@ export default function App() {
                       <p className="text-sm text-gray-600 mt-2 p-2 bg-gray-50 rounded-md">
                         {methodTemplates.find(m => m.id === parseInt(selectedMethod))?.description}
                       </p>
+                    )}
+                    
+                    {/* Add new method button */}
+                    <button
+                      onClick={() => setShowNewMethodForm(!showNewMethodForm)}
+                      className="mt-3 w-full py-2 px-4 bg-purple-100 text-purple-800 rounded-lg hover:bg-purple-200 flex items-center justify-center space-x-2"
+                    >
+                      <Plus className="w-4 h-4" />
+                      <span>{showNewMethodForm ? 'Cancel' : 'Create New Method'}</span>
+                    </button>
+
+                    {/* New method form */}
+                    {showNewMethodForm && (
+                      <div className="mt-3 p-4 bg-purple-50 border border-purple-200 rounded-lg space-y-3">
+                        <div>
+                          <label className="block text-sm font-semibold text-gray-700 mb-1">Method Name</label>
+                          <input
+                            type="text"
+                            value={newMethodName}
+                            onChange={(e) => setNewMethodName(e.target.value)}
+                            placeholder="e.g., Task-Based Learning"
+                            className="w-full p-2 border border-gray-300 rounded-lg text-sm"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-semibold text-gray-700 mb-1">Method Description</label>
+                          <textarea
+                            rows="3"
+                            value={newMethodDescription}
+                            onChange={(e) => setNewMethodDescription(e.target.value)}
+                            placeholder="Describe the teaching method..."
+                            className="w-full p-2 border border-gray-300 rounded-lg text-sm"
+                          />
+                        </div>
+                        <button
+                          onClick={handleCreateNewMethod}
+                          className="w-full py-2 px-4 bg-purple-600 text-white rounded-lg hover:bg-purple-700 flex items-center justify-center space-x-2"
+                        >
+                          <Plus className="w-4 h-4" />
+                          <span>Add Method</span>
+                        </button>
+                      </div>
                     )}
                   </div>
                 </div>
