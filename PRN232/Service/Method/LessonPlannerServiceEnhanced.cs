@@ -55,18 +55,24 @@ namespace Services
                 {
                     Id = o.Id,
                     ObjectiveTemplateId = o.ObjectiveTemplateId,
+                    Name = o.SnapshotName,
+                    CustomContent = o.CustomContent,
                     DisplayOrder = o.DisplayOrder
                 }).ToList() ?? new List<LessonObjectiveDto>(),
                 Skills = planner.Skills?.Select(s => new LessonSkillDto
                 {
                     Id = s.Id,
                     SkillTemplateId = s.SkillTemplateId,
+                    Name = s.SnapshotName,
+                    Description = s.SnapshotDescription,
                     DisplayOrder = s.DisplayOrder
                 }).ToList() ?? new List<LessonSkillDto>(),
                 Attitudes = planner.Attitudes?.Select(a => new LessonAttitudeDto
                 {
                     Id = a.Id,
                     AttitudeTemplateId = a.AttitudeTemplateId,
+                    Name = a.SnapshotName,
+                    CustomContent = a.CustomContent,
                     DisplayOrder = a.DisplayOrder
                 }).ToList() ?? new List<LessonAttitudeDto>(),
 
@@ -75,6 +81,7 @@ namespace Services
                     Id = lf.Id,
                     LanguageFocusTypeId = lf.LanguageFocusTypeId,
                     Content = lf.Content,
+                    Name = lf.SnapshotTypeName,
                     DisplayOrder = lf.DisplayOrder
                 }).ToList() ?? new List<LessonLanguageFocusDto>(),
 
@@ -82,6 +89,7 @@ namespace Services
                 {
                     Id = p.Id,
                     PreparationTypeId = p.PreparationTypeId,
+                    Name = p.SnapshotTypeName,
                     Materials = p.Materials,
                     DisplayOrder = p.DisplayOrder
                 }).ToList() ?? new List<LessonPreparationDto>(),
@@ -97,7 +105,11 @@ namespace Services
                         TimeInMinutes = i.TimeInMinutes,
                         Content = i.Content,
                         InteractionPatternId = i.InteractionPatternId,
+                        InteractionPatternName = i.SnapshotInteractionName,
+                        InteractionPatternShortCode = i.SnapshotInteractionShortCode,
                         ActivityTemplateId = i.ActivityTemplateId,
+                        ActivityTemplateName = i.SnapshotActivityName,
+                        ActivityTemplateContent = i.SnapshotActivityContent,
                         DisplayOrder = i.DisplayOrder
                     }).ToList() ?? new List<LessonActivityItemDto>()
                 }).ToList() ?? new List<LessonActivityStageDto>()
@@ -138,19 +150,20 @@ namespace Services
             var classEntity = await _context.Classes
                 .Include(c => c.GradeLevel)
                 .FirstOrDefaultAsync(c => c.Id == request.ClassId);
-            
+
             if (classEntity != null)
             {
                 entity.SnapshotClassName = classEntity.Name;
                 entity.SnapshotGradeLevelName = classEntity.GradeLevel?.Name;
             }
 
-            // Populate snapshot data for Method Template
+            // Populate snapshot data for Method
+            // If request.method is new, id will not be in DB
             if (request.MethodTemplateId.HasValue)
             {
                 var methodTemplate = await _context.MethodTemplates
                     .FirstOrDefaultAsync(m => m.Id == request.MethodTemplateId);
-                
+
                 if (methodTemplate != null)
                 {
                     entity.SnapshotMethodName = methodTemplate.Name;
@@ -160,6 +173,9 @@ namespace Services
                 {
                     // Template doesn't exist, set to null to avoid FK constraint violation
                     entity.MethodTemplateId = null;
+
+                    entity.SnapshotMethodName = request.MethodName;
+                    entity.SnapshotMethodDescription = request.MethodDescription;
                 }
             }
 
@@ -177,14 +193,18 @@ namespace Services
                 {
                     var template = await _context.ObjectiveTemplates
                         .FirstOrDefaultAsync(t => t.Id == objDto.ObjectiveTemplateId);
-                    
+
                     if (template != null)
                     {
                         lessonObj.ObjectiveTemplateId = objDto.ObjectiveTemplateId;
                         lessonObj.SnapshotName = template.Name;
                         lessonObj.SnapshotContent = template.Content;
                     }
-                    // else: template doesn't exist, leave ObjectiveTemplateId as null
+                    else
+                    {
+                        lessonObj.SnapshotName = objDto.Name;
+                        lessonObj.SnapshotContent = objDto.CustomContent;
+                    }
                 }
 
                 entity.Objectives.Add(lessonObj);
@@ -204,14 +224,18 @@ namespace Services
                 {
                     var template = await _context.SkillTemplates
                         .FirstOrDefaultAsync(t => t.Id == skillDto.SkillTemplateId);
-                    
+
                     if (template != null)
                     {
                         lessonSkill.SkillTemplateId = skillDto.SkillTemplateId;
                         lessonSkill.SnapshotName = template.Name;
                         lessonSkill.SnapshotDescription = template.Description;
                     }
-                    // else: template doesn't exist, leave SkillTemplateId as null
+                    else
+                    {
+                        lessonSkill.SnapshotName = skillDto.Name;
+                        lessonSkill.SnapshotDescription = skillDto.Description;
+                    }
                 }
 
                 entity.Skills.Add(lessonSkill);
@@ -231,14 +255,18 @@ namespace Services
                 {
                     var template = await _context.AttitudeTemplates
                         .FirstOrDefaultAsync(t => t.Id == attDto.AttitudeTemplateId);
-                    
+
                     if (template != null)
                     {
                         lessonAtt.AttitudeTemplateId = attDto.AttitudeTemplateId;
                         lessonAtt.SnapshotName = template.Name;
                         lessonAtt.SnapshotContent = template.Content;
                     }
-                    // else: template doesn't exist, leave AttitudeTemplateId as null
+                    else
+                    {
+                        lessonAtt.SnapshotName = attDto.Name;
+                        lessonAtt.SnapshotContent = attDto.CustomContent;
+                    }
                 }
 
                 entity.Attitudes.Add(lessonAtt);
@@ -258,13 +286,16 @@ namespace Services
                 {
                     var type = await _context.LanguageFocusTypes
                         .FirstOrDefaultAsync(t => t.Id == lfDto.LanguageFocusTypeId);
-                    
+
                     if (type != null)
                     {
                         lessonLF.LanguageFocusTypeId = lfDto.LanguageFocusTypeId;
                         lessonLF.SnapshotTypeName = type.Name;
                     }
-                    // else: type doesn't exist, leave LanguageFocusTypeId as null
+                    else
+                    {
+                        lessonLF.SnapshotTypeName = lfDto.Name;
+                    }
                 }
 
                 entity.LanguageFocusItems.Add(lessonLF);
@@ -284,13 +315,16 @@ namespace Services
                 {
                     var type = await _context.PreparationTypes
                         .FirstOrDefaultAsync(t => t.Id == prepDto.PreparationTypeId);
-                    
+
                     if (type != null)
                     {
                         lessonPrep.PreparationTypeId = prepDto.PreparationTypeId;
                         lessonPrep.SnapshotTypeName = type.Name;
                     }
-                    // else: type doesn't exist, leave PreparationTypeId as null
+                    else
+                    {
+                        lessonPrep.SnapshotTypeName = prepDto.Name;
+                    }
                 }
 
                 entity.Preparations.Add(lessonPrep);
@@ -320,14 +354,18 @@ namespace Services
                     {
                         var pattern = await _context.InteractionPatterns
                             .FirstOrDefaultAsync(p => p.Id == itemDto.InteractionPatternId);
-                        
+
                         if (pattern != null)
                         {
                             activityItem.InteractionPatternId = itemDto.InteractionPatternId;
                             activityItem.SnapshotInteractionName = pattern.Name;
                             activityItem.SnapshotInteractionShortCode = pattern.ShortCode;
                         }
-                        // else: pattern doesn't exist, leave InteractionPatternId as null
+                        else
+                        {
+                            activityItem.SnapshotInteractionName = itemDto.InteractionPatternName;
+                            activityItem.SnapshotInteractionShortCode = itemDto.InteractionPatternShortCode;
+                        }
                     }
 
                     // Populate snapshot data and validate activity template exists
@@ -335,14 +373,18 @@ namespace Services
                     {
                         var activityTemplate = await _context.ActivityTemplates
                             .FirstOrDefaultAsync(at => at.Id == itemDto.ActivityTemplateId);
-                        
+
                         if (activityTemplate != null)
                         {
                             activityItem.ActivityTemplateId = itemDto.ActivityTemplateId;
                             activityItem.SnapshotActivityName = activityTemplate.Name;
                             activityItem.SnapshotActivityContent = activityTemplate.Content;
                         }
-                        // else: template doesn't exist, leave ActivityTemplateId as null
+                        else
+                        {
+                            activityItem.SnapshotActivityName = itemDto.ActivityTemplateName;
+                            activityItem.SnapshotActivityContent = itemDto.ActivityTemplateContent;
+                        }
                     }
 
                     stage.ActivityItems.Add(activityItem);

@@ -13,7 +13,7 @@ namespace BusinessObject.Dtos.LessonDTO
         [Required]
         [MaxLength(200)]
         public string Title { get; set; }
-        
+
         public string? Content { get; set; }
         public string? Description { get; set; }
         public DateTime? DateOfPreparation { get; set; }
@@ -30,10 +30,13 @@ namespace BusinessObject.Dtos.LessonDTO
 
         [Required]
         public int ClassId { get; set; }
-        
+
         public int? UnitId { get; set; }
         public int? LessonDefinitionId { get; set; }
+
         public int? MethodTemplateId { get; set; }
+        public string? MethodName { get; set; }
+        public string? MethodDescription { get; set; }
 
         [JsonPropertyName("objectives")]
         public List<LessonObjectiveDto>? Objectives { get; set; } = new();
@@ -50,62 +53,74 @@ namespace BusinessObject.Dtos.LessonDTO
     }
 
 
-    public class LessonObjectiveDto 
-    { 
-        public int Id { get; set; } 
-        public int? ObjectiveTemplateId { get; set; } 
-        public string? CustomContent { get; set; } 
-        public int DisplayOrder { get; set; } 
+    public class LessonObjectiveDto
+    {
+        public int Id { get; set; }
+        public int? ObjectiveTemplateId { get; set; }
+        public string? Name { get; set; }
+        public string? CustomContent { get; set; }
+        public int DisplayOrder { get; set; }
     }
-    
-    public class LessonSkillDto 
-    { 
-        public int Id { get; set; } 
-        public int? SkillTemplateId { get; set; } 
-        public string? Description { get; set; } 
-        public int DisplayOrder { get; set; } 
+
+    public class LessonSkillDto
+    {
+        public int Id { get; set; }
+        public int? SkillTemplateId { get; set; }
+        public string? Name { get; set; }
+        public string? Description { get; set; }
+        public int DisplayOrder { get; set; }
     }
-    
-    public class LessonAttitudeDto 
-    { 
-        public int Id { get; set; } 
-        public int? AttitudeTemplateId { get; set; } 
-        public string? CustomContent { get; set; } 
-        public int DisplayOrder { get; set; } 
+
+    public class LessonAttitudeDto
+    {
+        public int Id { get; set; }
+        public int? AttitudeTemplateId { get; set; }
+        public string? Name { get; set; }
+        public string? CustomContent { get; set; }
+        public int DisplayOrder { get; set; }
     }
-    
-    public class LessonLanguageFocusDto 
-    { 
-        public int Id { get; set; } 
-        public int? LanguageFocusTypeId { get; set; } 
-        public string? Content { get; set; } 
-        public int DisplayOrder { get; set; } 
+
+    public class LessonLanguageFocusDto
+    {
+        public int Id { get; set; }
+        public int? LanguageFocusTypeId { get; set; }
+        public string? Name { get; set; }
+        public string? Content { get; set; }
+        public int DisplayOrder { get; set; }
     }
-    
-    public class LessonPreparationDto 
-    { 
-        public int Id { get; set; } 
-        public int? PreparationTypeId { get; set; } 
-        public string? Materials { get; set; } 
-        public int DisplayOrder { get; set; } 
+
+    public class LessonPreparationDto
+    {
+        public int Id { get; set; }
+        public int? PreparationTypeId { get; set; }
+        public string? Name { get; set; }
+        public string? Materials { get; set; }
+        public int DisplayOrder { get; set; }
     }
-    
-    public class LessonActivityItemDto 
-    { 
-        public int Id { get; set; } 
-        public int TimeInMinutes { get; set; } 
-        public string? Content { get; set; } 
+
+    public class LessonActivityItemDto
+    {
+        public int Id { get; set; }
+        public int TimeInMinutes { get; set; }
+        public string? Content { get; set; }
+
         public int? InteractionPatternId { get; set; }
+        public string? InteractionPatternName { get; set; }
+        public string? InteractionPatternShortCode { get; set; }
+
         public int? ActivityTemplateId { get; set; }
-        public int DisplayOrder { get; set; } 
+        public string? ActivityTemplateName { get; set; }
+        public string? ActivityTemplateContent { get; set; }
+
+        public int DisplayOrder { get; set; }
     }
-    
-    public class LessonActivityStageDto 
-    { 
-        public int Id { get; set; } 
-        public string? StageName { get; set; } 
+
+    public class LessonActivityStageDto
+    {
+        public int Id { get; set; }
+        public string? StageName { get; set; }
         public int DisplayOrder { get; set; }
         [JsonPropertyName("activityItems")]
-        public List<LessonActivityItemDto>? ActivityItems { get; set; } = new(); 
+        public List<LessonActivityItemDto>? ActivityItems { get; set; } = new();
     }
 }

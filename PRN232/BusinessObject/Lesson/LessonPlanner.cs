@@ -75,6 +75,10 @@ namespace BusinessObject.Lesson
         public string? SnapshotClassName { get; set; }
         public string? SnapshotGradeLevelName { get; set; }
 
+        // History/Snapshot fields for Definition
+        public string? SnapshotDefinitionLessonNumber { get; set; }
+        public string? SnapshotDefinitionLessonTitle { get; set; }
+
         // History/Snapshot fields for Method
         public string? SnapshotMethodName { get; set; }
         public string? SnapshotMethodDescription { get; set; }
