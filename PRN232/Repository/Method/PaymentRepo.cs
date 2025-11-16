@@ -24,6 +24,12 @@ namespace Repository.Method
         public async Task<Payment> CreatePayment(int userId, long orderCode, int packageId ,int amount, string description)
         => await _paymentDAO.CreatePayment(userId, orderCode, packageId ,amount, description);
 
+        public async  Task<List<Payment>> GetAllPaidPaymentsAsync(DateTime? startDate = null, DateTime? endDate = null)
+       => await _paymentDAO.GetAllPaidPaymentsAsync(startDate, endDate);
+
+        public async Task<(List<Payment> payments, int totalCount)> GetPaginatedPaidPaymentsAsync(int pageNumber, int pageSize, DateTime? startDate = null, DateTime? endDate = null)
+        => await _paymentDAO.GetPaginatedPaidPaymentsAsync(pageNumber, pageSize, startDate, endDate);
+
         public async Task<Payment> GetPaymentById(int id)
         => await _paymentDAO.GetPaymentById(id);
 

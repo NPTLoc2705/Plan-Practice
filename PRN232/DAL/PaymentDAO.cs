@@ -20,7 +20,7 @@ namespace DAL
             _logger = logger;
         }
 
-        public async Task<Payment> CreatePayment(int userId, long orderCode, int packageId ,int amount, string description)
+        public async Task<Payment> CreatePayment(int userId, long orderCode, int packageId, int amount, string description)
         {
             var payment = new Payment
             {
@@ -104,7 +104,7 @@ namespace DAL
             if (status == "PAID")
             {
                 payment.PaidAt = DateTime.UtcNow;
-                if(payment.PackageId != null)
+                if (payment.PackageId != null)
                 {
                     await AddCoinToUser(payment.UserId, payment.Package.CoinAmount);
                 }
@@ -128,30 +128,55 @@ namespace DAL
             return payment;
         }
 
-        //public async Task<bool> UpgradeUserToVip(int userId)
-        //{
-        //    try
-        //    {
-        //        var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+        public async Task<List<Payment>> GetAllPaidPaymentsAsync(DateTime? startDate = null, DateTime? endDate = null)
+        {
+            var query = _context.Payments
+                .Include(p => p.User)
+                .Include(p => p.Package)
+                .Where(p => p.Status == "PAID");
 
-        //        if (user == null)
-        //        {
-        //            _logger.LogWarning("User not found for upgrade: UserId={UserId}", userId);
-        //            return false;
-        //        }
+            if (startDate.HasValue)
+            {
+                query = query.Where(p => p.PaidAt >= startDate.Value);
+            }
 
-        //        // RoleId = 2 is VIP based on your Role seeding
-        //        user.RoleId = 2;
-        //        await _context.SaveChangesAsync();
+            if (endDate.HasValue)
+            {
+                query = query.Where(p => p.PaidAt <= endDate.Value);
+            }
 
-        //        _logger.LogInformation("User upgraded to VIP: UserId={UserId}", userId);
-        //        return true;
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        _logger.LogError(ex, "Error upgrading user to VIP: UserId={UserId}", userId);
-        //        return false;
-        //    }
-        //}
+            return await query
+                .OrderByDescending(p => p.PaidAt)
+                .ToListAsync();
+        }
+
+        public async Task<(List<Payment> payments, int totalCount)> GetPaginatedPaidPaymentsAsync(
+            int pageNumber, int pageSize, DateTime? startDate = null, DateTime? endDate = null)
+        {
+            var query = _context.Payments
+                .Include(p => p.User)
+                .Include(p => p.Package)
+                .Where(p => p.Status == "PAID");
+
+            if (startDate.HasValue)
+            {
+                query = query.Where(p => p.PaidAt >= startDate.Value);
+            }
+
+            if (endDate.HasValue)
+            {
+                query = query.Where(p => p.PaidAt <= endDate.Value);
+            }
+
+            var totalCount = await query.CountAsync();
+
+            var payments = await query
+                .OrderByDescending(p => p.PaidAt)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return (payments, totalCount);
+        }
     }
 }
