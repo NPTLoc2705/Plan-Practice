@@ -55,8 +55,9 @@ namespace PRN232
         options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
         options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
     });
-            builder.Services.AddDbContext<PlantPraticeDbContext>(options =>
-   options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+            builder.Services.AddDbContext<PlantPraticeDbContext>();
+
+
             builder.Services.AddOpenApi("v1", options =>
             {
                 options.AddDocumentTransformer<BearerSecuritySchemeTransformer>();

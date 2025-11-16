@@ -75,16 +75,23 @@ namespace Service.Method
                 user.Phone = updateDto.Phone;
 
             // Update role if provided
-            if (updateDto.Role.HasValue)
+            if (!string.IsNullOrWhiteSpace(updateDto.Role))
             {
-                // Prevent removing the last admin
-                if (user.Role == UserRole.Admin && updateDto.Role.Value != UserRole.Admin)
+                if (Enum.TryParse<UserRole>(updateDto.Role, true, out var parsedRole))
                 {
-                    var adminCount = (await _adminRepository.GetAllUsersByRoleAsync(UserRole.Admin)).Count;
-                    if (adminCount <= 1)
-                        throw new Exception("Cannot change role. At least one admin must exist.");
+                    // Prevent removing the last admin
+                    if (user.Role == UserRole.Admin && parsedRole != UserRole.Admin)
+                    {
+                        var adminCount = (await _adminRepository.GetAllUsersByRoleAsync(UserRole.Admin)).Count;
+                        if (adminCount <= 1)
+                            throw new Exception("Cannot change role. At least one admin must exist.");
+                    }
+                    user.Role = parsedRole;
                 }
-                user.Role = updateDto.Role.Value;
+                else
+                {
+                    throw new Exception($"Invalid role: {updateDto.Role}");
+                }
             }
 
             var updatedUser = await _adminRepository.UpdateUserAsync(user);

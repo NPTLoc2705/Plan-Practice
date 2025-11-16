@@ -11,22 +11,25 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using BusinessObject.Payments;
 
 namespace Service.Method
 {
     public class PaymentService : IPaymentService
     {
         private readonly IPaymentRepo _paymentRepo;
+        private readonly IUserRepository _userRepo;
         private readonly IPackageRepo _packageRepo;
         private readonly IConfiguration _configuration;
         private readonly ILogger<PaymentService> _logger;
         private readonly PayOS _payOS;
 
-        public PaymentService(IPaymentRepo paymentRepo, IPackageRepo packageRepo ,IConfiguration configuration, ILogger<PaymentService> logger)
+        public PaymentService(IPaymentRepo paymentRepo, IPackageRepo packageRepo , IUserRepository userRepository ,IConfiguration configuration, ILogger<PaymentService> logger)
         {
             _paymentRepo = paymentRepo;
             _packageRepo = packageRepo;
             _configuration = configuration;
+            _userRepo = userRepository;
             _logger = logger;
 
             // Initialize PayOS SDK
@@ -115,8 +118,88 @@ namespace Service.Method
             }
         }
 
+        public async Task<List<PaymentTransactionDto>> GetAllPaidTransactionsAsync(DateTime? startDate = null, DateTime? endDate = null)
+        {
+            try
+            {
+                var payments = await _paymentRepo.GetAllPaidPaymentsAsync(startDate, endDate);
 
-      
+                return payments.Select(p => new PaymentTransactionDto
+                {
+                    OrderCode = p.OrderCode,
+                    UserId = p.UserId,
+                    UserName = p.User?.Username ?? "Unknown",
+                    Email = p.User?.Email ?? "Unknown",
+                    PackageId = p.PackageId,
+                    PackageName = p.Package?.Name ?? "Unknown",
+                    CoinAmount = p.Package?.CoinAmount ?? 0,
+                    Amount = p.Amount,
+                    Description = p.Description,
+                    Status = p.Status,
+                    CreatedAt = p.CreatedAt,
+                    PaidAt = p.PaidAt,
+                    TransactionCode = p.TransactionCode
+                }).ToList();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting all paid transactions");
+                throw;
+            }
+        }
+
+        public async Task<(List<PaymentTransactionDto> transactions, int totalCount)> GetPaginatedPaidTransactionsAsync(
+    int pageNumber, int pageSize, DateTime? startDate = null, DateTime? endDate = null)
+        {
+            try
+            {
+                if (pageNumber < 1) pageNumber = 1;
+                if (pageSize < 1 || pageSize > 100) pageSize = 10;
+
+                var (payments, totalCount) = await _paymentRepo.GetPaginatedPaidPaymentsAsync(
+                    pageNumber, pageSize, startDate, endDate);
+
+                var transactions = new List<PaymentTransactionDto>();
+
+                foreach (var p in payments)
+                {
+                    // If User or Package is null, try to load them manually
+                    if (p.User == null && p.UserId > 0)
+                    {
+                        p.User = await _userRepo.GetUserById(p.UserId);
+                    }
+
+                    if (p.Package == null && p.PackageId > 0)
+                    {
+                        p.Package = await _packageRepo.FindPackageById(p.PackageId);
+                    }
+
+                    transactions.Add(new PaymentTransactionDto
+                    {
+                        OrderCode = p.OrderCode,
+                        UserId = p.UserId,
+                        UserName = p.User?.Username ?? "Unknown User",
+                        Email = p.User?.Email ?? "No Email",
+                        PackageId = p.PackageId,
+                        PackageName = p.Package?.Name ?? "Unknown Package",
+                        CoinAmount = p.Package?.CoinAmount ?? 0,
+                        Amount = p.Amount,
+                        Description = p.Description ?? "",
+                        Status = p.Status ?? "UNKNOWN",
+                        CreatedAt = p.CreatedAt,
+                        PaidAt = p.PaidAt,
+                        TransactionCode = p.TransactionCode ?? ""
+                    });
+                }
+
+                return (transactions, totalCount);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting paginated paid transactions");
+                throw;
+            }
+        }
 
         public async Task<PaymentStatusResponse> GetPaymentStatus(long orderCode)
         {
@@ -168,6 +251,62 @@ namespace Service.Method
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error getting payment status for OrderCode={OrderCode}", orderCode);
+                throw;
+            }
+        }
+
+        public async Task<PaymentRevenueDto> GetTotalRevenueAsync(DateTime? startDate = null, DateTime? endDate = null)
+        {
+            try
+            {
+                var payments = await _paymentRepo.GetAllPaidPaymentsAsync(startDate, endDate);
+
+                // Calculate total revenue
+                var totalRevenue = payments.Sum(p => p.Amount);
+                var totalTransactions = payments.Count;
+                var totalCoins = payments.Sum(p => p.Package?.CoinAmount ?? 0);
+
+                // Revenue by package
+                var revenueByPackage = payments
+                    .GroupBy(p => new { p.PackageId, PackageName = p.Package?.Name ?? "Unknown" })
+                    .Select(g => new RevenueByPackageDto
+                    {
+                        PackageId = g.Key.PackageId,
+                        PackageName = g.Key.PackageName,
+                        TotalRevenue = g.Sum(p => p.Amount),
+                        TotalTransactions = g.Count(),
+                        TotalCoins = g.Sum(p => p.Package?.CoinAmount ?? 0)
+                    })
+                    .OrderByDescending(r => r.TotalRevenue)
+                    .ToList();
+
+                // Daily revenue
+                var dailyRevenue = payments
+                    .Where(p => p.PaidAt.HasValue)
+                    .GroupBy(p => p.PaidAt.Value.Date)
+                    .Select(g => new DailyRevenueDto
+                    {
+                        Date = g.Key,
+                        Revenue = g.Sum(p => p.Amount),
+                        TransactionCount = g.Count()
+                    })
+                    .OrderBy(d => d.Date)
+                    .ToList();
+
+                return new PaymentRevenueDto
+                {
+                    TotalRevenue = totalRevenue,
+                    TotalTransactions = totalTransactions,
+                    TotalCoins = totalCoins,
+                    StartDate = startDate,
+                    EndDate = endDate,
+                    RevenueByPackage = revenueByPackage,
+                    DailyRevenue = dailyRevenue
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error calculating total revenue");
                 throw;
             }
         }

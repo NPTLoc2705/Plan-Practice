@@ -1,460 +1,224 @@
+// src/pages/AdminDashboard.jsx
 import React, { useState, useEffect } from 'react';
-import { Search, RefreshCw, GraduationCap, BookOpen, Users, Shield, BarChart3, Filter, Ban, UserCheck } from 'lucide-react';
-
-// Components
-import Toast from '../components/Toast/Toast';
-import Pagination from '../components/Pagination/Pagination';
-import UserTable from '../components/UserTable/UserTable';
-
-// Services & Hooks
+import { useNavigate } from 'react-router-dom';
 import AdminAPI from '../components/APIService/AdminAPI';
-import { useToast } from '../components/Toast/useToast';
+
+// Import sub-components
+import DashboardOverview from '../components/Admin/DashboardOverview';
+import UserManagement from '../components/Admin/UserManagement';
+import RevenueManagement from '../components/Admin/RevenueManagement';
+import PackageManagement from '../components/Admin/PackageManagement';
+
+// Icons (you can use react-icons or heroicons)
+import { 
+  HomeIcon, 
+  UsersIcon, 
+  CurrencyDollarIcon, 
+  CubeIcon, 
+  DocumentTextIcon,
+  ArrowRightOnRectangleIcon,
+  UserCircleIcon,
+  Cog6ToothIcon
+} from '@heroicons/react/24/outline';
 
 const AdminDashboard = () => {
-  const [students, setStudents] = useState([]);
-  const [teachers, setTeachers] = useState([]);
-  const [loading, setLoading] = useState({ students: false, teachers: false });
-  const [searchTerm, setSearchTerm] = useState('');
-  const [banFilter, setBanFilter] = useState('all'); // 'all', 'banned', 'active'
-  const [currentPage, setCurrentPage] = useState({ students: 1, teachers: 1 });
-  const [editingUser, setEditingUser] = useState(null);
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('overview');
+  const [loading, setLoading] = useState(false);
+  const [adminInfo, setAdminInfo] = useState({
+    name: 'Admin User',
+    email: 'admin@example.com',
+    role: 'Administrator'
+  });
   const [stats, setStats] = useState({
+    totalUsers: 0,
     totalStudents: 0,
     totalTeachers: 0,
-    bannedUsers: 0,
-    activeUsers: 0
+    todayRevenue: 0,
+    monthRevenue: 0,
+    yearRevenue: 0
   });
-  
-  const { toast, showToast, hideToast } = useToast();
-
-  const ITEMS_PER_PAGE = 10;
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   useEffect(() => {
-    fetchStudents();
-    fetchTeachers();
+    fetchDashboardStats();
+    // Get admin info from localStorage or session
+    const storedAdminInfo = localStorage.getItem('adminInfo');
+    if (storedAdminInfo) {
+      setAdminInfo(JSON.parse(storedAdminInfo));
+    }
   }, []);
 
-  useEffect(() => {
-    // Update stats when data changes
-    const bannedStudents = students.filter(s => s.isBanned).length;
-    const bannedTeachers = teachers.filter(t => t.isBanned).length;
+  const fetchDashboardStats = async () => {
+    setLoading(true);
+    try {
+      const [users, students, teachers, todayRev, monthRev, yearRev] = await Promise.all([
+        AdminAPI.getUsers(),
+        AdminAPI.getStudents(),
+        AdminAPI.getTeachers(),
+        AdminAPI.getTodayRevenue(),
+        AdminAPI.getMonthRevenue(),
+        AdminAPI.getYearRevenue()
+      ]);
+
+      setStats({
+        totalUsers: users.data?.length || 0,
+        totalStudents: students.data?.length || 0,
+        totalTeachers: teachers.data?.length || 0,
+        todayRevenue: todayRev.data?.total || 0,
+        monthRevenue: monthRev.data?.total || 0,
+        yearRevenue: yearRev.data?.total || 0
+      });
+    } catch (error) {
+      console.error('Failed to fetch dashboard stats:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleLogout = () => {
+    // Clear authentication tokens and user data
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    sessionStorage.clear();
     
-    setStats({
-      totalStudents: students.length,
-      totalTeachers: teachers.length,
-      bannedUsers: bannedStudents + bannedTeachers,
-      activeUsers: (students.length + teachers.length) - (bannedStudents + bannedTeachers)
-    });
-  }, [students, teachers]);
+    // Redirect to login page
+    navigate('/login');
+    
+    // Optional: Call logout API if you have one
+    // AdminAPI.logout();
+  };
 
-  const fetchStudents = async () => {
-    setLoading(prev => ({ ...prev, students: true }));
-    try {
-      const response = await AdminAPI.getStudents();
-      setStudents(response.data);
-    } catch (error) {
-      showToast('Failed to load students', 'error');
-    } finally {
-      setLoading(prev => ({ ...prev, students: false }));
+  const renderContent = () => {
+    switch(activeTab) {
+      case 'overview':
+        return <DashboardOverview stats={stats} loading={loading} />;
+      case 'users':
+        return <UserManagement />;
+      case 'revenue':
+        return <RevenueManagement />;
+      case 'packages':
+        return <PackageManagement />;
+      default:
+        return <DashboardOverview stats={stats} loading={loading} />;
     }
   };
 
-  const fetchTeachers = async () => {
-    setLoading(prev => ({ ...prev, teachers: true }));
-    try {
-      const response = await AdminAPI.getTeachers();
-      setTeachers(response.data);
-    } catch (error) {
-      showToast('Failed to load teachers', 'error');
-    } finally {
-      setLoading(prev => ({ ...prev, teachers: false }));
-    }
-  };
-
-  const handleRefreshAll = () => {
-    fetchStudents();
-    fetchTeachers();
-    showToast('Refreshing all data...', 'info');
-  };
-
-  const handleBanToggle = async (user) => {
-    try {
-      if (user.isBanned) {
-        await AdminAPI.unbanUser(user.id);
-      } else {
-        await AdminAPI.banUser(user.id);
-      }
-
-      const updateList = user.role === 'Student' ? setStudents : setTeachers;
-      updateList(prev => prev.map(u => 
-        u.id === user.id ? { ...u, isBanned: !u.isBanned } : u
-      ));
-
-      showToast(
-        `User ${user.isBanned ? 'unbanned' : 'banned'} successfully`,
-        'success'
-      );
-    } catch (error) {
-      showToast('Failed to update user status', 'error');
-    }
-  };
-
-  const handleEditUser = async (userId, data) => {
-    try {
-      await AdminAPI.updateUser(userId, data);
-
-      const updateList = editingUser.role === 'Student' ? setStudents : setTeachers;
-      updateList(prev => prev.map(u => 
-        u.id === userId ? { ...u, ...data } : u
-      ));
-
-      showToast('User updated successfully', 'success');
-      setEditingUser(null);
-    } catch (error) {
-      showToast('Failed to update user', 'error');
-    }
-  };
-
-  // Enhanced filter function with ban status
-  const filterUsers = (users) => {
-    let filtered = users;
-
-    // Apply search filter
-    if (searchTerm) {
-      const term = searchTerm.toLowerCase();
-      filtered = filtered.filter(user => 
-        user.username?.toLowerCase().includes(term) ||
-        user.email?.toLowerCase().includes(term) ||
-        user.phone?.includes(term)
-      );
-    }
-
-    // Apply ban status filter
-    if (banFilter !== 'all') {
-      filtered = filtered.filter(user => 
-        banFilter === 'banned' ? user.isBanned : !user.isBanned
-      );
-    }
-
-    return filtered;
-  };
-
-  const paginateUsers = (users, page) => {
-    const startIndex = (page - 1) * ITEMS_PER_PAGE;
-    return users.slice(startIndex, startIndex + ITEMS_PER_PAGE);
-  };
-
-  const filteredStudents = filterUsers(students);
-  const filteredTeachers = filterUsers(teachers);
-  const paginatedStudents = paginateUsers(filteredStudents, currentPage.students);
-  const paginatedTeachers = paginateUsers(filteredTeachers, currentPage.teachers);
-
-  // Clear all filters
-  const clearFilters = () => {
-    setSearchTerm('');
-    setBanFilter('all');
-    setCurrentPage({ students: 1, teachers: 1 });
-  };
-
-  // Check if any filter is active
-  const hasActiveFilters = searchTerm || banFilter !== 'all';
+  const navItems = [
+    { id: 'overview', label: 'Overview', icon: HomeIcon },
+    { id: 'users', label: 'Users', icon: UsersIcon },
+    { id: 'revenue', label: 'Revenue', icon: CurrencyDollarIcon },
+    { id: 'packages', label: 'Packages', icon: CubeIcon },
+  ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50/30">
-      {/* Header */}
-      <div className="bg-white border-b border-gray-200 shadow-sm">
-        <div className="max-w-7xl mx-auto px-6 py-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                Plan&Practice Admin Dashboard
-              </h1>
-              <p className="text-gray-600 mt-2">Manage students and teachers efficiently</p>
-            </div>
-            <button
-              onClick={handleRefreshAll}
-              className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors shadow-sm"
-            >
-              <RefreshCw className="h-4 w-4" />
-              Refresh All
-            </button>
-          </div>
+    <div className="flex h-screen bg-gray-100">
+      {/* Sidebar */}
+      <div className="w-64 bg-gray-900 text-white shadow-lg flex flex-col">
+        {/* Header */}
+        <div className="p-6 border-b border-gray-800">
+          <h2 className="text-2xl font-bold mb-1">Admin Panel</h2>
+          <p className="text-xs text-gray-400">Management Dashboard</p>
+        </div>
 
-          {/* Navigation Tabs */}
-          <div className="mt-6 flex space-x-1 border-b border-gray-200">
-            {['overview', 'students', 'teachers', 'analytics'].map((tab) => (
+        {/* Admin Profile Section */}
+        <div className="px-6 py-4 border-b border-gray-800">
+          <div className="flex items-center space-x-3">
+            <div className="flex-shrink-0">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+                <UserCircleIcon className="w-6 h-6 text-white" />
+              </div>
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium truncate">{adminInfo.name}</p>
+              <p className="text-xs text-gray-400 truncate">{adminInfo.role}</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Navigation */}
+        <nav className="flex-1 mt-6">
+          {navItems.map((item) => {
+            const Icon = item.icon;
+            return (
               <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                className={`px-4 py-2 font-medium text-sm rounded-t-lg transition-colors ${
-                  activeTab === tab
-                    ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50/50'
-                    : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100/50'
+                key={item.id}
+                className={`w-full flex items-center px-6 py-3 text-left transition-colors duration-200 hover:bg-gray-800 ${
+                  activeTab === item.id 
+                    ? 'bg-blue-600 border-l-4 border-blue-400' 
+                    : ''
                 }`}
+                onClick={() => setActiveTab(item.id)}
               >
-                {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                <Icon className="w-5 h-5 mr-3" />
+                <span className="text-sm font-medium">{item.label}</span>
               </button>
-            ))}
-          </div>
+            );
+          })}
+        </nav>
+
+        {/* Bottom Section with Settings and Logout */}
+        <div className="border-t border-gray-800">
+         
+          
+          <button
+            className="w-full flex items-center px-6 py-3 text-left transition-colors duration-200 hover:bg-red-600 group"
+            onClick={() => setShowLogoutConfirm(true)}
+          >
+            <ArrowRightOnRectangleIcon className="w-5 h-5 mr-3 group-hover:animate-pulse" />
+            <span className="text-sm font-medium">Logout</span>
+          </button>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 py-8 space-y-8">
-        {/* Stats Overview */}
-        {activeTab === 'overview' && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
-              <div className="flex items-center justify-between">
+      {/* Main Content */}
+      <div className="flex-1 overflow-y-auto">
+        <div className="p-8">
+          {renderContent()}
+        </div>
+      </div>
+
+      {/* Logout Confirmation Modal */}
+      {showLogoutConfirm && (
+        <div className="fixed inset-0 z-50 overflow-y-auto">
+          <div className="flex items-center justify-center min-h-screen px-4">
+            <div 
+              className="fixed inset-0 bg-black opacity-50" 
+              onClick={() => setShowLogoutConfirm(false)}
+            ></div>
+            
+            <div className="relative bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="h-12 w-12 rounded-full bg-red-100 flex items-center justify-center">
+                  <ArrowRightOnRectangleIcon className="h-6 w-6 text-red-600" />
+                </div>
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Total Students</p>
-                  <p className="text-2xl font-bold text-gray-900 mt-1">{stats.totalStudents}</p>
-                </div>
-                <div className="p-3 bg-blue-100 rounded-xl">
-                  <GraduationCap className="h-6 w-6 text-blue-600" />
+                  <h3 className="text-lg font-semibold text-gray-900">Confirm Logout</h3>
+                  <p className="text-sm text-gray-600">Are you sure you want to logout?</p>
                 </div>
               </div>
-            </div>
 
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">Total Teachers</p>
-                  <p className="text-2xl font-bold text-gray-900 mt-1">{stats.totalTeachers}</p>
-                </div>
-                <div className="p-3 bg-purple-100 rounded-xl">
-                  <BookOpen className="h-6 w-6 text-purple-600" />
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">Active Users</p>
-                  <p className="text-2xl font-bold text-green-600 mt-1">{stats.activeUsers}</p>
-                </div>
-                <div className="p-3 bg-green-100 rounded-xl">
-                  <Users className="h-6 w-6 text-green-600" />
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">Banned Users</p>
-                  <p className="text-2xl font-bold text-red-600 mt-1">{stats.bannedUsers}</p>
-                </div>
-                <div className="p-3 bg-red-100 rounded-xl">
-                  <Shield className="h-6 w-6 text-red-600" />
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Enhanced Search and Filter Bar */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
-            <div className="flex flex-col sm:flex-row gap-4 flex-1 max-w-4xl">
-              {/* Search Input */}
-              <div className="relative flex-1 min-w-[300px]">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
-                <input
-                  type="text"
-                  placeholder="Search by username, email, or phone..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:outline-none transition-all"
-                />
-              </div>
-
-              {/* Ban Status Filter */}
-              <div className="flex gap-2 items-center">
-                <select
-                  value={banFilter}
-                  onChange={(e) => setBanFilter(e.target.value)}
-                  className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:outline-none transition-all"
-                >
-                  <option value="all">All Users</option>
-                  <option value="active">Active Only</option>
-                  <option value="banned">Banned Only</option>
-                </select>
-              </div>
-            </div>
-
-            <div className="flex gap-3 w-full lg:w-auto">
-              {/* Clear Filters Button */}
-              {hasActiveFilters && (
-                <button 
-                  onClick={clearFilters}
-                  className="flex items-center gap-2 px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-                >
-                  Clear Filters
-                </button>
-              )}
+              <p className="text-gray-700 mb-6">
+                You will be redirected to the login page and will need to sign in again to access the admin dashboard.
+              </p>
               
-              <button className="px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
-                Export Data
-              </button>
+              <div className="flex justify-end gap-3">
+                <button
+                  onClick={() => setShowLogoutConfirm(false)}
+                  className="px-5 py-2.5 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleLogout}
+                  className="px-5 py-2.5 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                >
+                  Logout
+                </button>
+              </div>
             </div>
-          </div>
-
-          {/* Active Filters Display */}
-          {hasActiveFilters && (
-            <div className="mt-4 flex flex-wrap gap-2">
-              {searchTerm && (
-                <span className="inline-flex items-center gap-1 px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
-                  Search: "{searchTerm}"
-                  <button 
-                    onClick={() => setSearchTerm('')}
-                    className="hover:text-blue-600"
-                  >
-                    ×
-                  </button>
-                </span>
-              )}
-              {banFilter !== 'all' && (
-                <span className="inline-flex items-center gap-1 px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-sm">
-                  Status: {banFilter === 'banned' ? 'Banned' : 'Active'}
-                  <button 
-                    onClick={() => setBanFilter('all')}
-                    className="hover:text-purple-600"
-                  >
-                    ×
-                  </button>
-                </span>
-              )}
-            </div>
-          )}
-
-          {/* Results Count */}
-          <div className="mt-4 text-sm text-gray-600">
-            Showing {filteredStudents.length + filteredTeachers.length} users 
-            ({filteredStudents.length} students, {filteredTeachers.length} teachers)
-            {hasActiveFilters && ` (filtered from ${students.length + teachers.length} total)`}
           </div>
         </div>
-
-        {/* Students Section */}
-        {(activeTab === 'overview' || activeTab === 'students') && (
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
-            <div className="p-6 border-b border-gray-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-blue-100 rounded-lg">
-                  <GraduationCap className="h-6 w-6 text-blue-600" />
-                </div>
-                <div>
-                  <h2 className="text-xl font-bold text-gray-900">Students Management</h2>
-                  <p className="text-sm text-gray-600">
-                    Showing {paginatedStudents.length} of {filteredStudents.length} students
-                    {hasActiveFilters && ` (filtered from ${students.length} total)`}
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={fetchStudents}
-                  disabled={loading.students}
-                  className="flex items-center gap-2 px-3 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 transition-colors"
-                >
-                  <RefreshCw className={`h-4 w-4 ${loading.students ? 'animate-spin' : ''}`} />
-                  Refresh
-                </button>
-              </div>
-            </div>
-
-            <UserTable
-              users={paginatedStudents}
-              userType="Student"
-              onBanToggle={handleBanToggle}
-              onEdit={setEditingUser}
-              loading={loading.students}
-            />
-
-            {filteredStudents.length > ITEMS_PER_PAGE && (
-              <div className="p-6 border-t border-gray-200 bg-gray-50/50">
-                <Pagination
-                  currentPage={currentPage.students}
-                  totalPages={Math.ceil(filteredStudents.length / ITEMS_PER_PAGE)}
-                  onPageChange={(page) => setCurrentPage(prev => ({ ...prev, students: page }))}
-                />
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Teachers Section */}
-        {(activeTab === 'overview' || activeTab === 'teachers') && (
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
-            <div className="p-6 border-b border-gray-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-purple-100 rounded-lg">
-                  <BookOpen className="h-6 w-6 text-purple-600" />
-                </div>
-                <div>
-                  <h2 className="text-xl font-bold text-gray-900">Teachers Management</h2>
-                  <p className="text-sm text-gray-600">
-                    Showing {paginatedTeachers.length} of {filteredTeachers.length} teachers
-                    {hasActiveFilters && ` (filtered from ${teachers.length} total)`}
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={fetchTeachers}
-                  disabled={loading.teachers}
-                  className="flex items-center gap-2 px-3 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 transition-colors"
-                >
-                  <RefreshCw className={`h-4 w-4 ${loading.teachers ? 'animate-spin' : ''}`} />
-                  Refresh
-                </button>
-              </div>
-            </div>
-
-            <UserTable
-              users={paginatedTeachers}
-              userType="Teacher"
-              onBanToggle={handleBanToggle}
-              onEdit={setEditingUser}
-              loading={loading.teachers}
-            />
-
-            {filteredTeachers.length > ITEMS_PER_PAGE && (
-              <div className="p-6 border-t border-gray-200 bg-gray-50/50">
-                <Pagination
-                  currentPage={currentPage.teachers}
-                  totalPages={Math.ceil(filteredTeachers.length / ITEMS_PER_PAGE)}
-                  onPageChange={(page) => setCurrentPage(prev => ({ ...prev, teachers: page }))}
-                />
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Analytics Placeholder */}
-        {activeTab === 'analytics' && (
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 text-center">
-            <BarChart3 className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-xl font-bold text-gray-900 mb-2">Analytics Dashboard</h3>
-            <p className="text-gray-600 max-w-md mx-auto">
-              User engagement metrics, platform usage statistics, and performance analytics will be displayed here.
-            </p>
-            <button className="mt-6 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
-              Generate Reports
-            </button>
-          </div>
-        )}
-      </div>
-
-      {/* Toast */}
-      {toast && (
-        <Toast
-          message={toast.message}
-          type={toast.type}
-          onClose={hideToast}
-        />
       )}
     </div>
   );

@@ -15,5 +15,12 @@ namespace Repository.Interface
         Task<List<Payment>> GetUserPayments(int userId);
         Task<Payment> UpdatePaymentStatus(long orderCode, string status, string transactionCode = null, string paymentLinkId = null);
         Task<bool> AddCoinToUser(int userId, int coinAmount);
+
+
+        Task<List<Payment>> GetAllPaidPaymentsAsync(DateTime? startDate = null, DateTime? endDate = null);
+        Task<(List<Payment> payments, int totalCount)> GetPaginatedPaidPaymentsAsync(
+            int pageNumber, int pageSize, DateTime? startDate = null, DateTime? endDate = null);
+
+      
     }
 }

@@ -34,15 +34,18 @@ namespace BusinessObject.Dtos.Admin
     // Update DTO
     public class UpdateUserDto
     {
-        [StringLength(50)]
+        [MinLength(3, ErrorMessage = "Username must be at least 3 characters long")]
+        [MaxLength(50, ErrorMessage = "Username cannot exceed 50 characters")]
+        [RegularExpression(@"^[a-zA-Z0-9_]+$", ErrorMessage = "Username can only contain letters, numbers, and underscores")]
         public string? Username { get; set; }
 
-        [StringLength(15)]
-        [Phone]
+        [MaxLength(15, ErrorMessage = "Phone number cannot exceed 15 digits")]
+        [RegularExpression(@"^[0-9]+$", ErrorMessage = "Phone number must contain only digits")]
         public string? Phone { get; set; }
 
         // Allow admin to change role
-        public UserRole? Role { get; set; }
+        [RegularExpression(@"^(Student|Teacher|Admin)$", ErrorMessage = "Role must be Student, Teacher, or Admin")]
+        public string? Role { get; set; }
     }
 
     // Pagination response
