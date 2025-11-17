@@ -64,11 +64,11 @@ export default function PaymentSuccess() {
   }, [paymentLinkId, orderCode]);
 
   const handleContinue = () => {
-    navigate('/profile');
+    navigate('/');
   };
 
   const handleViewHistory = () => {
-    navigate('/payment-history');
+      navigate('/profile');
   };
 
   if (loading) {
