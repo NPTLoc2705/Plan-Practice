@@ -186,29 +186,10 @@ const Profile = () => {
               <span className="ml-1 text-gray-900">{user?.email || 'N/A'}</span>
             </div>
 
-            <div className="bg-purple-50 rounded-lg p-4">
-              <span className="font-semibold text-gray-700">Phone:</span>{' '}
-              {isEditing ? (
-                <input
-                  type="tel"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleChange}
-                  className="ml-1 border border-gray-300 rounded-md px-2 py-1 text-sm focus:outline-none focus:ring focus:ring-blue-200"
-                />
-              ) : (
-                <span className="ml-1 text-gray-900">{user?.phone || 'N/A'}</span>
-              )}
-            </div>
 
             <div className="bg-green-50 rounded-lg p-4">
               <span className="font-semibold text-gray-700">Role:</span>{' '}
               <span className="ml-1 text-gray-900 capitalize">{getRoleDisplay(user?.role)}</span>
-            </div>
-
-            <div className="bg-blue-50 rounded-lg p-4 md:col-span-2">
-              <span className="font-semibold text-gray-700">Member Since:</span>{' '}
-              <span className="ml-1 text-gray-900">{formatDate(user?.createdAt)}</span>
             </div>
           </div>
 
