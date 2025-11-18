@@ -7,7 +7,7 @@ using System.Security.Claims;
 
 namespace PRN232.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/auth")]
     [ApiController]
     public class AuthController : ControllerBase
     {
@@ -42,7 +42,7 @@ namespace PRN232.Controllers
             }
         }
 
-        [HttpPost("verify-registration")]
+        [HttpPost("registration/verification")]
         public async Task<IActionResult> VerifyRegistration([FromBody] VerifyRegistrationRequest request)
         {
             try
@@ -66,7 +66,7 @@ namespace PRN232.Controllers
             }
         }
 
-        [HttpPost("resend-registration-otp")]
+        [HttpPost("registration/otp/resend")]
         public async Task<IActionResult> ResendRegistrationOtp([FromBody] ResendOtpRequest request)
         {
             try
@@ -174,7 +174,7 @@ namespace PRN232.Controllers
                 return BadRequest(new { message = ex.Message });
             }
         }
-        [HttpPut("update-profile")]
+        [HttpPut("profile")]
         [Authorize] // Assuming you have JWT authentication
         public async Task<IActionResult> UpdateProfile([FromBody] UpdateUserProfileDto updateDto)
         {

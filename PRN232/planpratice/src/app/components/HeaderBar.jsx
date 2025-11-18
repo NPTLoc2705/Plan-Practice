@@ -106,13 +106,15 @@ const HeaderBar = () => {
               </Link>
             ))}
             
-            {/* Packages Button */}
-            <button
-              onClick={() => setShowPackages(true)}
-              className="px-4 py-2 rounded-md font-medium text-gray-700 border border-gray-300 hover:bg-gray-50 transition-colors"
-            >
-              Packages
-            </button>
+            {/* Packages Button - Only show for teachers */}
+            {isTeacher && (
+              <button
+                onClick={() => setShowPackages(true)}
+                className="px-4 py-2 rounded-md font-medium text-gray-700 border border-gray-300 hover:bg-gray-50 transition-colors"
+              >
+                Packages
+              </button>
+            )}
             
             {/* Profile/Login button or dropdown */}
             {!isAuthenticated ? (
@@ -183,11 +185,13 @@ const HeaderBar = () => {
         </div>
       </header>
 
-      {/* Package Modal */}
-      <PackageModal 
-        isOpen={showPackages} 
-        onClose={() => setShowPackages(false)} 
-      />
+      {/* Package Modal - Only render for teachers */}
+      {isTeacher && (
+        <PackageModal 
+          isOpen={showPackages} 
+          onClose={() => setShowPackages(false)} 
+        />
+      )}
     </>
   );
 };

@@ -16,7 +16,7 @@ class AuthAPI {
   }
 
   static async verifyRegistration(data) {
-    const response = await fetch(`${API_BASE_URL}/verify-registration`, {
+    const response = await fetch(`${API_BASE_URL}/registration/verification`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data)
@@ -28,7 +28,7 @@ class AuthAPI {
   }
 
   static async resendOTP(email) {
-    const response = await fetch(`${API_BASE_URL}/resend-registration-otp`, {
+    const response = await fetch(`${API_BASE_URL}/registration/otp/resend`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email })
@@ -110,7 +110,7 @@ class AuthAPI {
       NewPassword: updateData.newPassword || ''
     };
 
-    const response = await fetch(`${API_BASE_URL}/update-profile`, {
+    const response = await fetch(`${API_BASE_URL}/profile`, {
       method: 'PUT',
       headers: { 
         'Content-Type': 'application/json',

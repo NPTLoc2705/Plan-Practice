@@ -79,36 +79,44 @@ namespace Service.Method
             };
 
             await _otpRepository.CreateAsync(otpVerify);
-            var subject = "IELTS System Login Verification Code";
+            var subject = "P&P System Login Verification Code";
             var body = $@"
 <html>
-  <body style='margin:0; padding:0; background-color:#f6f9fc; font-family:Arial, sans-serif;'>
-    <table role='presentation' style='width:100%; border-collapse:collapse; background-color:#f6f9fc;'>
+  <body style='margin:0; padding:0; background-color:#f4f6f8; font-family:Arial, sans-serif;'>
+    <table role='presentation' style='width:100%; border-collapse:collapse; background-color:#f4f6f8;'>
       <tr>
         <td align='center' style='padding:40px 0;'>
-          <table role='presentation' style='width:100%; max-width:600px; background:#ffffff; border-radius:8px; padding:40px; text-align:center;'>
+          <table role='presentation' style='width:100%; max-width:600px; background:#ffffff; border-radius:10px; padding:40px; text-align:center; box-shadow:0 4px 10px rgba(0,0,0,0.05);'>
             <tr>
               <td>
-                <h2 style='color:#2a7ae2; margin-bottom:20px;'>IELTS System</h2>
+
+                <h2 style='color:#4a6cf7; margin-bottom:20px;'>Study Plan & Practice System</h2>
+
                 <p style='font-size:16px; color:#333; margin-bottom:20px;'>
                   Hello,<br/><br/>
-                  We received a request to sign in to your account. 
-                  Please use the one-time password (OTP) below to complete your login:
+                  To continue setting up your account, please use the verification code below:
                 </p>
-                <p style='font-size:24px; font-weight:bold; color:#2a7ae2; margin:20px 0;'>
+
+                <p style='font-size:32px; font-weight:bold; letter-spacing:4px; color:#4a6cf7; margin:25px 0;'>
                   {otpCode}
                 </p>
+
                 <p style='font-size:14px; color:#555; margin-bottom:20px;'>
-                  This code will expire in <strong>3 minutes</strong>. 
-                  For your security, do not share this code with anyone.
+                  This code will expire in <strong>3 minutes</strong>.<br/>
+                  For your security, please do not share it with anyone.
                 </p>
+
+                <hr style='border:none; border-top:1px solid #eee; margin:30px 0;' />
+
                 <p style='font-size:14px; color:#888;'>
-                  If you did not attempt to sign in, you can safely ignore this email.
+                  If you did not request this verification, you may ignore this email.
                 </p>
-                <p style='font-size:14px; color:#555;'>
-                  Thank you,<br/>
-                  The IELTS System Team
+
+                <p style='font-size:14px; color:#555; margin-top:20px;'>
+                  Best regards,<br/>
+                  <strong>Study Plan & Practice System Team</strong>
                 </p>
+
               </td>
             </tr>
           </table>
@@ -234,37 +242,44 @@ namespace Service.Method
             await _otpRepository.CreateAsync(otpVerify);
 
 
-            var subject = "IELTS System Login Verification Code";
+            var subject = "P&P System Login Verification Code";
             var body = $@"
 <html>
-  <body style='margin:0; padding:0; background-color:#f6f9fc; font-family:Arial, sans-serif;'>
-    <table role='presentation' style='width:100%; border-collapse:collapse; background-color:#f6f9fc;'>
+  <body style='margin:0; padding:0; background-color:#f4f6f8; font-family:Arial, sans-serif;'>
+    <table role='presentation' style='width:100%; border-collapse:collapse; background-color:#f4f6f8;'>
       <tr>
         <td align='center' style='padding:40px 0;'>
-          <table role='presentation' style='width:100%; max-width:600px; background:#ffffff; border-radius:8px; padding:40px; text-align:center;'>
+          <table role='presentation' style='width:100%; max-width:600px; background:#ffffff; border-radius:10px; padding:40px; text-align:center; box-shadow:0 4px 10px rgba(0,0,0,0.05);'>
             <tr>
               <td>
-                <h2 style='color:#2a7ae2; margin-bottom:20px;'>IELTS System</h2>
+
+                <h2 style='color:#4a6cf7; margin-bottom:20px;'>Study Plan & Practice System</h2>
+
                 <p style='font-size:16px; color:#333; margin-bottom:20px;'>
                   Hello,<br/><br/>
-                  We received a request to sign in to your account. 
-                  Please use the one-time password (OTP) below to complete your login:
+                  To continue setting up your account, please use the verification code below:
                 </p>
-                <p style='font-size:24px; font-weight:bold; color:#2a7ae2; margin:20px 0;'>
+
+                <p style='font-size:32px; font-weight:bold; letter-spacing:4px; color:#4a6cf7; margin:25px 0;'>
                   {otpCode}
                 </p>
+
                 <p style='font-size:14px; color:#555; margin-bottom:20px;'>
-                  This code will expire in <strong>3 minutes</strong>. 
-                  For your security, do not share this code with anyone.
+                  This code will expire in <strong>3 minutes</strong>.<br/>
+                  For your security, please do not share it with anyone.
                 </p>
+
+                <hr style='border:none; border-top:1px solid #eee; margin:30px 0;' />
+
                 <p style='font-size:14px; color:#888;'>
-                  If you did not attempt to sign in, you can safely ignore this email.
+                  If you did not request this verification, you may ignore this email.
                 </p>
-               
-                <p style='font-size:14px; color:#555;'>
-                  Thank you,<br/>
-                  The IELTS System Team
+
+                <p style='font-size:14px; color:#555; margin-top:20px;'>
+                  Best regards,<br/>
+                  <strong>Study Plan & Practice System Team</strong>
                 </p>
+
               </td>
             </tr>
           </table>
