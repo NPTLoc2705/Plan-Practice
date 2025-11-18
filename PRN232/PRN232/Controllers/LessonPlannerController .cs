@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Service.Interface;
 using Service.Method;
+using Service.QuizzInterface;
 using System;
 using System.IO;
 using System.Security.Claims;
@@ -21,18 +22,21 @@ namespace API.Controllers
         private readonly ILessonPlannerDocumentService _documentService;
         private readonly IWebHostEnvironment _environment;
         private readonly ICoinService _coinService;
+        private readonly IGeminiService _geminiService;
         private const int LessonGenerationCoinCost = 50;
 
         public LessonPlannerController(
             ILessonPlannerService lessonPlannerService,
             ILessonPlannerDocumentService documentService,
             IWebHostEnvironment environment,
-            ICoinService coinService)
+            ICoinService coinService,
+            IGeminiService geminiService)
         {
             _lessonPlannerService = lessonPlannerService;
             _documentService = documentService;
             _environment = environment;
             _coinService = coinService;
+            _geminiService = geminiService;
         }
 
         private int GetCurrentUserId()
@@ -211,6 +215,62 @@ namespace API.Controllers
         {
             var planners = await _lessonPlannerService.GetAllLessonPlannersAsync();
             return Ok(new { success = true, data = planners });
+        }
+
+        /// <summary>
+        /// Generate a lesson planner using AI (Gemini)
+        /// </summary>
+        [HttpPost("generate-ai")]
+        public async Task<IActionResult> GenerateLessonPlannerWithAI([FromBody] GenerateLessonPlannerRequest request)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(new { success = false, message = "Invalid data.", errors = ModelState });
+            }
+
+            try
+            {
+                var userId = GetCurrentUserId();
+
+                // Check if user has enough coins
+                var currentBalance = await _coinService.GetUserCoinBalance(userId);
+                if (currentBalance < LessonGenerationCoinCost)
+                {
+                    return BadRequest(new
+                    {
+                        success = false,
+                        message = $"Insufficient coins. You need {LessonGenerationCoinCost} coins but only have {currentBalance}.",
+                        requiredCoins = LessonGenerationCoinCost,
+                        currentBalance = currentBalance
+                    });
+                }
+
+                // Generate lesson planner using AI
+                var generatedLesson = await _geminiService.GenerateLessonPlannerAsync(request);
+
+                // Deduct coins
+                await _coinService.DeductCoinsForLessonGeneration(userId);
+
+                // Get updated balance
+                var newBalance = await _coinService.GetUserCoinBalance(userId);
+
+                return Ok(new
+                {
+                    success = true,
+                    data = generatedLesson,
+                    coinsDeducted = LessonGenerationCoinCost,
+                    newBalance = newBalance,
+                    message = "Lesson planner generated successfully!"
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    success = false,
+                    message = $"Error generating lesson planner: {ex.Message}"
+                });
+            }
         }
 
         [HttpPost("upload-document")]

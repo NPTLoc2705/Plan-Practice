@@ -15,6 +15,7 @@ namespace Service.Method
         private readonly IUserRepository _userRepo;
         private readonly ILogger<CoinService> _logger;
         private const int LESSON_GENERATION_COST = 50;
+        private const int AI_LESSON_GENERATION_COST = 75;
 
         public CoinService(IUserRepository userRepo, ILogger<CoinService> logger)
         {
@@ -55,6 +56,41 @@ namespace Service.Method
                 throw;
             }
         }
+
+        public async Task<bool> DeductCoinForGenerateAILesson(int userId)
+        {
+            try
+            {
+                var user = await _userRepo.GetUserById(userId);
+
+                if (user == null)
+                {
+                    _logger.LogWarning("User not found: UserId={UserId}", userId);
+                    return false;
+                }
+
+                if (user.CoinBalance < AI_LESSON_GENERATION_COST)
+                {
+                    _logger.LogWarning("Insufficient coins: UserId={UserId}, Balance={Balance}, Required={Required}",
+                        userId, user.CoinBalance, AI_LESSON_GENERATION_COST);
+                    return false;
+                }
+
+                user.CoinBalance -= AI_LESSON_GENERATION_COST;
+                await _userRepo.UpdateAsync(user);
+
+                _logger.LogInformation("Coins deducted for AI lesson generation: UserId={UserId}, Amount={Amount}, NewBalance={NewBalance}",
+                    userId, AI_LESSON_GENERATION_COST, user.CoinBalance);
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error deducting coins for AI lesson generation for UserId={UserId}", userId);
+                throw;
+            }
+        }
+
         public async Task<bool> RefundCoins(int userId, int amount)
         {
             try
