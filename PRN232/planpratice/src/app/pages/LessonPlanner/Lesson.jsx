@@ -60,8 +60,8 @@ import {
 
 // =================================================================
 // API CONFIGURATION
-// =================================================================
 const API_BASE_URL = 'https://localhost:7025/api';
+// =================================================================
 
 // =================================================================
 // API HELPER FUNCTIONS
@@ -108,21 +108,21 @@ const postToApi = async (endpoint, data, token) => {
 // =================================================================
 // ITEM SELECTOR COMPONENT (defined outside to prevent re-renders)
 // =================================================================
-const ItemSelector = ({ title, templates, selectedIds, onAdd, onRemove, selectedValue, onSelectChange, showCreateForm, setShowCreateForm, createFormContent, onCreateNew }) => { 
-  const availableItems = templates.filter(t => !selectedIds.includes(t.id)); 
-  
+const ItemSelector = ({ title, templates, selectedIds, onAdd, onRemove, selectedValue, onSelectChange, showCreateForm, setShowCreateForm, createFormContent, onCreateNew }) => {
+  const availableItems = templates.filter(t => !selectedIds.includes(t.id));
+
   return (
-    <div className="space-y-4"> 
-      <div className="flex items-center gap-2"> 
-        <select value={selectedValue} onChange={onSelectChange} className="w-full p-2 border border-gray-300 rounded-lg text-sm" disabled={availableItems.length === 0} > 
-          <option value="">{availableItems.length > 0 ? `Select a ${title.toLowerCase()}...` : `All ${title.toLowerCase()} added`}</option> 
-          {availableItems.map(item => (<option key={item.id} value={item.id}>{item.name}</option>))} 
-        </select> 
-        <button onClick={() => onAdd(selectedValue)} disabled={!selectedValue} className="px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed flex-shrink-0" > 
-          <Plus className="w-5 h-5" /> 
-        </button> 
+    <div className="space-y-4">
+      <div className="flex items-center gap-2">
+        <select value={selectedValue} onChange={onSelectChange} className="w-full p-2 border border-gray-300 rounded-lg text-sm" disabled={availableItems.length === 0} >
+          <option value="">{availableItems.length > 0 ? `Select a ${title.toLowerCase()}...` : `All ${title.toLowerCase()} added`}</option>
+          {availableItems.map(item => (<option key={item.id} value={item.id}>{item.name}</option>))}
+        </select>
+        <button onClick={() => onAdd(selectedValue)} disabled={!selectedValue} className="px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed flex-shrink-0" >
+          <Plus className="w-5 h-5" />
+        </button>
       </div>
-      
+
       {/* Create New Button */}
       {onCreateNew && (
         <div>
@@ -155,24 +155,24 @@ const ItemSelector = ({ title, templates, selectedIds, onAdd, onRemove, selected
           )}
         </div>
       )}
-      
-      <div className="space-y-2"> 
-        {selectedIds.length > 0 ? (selectedIds.map(id => { 
-          const item = templates.find(t => t.id === id); 
-          if (!item) return null; 
-          return (<div key={id} className="flex items-center justify-between p-2 bg-gray-100 border rounded-lg animate-fade-in"> 
-            <div className="text-sm"> 
-              <p className="font-semibold">{item.name}</p> 
-              <p className="text-gray-600">{item.content || item.description}</p> 
-            </div> 
-            <button onClick={() => onRemove(id)} className="text-red-500 hover:text-red-700 p-1"> 
-              <X className="w-4 h-4" /> 
-            </button> 
-          </div>); 
-        })) : (<p className="text-sm text-gray-500 text-center py-2">No {title.toLowerCase()} added yet.</p>)} 
-      </div> 
+
+      <div className="space-y-2">
+        {selectedIds.length > 0 ? (selectedIds.map(id => {
+          const item = templates.find(t => t.id === id);
+          if (!item) return null;
+          return (<div key={id} className="flex items-center justify-between p-2 bg-gray-100 border rounded-lg animate-fade-in">
+            <div className="text-sm">
+              <p className="font-semibold">{item.name}</p>
+              <p className="text-gray-600">{item.content || item.description}</p>
+            </div>
+            <button onClick={() => onRemove(id)} className="text-red-500 hover:text-red-700 p-1">
+              <X className="w-4 h-4" />
+            </button>
+          </div>);
+        })) : (<p className="text-sm text-gray-500 text-center py-2">No {title.toLowerCase()} added yet.</p>)}
+      </div>
     </div>
-  ); 
+  );
 };
 
 export default function App() {
@@ -198,34 +198,34 @@ export default function App() {
   const [newObjectiveName, setNewObjectiveName] = useState('');
   const [newObjectiveContent, setNewObjectiveContent] = useState('');
   const [showNewObjectiveForm, setShowNewObjectiveForm] = useState(false);
-  
+
   const [skillTemplates, setSkillTemplates] = useState([]);
   const [selectedSkills, setSelectedSkills] = useState([]);
   const [skillToAdd, setSkillToAdd] = useState('');
   const [newSkillName, setNewSkillName] = useState('');
   const [newSkillDescription, setNewSkillDescription] = useState('');
   const [showNewSkillForm, setShowNewSkillForm] = useState(false);
-  
+
   const [attitudeTemplates, setAttitudeTemplates] = useState([]);
   const [selectedAttitudes, setSelectedAttitudes] = useState([]);
   const [attitudeToAdd, setAttitudeToAdd] = useState('');
   const [newAttitudeContent, setNewAttitudeContent] = useState('');
   const [showNewAttitudeForm, setShowNewAttitudeForm] = useState(false);
-  
+
   const [languageFocusTypes, setLanguageFocusTypes] = useState([]);
   const [languageFocus, setLanguageFocus] = useState([
     { typeId: null, content: '' },
   ]);
   const [newLanguageFocusTypeName, setNewLanguageFocusTypeName] = useState('');
   const [showNewLanguageFocusTypeForm, setShowNewLanguageFocusTypeForm] = useState(false);
-  
+
   const [preparationTemplates, setPreparationTemplates] = useState([]);
   const [selectedPreparations, setSelectedPreparations] = useState([]);
   const [preparationToAdd, setPreparationToAdd] = useState('');
   const [newPreparationName, setNewPreparationName] = useState('');
   const [newPreparationDescription, setNewPreparationDescription] = useState('');
   const [showNewPreparationForm, setShowNewPreparationForm] = useState(false);
-  
+
   const [methodTemplates, setMethodTemplates] = useState([]);
   const [selectedMethod, setSelectedMethod] = useState('');
   const [newMethodName, setNewMethodName] = useState('');
@@ -233,16 +233,29 @@ export default function App() {
   const [showNewMethodForm, setShowNewMethodForm] = useState(false);
   const [coinBalance, setCoinBalance] = useState(null);
   const [isCheckingCoins, setIsCheckingCoins] = useState(false);
-  
+
   const [activityTemplates, setActivityTemplates] = useState([]);
   const [newActivityName, setNewActivityName] = useState('');
   const [newActivityContent, setNewActivityContent] = useState('');
   const [showNewActivityForm, setShowNewActivityForm] = useState(false);
-  
+
   const [interactionPatterns, setInteractionPatterns] = useState([]);
   const [newInteractionName, setNewInteractionName] = useState('');
   const [newInteractionShortCode, setNewInteractionShortCode] = useState('');
   const [showNewInteractionForm, setShowNewInteractionForm] = useState(false);
+
+  // AI Generation States
+  const [showAIModal, setShowAIModal] = useState(false);
+  const [isGeneratingAI, setIsGeneratingAI] = useState(false);
+  const [aiRequest, setAiRequest] = useState({
+    title: '',
+    topic: '',
+    gradeLevel: '',
+    durationInMinutes: 45,
+    learningObjectives: '',
+    additionalInstructions: ''
+  });
+
   const [activities, setActivities] = useState([
     {
       stageName: 'Warm up',
@@ -531,6 +544,191 @@ export default function App() {
     setNewInteractionShortCode('');
     setShowNewInteractionForm(false);
     setMessage('✅ New interaction pattern created!');
+  };
+
+  // =================================================================
+  // AI GENERATION HANDLER
+  // =================================================================
+  const handleGenerateWithAI = async () => {
+    // Validation checks
+    if (!aiRequest.title.trim() || !aiRequest.topic.trim()) {
+      setMessage('❌ Please provide at least a title and topic for AI generation');
+      return;
+    }
+
+    if (coinBalance === null || coinBalance < 50) {
+      setMessage('❌ Insufficient coins! You need 50 coins to generate a lesson plan.');
+      return;
+    }
+
+    // Check if class is selected (required by backend)
+    if (!selectedClassId) {
+      setMessage('❌ Please select a Grade Level and Class in the Basic Information section first.');
+      setShowAIModal(false);
+      setCurrentStep(1); // Take user to step 1
+      return;
+    }
+
+    setIsGeneratingAI(true);
+    setMessage('🤖 Generating lesson plan with AI... This may take 10-30 seconds.');
+
+    try {
+      const token = getAuthToken();
+
+      const requestBody = {
+        title: aiRequest.title,
+        topic: aiRequest.topic,
+        classId: parseInt(selectedClassId),
+        gradeLevel: aiRequest.gradeLevel || gradeLevels.find(g => g.id === parseInt(selectedGradeId))?.name || 'Not specified',
+        durationInMinutes: aiRequest.durationInMinutes || 45,
+        learningObjectives: aiRequest.learningObjectives || '',
+        additionalInstructions: aiRequest.additionalInstructions || ''
+      };
+
+      // Use postToApi which already handles the response
+      const result = await postToApi('/LessonPlanner/generate-ai', requestBody, token);
+
+      if (result.success && result.data) {
+        const generatedData = result.data;
+
+        // Populate all form fields with AI-generated data
+        setLessonTitle(generatedData.title || '');
+        setLessonDescription(generatedData.description || '');
+        setUnitNumber(generatedData.unitNumber || '');
+        setUnitName(generatedData.unitName || '');
+        setLessonNumber(generatedData.lessonNumber || '');
+
+        if (generatedData.methodName && generatedData.methodDescription) {
+          // Create new method from AI
+          const newMethodId = Math.max(...methodTemplates.map(m => m.id), 0) + 1;
+          const newMethod = {
+            id: newMethodId,
+            name: generatedData.methodName,
+            description: generatedData.methodDescription
+          };
+          setMethodTemplates([...methodTemplates, newMethod]);
+          setSelectedMethod(newMethodId.toString());
+        }
+
+        // Populate objectives
+        if (generatedData.objectives && generatedData.objectives.length > 0) {
+          const aiObjectives = generatedData.objectives.map((obj, index) => ({
+            id: -1000 - index, // Negative IDs for AI-generated items
+            name: obj.name,
+            content: obj.customContent
+          }));
+          setObjectiveTemplates([...objectiveTemplates, ...aiObjectives]);
+          setSelectedObjectives(aiObjectives.map(o => o.id));
+        }
+
+        // Populate skills
+        if (generatedData.skills && generatedData.skills.length > 0) {
+          const aiSkills = generatedData.skills.map((skill, index) => ({
+            id: -2000 - index,
+            name: skill.name,
+            description: skill.description
+          }));
+          setSkillTemplates([...skillTemplates, ...aiSkills]);
+          setSelectedSkills(aiSkills.map(s => s.id));
+        }
+
+        // Populate attitudes
+        if (generatedData.attitudes && generatedData.attitudes.length > 0) {
+          const aiAttitudes = generatedData.attitudes.map((att, index) => ({
+            id: -3000 - index,
+            name: att.name,
+            content: att.customContent
+          }));
+          setAttitudeTemplates([...attitudeTemplates, ...aiAttitudes]);
+          setSelectedAttitudes(aiAttitudes.map(a => a.id));
+        }
+
+        // Populate language focus
+        if (generatedData.languageFocusItems && generatedData.languageFocusItems.length > 0) {
+          generatedData.languageFocusItems.forEach((item, index) => {
+            const newId = Math.max(...languageFocusTypes.map(t => t.id), 0) + 1 + index;
+            const newType = {
+              id: newId,
+              name: item.name
+            };
+
+            setLanguageFocusTypes(prev => ([...prev, newType]));
+            setLanguageFocus(prev => ([...prev, {
+              typeId: newId,
+              content: item.content
+            }]));
+          });
+        }
+
+        // Populate preparations
+        if (generatedData.preparations && generatedData.preparations.length > 0) {
+          const aiPreps = generatedData.preparations.map((prep, index) => {
+            const newId = Math.max(...languageFocusTypes.map(t => t.id), 0) + 1 + index;
+            return {
+              id: newId,
+              name: prep.name,
+              description: prep.materials
+            };
+          });
+          setPreparationTemplates([...preparationTemplates, ...aiPreps]);
+          setSelectedPreparations([
+            ...selectedPreparations,
+            ...aiPreps.map(p => ({ id: p.id, name: p.name, materials: p.description }))
+          ]);
+        }
+
+        // Populate activity stages
+        if (generatedData.activityStages && generatedData.activityStages.length > 0) {
+          // Calculate starting IDs once to avoid duplicates
+          let activityIdCounter = Math.max(...activityTemplates.map(p => p.id), 0) + 1;
+          let interactionIdCounter = Math.max(...interactionPatterns.map(p => p.id), 0) + 1;
+
+          generatedData.activityStages.forEach((stage, stageIndex) => {
+            const aiActivities = {
+              stageName: stage.stageName,
+              subActivities: []
+            };
+
+            stage.activityItems.forEach((item, itemIndex) => {
+              const aiActivityTemplate = {
+                id: activityIdCounter++,
+                name: item.activityTemplateName.trim(),
+                content: item.activityTemplateContent.trim()
+              }
+              setActivityTemplates(prev => [...prev, aiActivityTemplate]);
+
+              const aiInteractionPatterns = {
+                id: interactionIdCounter++,
+                name: item.interactionPatternName.trim(),
+                shortCode: item.interactionPatternShortCode.trim()
+              };
+              setInteractionPatterns(prev => [...prev, aiInteractionPatterns]);
+
+              aiActivities.subActivities.push({
+                timeInMinutes: item.timeInMinutes,
+                activityTemplateId: aiActivityTemplate.id,
+                interactionPatternId: aiInteractionPatterns.id
+              });
+            });
+            setActivities(activities => [...activities, aiActivities]);
+          });
+        }
+
+        // Update coin balance
+        setCoinBalance(result.newBalance);
+
+        setMessage(`✅ ${result.message} (${result.coinsDeducted} coins deducted. New balance: ${result.newBalance})`);
+        setShowAIModal(false);
+        setCurrentStep(1); // Start from step 1 to review
+      } else {
+        throw new Error('Invalid response from AI generation');
+      }
+    } catch (error) {
+      console.error('AI Generation Error:', error);
+      setMessage(`❌ AI Generation failed: ${error.message}`);
+    } finally {
+      setIsGeneratingAI(false);
+    }
   };
 
 
@@ -965,7 +1163,7 @@ export default function App() {
   // ... (all JSX rendering code from return() is unchanged)
   const RichTextToolbar = () => (<div className="flex flex-wrap items-center p-3 border-b bg-gray-100 rounded-t-xl sticky top-0 z-10"> <button className="ml-auto flex items-center space-x-2 px-3 py-1.5 text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition shadow" onClick={handleSaveLesson}> <Save className="w-4 h-4" /> <span className="text-sm font-medium">Save Lesson</span> </button> </div>);
   const StepIndicator = () => (<div className="flex items-center justify-center mb-8"> {[1, 2, 3, 4, 5, 6].map((step) => (<React.Fragment key={step}> <div className={`flex flex-col items-center cursor-pointer ${step <= currentStep ? 'text-blue-600' : 'text-gray-400'}`} onClick={() => setCurrentStep(step)}> <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold transition-all duration-300 ${step < currentStep ? 'bg-green-500 text-white' : step === currentStep ? 'bg-blue-600 text-white scale-110' : 'bg-gray-300'}`}> {step < currentStep ? <CheckCircle2 className="w-6 h-6" /> : step} </div> <span className="text-xs mt-1 hidden sm:block"> {['Basic', 'Objectives', 'Skills', 'Attitudes', 'Prep', 'Activities'][step - 1]} </span> </div> {step < 6 && <div className={`h-1 w-12 sm:w-20 transition-all duration-500 ${step < currentStep ? 'bg-green-500' : 'bg-gray-300'}`} />} </React.Fragment>))} </div>);
-  
+
   return (
     <div className="min-h-screen bg-gray-50 p-4 sm:p-8 font-['Inter']">
       <header className="mb-8">
@@ -977,17 +1175,253 @@ export default function App() {
             </h1>
             <p className="text-gray-500 mt-1">Build your lesson plan step by step, or jump to any step.</p>
           </div>
-          {coinBalance !== null && (
-            <div className="flex items-center space-x-2 px-4 py-2 bg-yellow-100 border-2 border-yellow-400 rounded-lg">
-              <span className="text-2xl">🪙</span>
-              <div>
-                <p className="text-xs text-gray-600">Your Balance</p>
-                <p className="text-lg font-bold text-yellow-700">{coinBalance} coins</p>
+          <div className="flex items-center space-x-4">
+            <button
+              onClick={() => {
+                // Pre-populate grade level if already selected
+                if (selectedGradeId) {
+                  const selectedGrade = gradeLevels.find(g => g.id === parseInt(selectedGradeId));
+                  if (selectedGrade) {
+                    setAiRequest(prev => ({ ...prev, gradeLevel: selectedGrade.name }));
+                  }
+                }
+                setShowAIModal(true);
+              }}
+              disabled={isGeneratingAI}
+              className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg hover:from-purple-700 hover:to-blue-700 transition shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <Brain className="w-5 h-5" />
+              <span className="font-semibold">Generate with AI</span>
+              <span className="text-xs bg-white/20 px-2 py-0.5 rounded">50 🪙</span>
+            </button>
+            {coinBalance !== null && (
+              <div className="flex items-center space-x-2 px-4 py-2 bg-yellow-100 border-2 border-yellow-400 rounded-lg">
+                <span className="text-2xl">🪙</span>
+                <div>
+                  <p className="text-xs text-gray-600">Your Balance</p>
+                  <p className="text-lg font-bold text-yellow-700">{coinBalance} coins</p>
+                </div>
               </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </header>
+
+      {/* AI Generation Modal */}
+      {showAIModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="bg-gradient-to-r from-purple-600 to-blue-600 text-white p-6 rounded-t-2xl">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <Brain className="w-8 h-8" />
+                  <div>
+                    <h2 className="text-2xl font-bold">AI Lesson Generator</h2>
+                    <p className="text-sm opacity-90">Let AI create a comprehensive lesson plan for you</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setShowAIModal(false)}
+                  disabled={isGeneratingAI}
+                  className="text-white hover:bg-white/20 rounded-full p-2 transition"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+            </div>
+
+            <div className="p-6 space-y-4">
+              {!selectedClassId && (
+                <div className="bg-yellow-50 border border-yellow-300 rounded-lg p-4 mb-4">
+                  <div className="flex items-start space-x-3">
+                    <div className="text-2xl">⚠️</div>
+                    <div className="flex-1">
+                      <p className="font-semibold text-yellow-900 mb-1">Grade & Class Selection Required</p>
+                      <p className="text-sm text-yellow-800">
+                        Please select a <strong>Grade Level</strong> and <strong>Class</strong> below to continue with AI generation.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                <div className="flex items-start space-x-3">
+                  <div className="text-3xl">💡</div>
+                  <div className="flex-1">
+                    <p className="font-semibold text-blue-900 mb-1">How it works:</p>
+                    <ul className="text-sm text-blue-800 space-y-1">
+                      <li>• AI will generate a complete lesson plan based on your inputs</li>
+                      <li>• Cost: <strong>50 coins</strong> per generation</li>
+                      <li>• Generation time: 10-30 seconds</li>
+                      <li>• You can review and edit the generated content before saving</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2">Lesson Title *</label>
+                <input
+                  type="text"
+                  placeholder="e.g., Introduction to Present Simple Tense"
+                  value={aiRequest.title}
+                  onChange={(e) => setAiRequest({ ...aiRequest, title: e.target.value })}
+                  disabled={isGeneratingAI}
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2">Topic / Theme *</label>
+                <input
+                  type="text"
+                  placeholder="e.g., Present Simple Tense - Daily Routines"
+                  value={aiRequest.topic}
+                  onChange={(e) => setAiRequest({ ...aiRequest, topic: e.target.value })}
+                  disabled={isGeneratingAI}
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2">Grade Level *</label>
+                <select
+                  value={selectedGradeId}
+                  onChange={(e) => {
+                    setSelectedGradeId(e.target.value);
+                    const selectedGrade = gradeLevels.find(g => g.id === parseInt(e.target.value));
+                    if (selectedGrade) {
+                      setAiRequest({ ...aiRequest, gradeLevel: selectedGrade.name });
+                    }
+                    // Reset class selection when grade changes
+                    setSelectedClassId('');
+                  }}
+                  disabled={isGeneratingAI || isLoadingGrades}
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                >
+                  <option value="">
+                    {isLoadingGrades ? 'Loading...' : 'Select Grade Level'}
+                  </option>
+                  {gradeLevels.map(grade => (
+                    <option key={grade.id} value={grade.id}>
+                      {grade.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2">Class *</label>
+                <select
+                  value={selectedClassId}
+                  onChange={(e) => setSelectedClassId(e.target.value)}
+                  disabled={isGeneratingAI || !selectedGradeId || isLoadingClasses}
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                >
+                  <option value="">
+                    {isLoadingClasses ? 'Loading...' : !selectedGradeId ? 'Select grade first' : 'Select Class'}
+                  </option>
+                  {classes.map(cls => (
+                    <option key={cls.id} value={cls.id}>
+                      {cls.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2">Duration (minutes)</label>
+                <input
+                  type="number"
+                  placeholder="45"
+                  value={aiRequest.durationInMinutes}
+                  onChange={(e) => setAiRequest({ ...aiRequest, durationInMinutes: parseInt(e.target.value) || 45 })}
+                  disabled={isGeneratingAI}
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2">Learning Objectives (Optional)</label>
+                <textarea
+                  rows="3"
+                  placeholder="e.g., Students will be able to understand and use present simple tense to describe daily routines"
+                  value={aiRequest.learningObjectives}
+                  onChange={(e) => setAiRequest({ ...aiRequest, learningObjectives: e.target.value })}
+                  disabled={isGeneratingAI}
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2">Additional Instructions (Optional)</label>
+                <textarea
+                  rows="3"
+                  placeholder="e.g., Include interactive activities, focus on speaking practice, use visual aids"
+                  value={aiRequest.additionalInstructions}
+                  onChange={(e) => setAiRequest({ ...aiRequest, additionalInstructions: e.target.value })}
+                  disabled={isGeneratingAI}
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                />
+              </div>
+
+              {coinBalance !== null && coinBalance < 50 && (
+                <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                  <p className="text-red-800 font-semibold">⚠️ Insufficient coins!</p>
+                  <p className="text-sm text-red-700 mt-1">You need 50 coins but only have {coinBalance}.</p>
+                  <button
+                    onClick={() => window.location.href = '/payment'}
+                    className="mt-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 text-sm"
+                  >
+                    Buy Coins
+                  </button>
+                </div>
+              )}
+
+              <div className="flex items-center justify-between pt-4 border-t">
+                <div className="text-sm text-gray-600">
+                  {coinBalance !== null && (
+                    <span>Your balance: <strong>{coinBalance} coins</strong></span>
+                  )}
+                </div>
+                <div className="flex space-x-3">
+                  <button
+                    onClick={() => setShowAIModal(false)}
+                    disabled={isGeneratingAI}
+                    className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition disabled:opacity-50"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleGenerateWithAI}
+                    disabled={
+                      isGeneratingAI ||
+                      !aiRequest.title.trim() ||
+                      !aiRequest.topic.trim() ||
+                      !selectedClassId ||
+                      (coinBalance !== null && coinBalance < 50)
+                    }
+                    className="flex items-center space-x-2 px-6 py-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg hover:from-purple-700 hover:to-blue-700 transition shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isGeneratingAI ? (
+                      <>
+                        <Loader2 className="w-5 h-5 animate-spin" />
+                        <span>Generating...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Brain className="w-5 h-5" />
+                        <span>Generate (50 🪙)</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {coinBalance !== null && coinBalance < 50 && (
         <div className="mb-4 p-3 bg-red-100 text-red-800 rounded-lg shadow-sm text-sm font-medium flex items-center justify-between">
@@ -1202,7 +1636,7 @@ export default function App() {
 
                   <div className="mt-6">
                     <h3 className="font-bold text-gray-700 mb-3">Language Focus</h3>
-                    
+
                     {/* Create new language focus type */}
                     {!showNewLanguageFocusTypeForm ? (
                       <button
@@ -1240,7 +1674,7 @@ export default function App() {
                         </div>
                       </div>
                     )}
-                    
+
                     <div className="space-y-3">
                       {languageFocus.map((lf, idx) => (
                         <div key={idx} className="flex gap-2 items-start">
@@ -1254,7 +1688,7 @@ export default function App() {
                               {languageFocusTypes.map(type => (
                                 <option key={type.id} value={type.id}>{type.name}</option>
                               ))}
-                              </select>
+                            </select>
                             <textarea
                               rows="2"
                               placeholder="Enter content..."
@@ -1397,7 +1831,7 @@ export default function App() {
                         {methodTemplates.find(m => m.id === parseInt(selectedMethod))?.description}
                       </p>
                     )}
-                    
+
                     {/* Add new method button */}
                     <button
                       onClick={() => setShowNewMethodForm(!showNewMethodForm)}

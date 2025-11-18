@@ -1,4 +1,5 @@
 ﻿using BusinessObject.Dtos.Quiz;
+using BusinessObject.Dtos.LessonDTO;
 using GenerativeAI;
 using Microsoft.Extensions.Configuration;
 using Service.QuizzInterface;
@@ -49,9 +50,9 @@ namespace Service.QuizzMethod
             }
         }
 
-       private string BuildPrompt(string lessonContent, int numberOfQuestions)
-{
-    return $@"
+        private string BuildPrompt(string lessonContent, int numberOfQuestions)
+        {
+            return $@"
 Based on the following lesson content, especially focusing on section 'D. Procedures – Part 2: New Lesson',
 generate {numberOfQuestions} multiple-choice questions (MCQs) in ENGLISH.
 
@@ -94,7 +95,7 @@ Requirements:
     }}
   ]
 }}";
-}
+        }
 
         // ========== BỔ SUNG: PARSE VÀ VALIDATE AI RESPONSE ==========
         private QuizGenerationResult ParseAndValidateQuizResponse(string text, int expectedQuestionCount)
@@ -326,6 +327,83 @@ Requirements:
                 throw new InvalidOperationException(
                     $"Duplicate questions detected: {duplicateInfo}"
                 );
+            }
+        }
+
+        // ========== LESSON PLANNER AI GENERATION ==========
+
+        public async Task<GeneratedLessonPlannerResult> GenerateLessonPlannerAsync(GenerateLessonPlannerRequest request)
+        {
+            var prompt = BuildLessonPlannerPrompt(request);
+
+            try
+            {
+                var model = _googleAI.CreateGenerativeModel("models/gemini-2.5-flash");
+                var response = await model.GenerateObjectAsync<GeneratedLessonPlannerResult>(prompt);
+
+                // Parse and validate response
+                ValidateLessonPlannerResult(response);
+
+                return response;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error generating lesson planner with Gemini: {ex.Message}", ex);
+            }
+        }
+
+        private string BuildLessonPlannerPrompt(GenerateLessonPlannerRequest request)
+        {
+            return $@"
+You are an expert educational curriculum designer. Generate a comprehensive lesson plan based on the following requirements:
+
+**Lesson Information:**
+- Title: {request.Title}
+- Topic: {request.Topic}
+- Grade Level: {request.GradeLevel ?? "Not specified"}
+- Duration: {request.DurationInMinutes ?? 45} minutes
+- Learning Objectives: {request.LearningObjectives ?? "To be determined based on topic"}
+- Additional Instructions: {request.AdditionalInstructions ?? "None"}
+
+**Requirements:**
+1. Create a detailed, well-structured lesson plan suitable for English language teaching
+2. Include all necessary components: objectives, skills, attitudes, language focus, preparations, and activity stages
+3. Design activities that are engaging, age-appropriate, and aligned with communicative language teaching principles
+4. Ensure proper time allocation for each activity (total should be approximately {request.DurationInMinutes ?? 45} minutes)
+5. Include varied interaction patterns (T-S, S-S, individual work, group work, etc.)
+
+**Important Notes:**
+- Ensure at least 3 objectives covering knowledge, skills, and attitudes
+- Include at least 2-3 language focus items
+- Create 4-5 activity stages following a logical teaching sequence
+- Each activity stage should have 1-3 activity items
+- Materials in Preparations is preparation's description (what to do, what to prepare)
+- Vary interaction patterns throughout the lesson
+- Total activity time should sum to approximately {request.DurationInMinutes ?? 45} minutes
+- All text should be in English and professionally formatted
+- Do NOT include any markdown formatting or code blocks in your response
+";
+        }
+
+        private void ValidateLessonPlannerResult(GeneratedLessonPlannerResult? result)
+        {
+            if (result == null)
+                throw new InvalidOperationException("AI returned null result");
+
+            if (string.IsNullOrWhiteSpace(result.Title))
+                throw new InvalidOperationException("Lesson planner must have a title");
+
+            if (result.ActivityStages == null || !result.ActivityStages.Any())
+                throw new InvalidOperationException("Lesson planner must have at least one activity stage");
+
+            // Validate each activity stage
+            foreach (var stage in result.ActivityStages)
+            {
+                if (string.IsNullOrWhiteSpace(stage.StageName))
+                    throw new InvalidOperationException("Each activity stage must have a name");
+
+                if (stage.ActivityItems == null || !stage.ActivityItems.Any())
+                    throw new InvalidOperationException($"Activity stage '{stage.StageName}' must have at least one activity item");
             }
         }
     }
