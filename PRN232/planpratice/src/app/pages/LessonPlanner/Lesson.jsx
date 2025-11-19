@@ -247,6 +247,7 @@ export default function App() {
   // AI Generation States
   const [showAIModal, setShowAIModal] = useState(false);
   const [isGeneratingAI, setIsGeneratingAI] = useState(false);
+  const [aiGenerationComplete, setAiGenerationComplete] = useState(false);
   const [aiRequest, setAiRequest] = useState({
     title: '',
     topic: '',
@@ -721,7 +722,7 @@ export default function App() {
         setShowAIModal(false);
         setCurrentStep(1); // Start from step 1 to review
 
-        generateLessonContent(); // Refresh lesson content preview
+        setAiGenerationComplete(true);
       } else {
         throw new Error('Invalid response from AI generation');
       }
@@ -839,6 +840,17 @@ export default function App() {
     };
     fetchClasses();
   }, [selectedGradeId]);
+
+  // Generate lesson content after AI generation completes and all states are updated
+  useEffect(() => {
+    if (aiGenerationComplete) {
+      // Small delay to ensure all state updates are reflected
+      setTimeout(() => {
+        generateLessonContent();
+        setAiGenerationComplete(false); // Reset flag
+      }, 100);
+    }
+  }, [aiGenerationComplete]);
 
 
 
