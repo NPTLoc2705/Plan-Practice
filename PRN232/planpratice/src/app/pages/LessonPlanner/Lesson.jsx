@@ -646,19 +646,19 @@ export default function App() {
 
         // Populate language focus
         if (generatedData.languageFocusItems && generatedData.languageFocusItems.length > 0) {
-          generatedData.languageFocusItems.forEach((item, index) => {
+          const aiLFItems = generatedData.languageFocusItems.map((item, index) => {
             const newId = Math.max(...languageFocusTypes.map(t => t.id), 0) + 1 + index;
-            const newType = {
+            return {
               id: newId,
               name: item.name
             };
-
-            setLanguageFocusTypes(prev => ([...prev, newType]));
-            setLanguageFocus(prev => ([...prev, {
-              typeId: newId,
-              content: item.content
-            }]));
           });
+          
+          setLanguageFocusTypes([...languageFocusTypes, ...aiLFItems]);
+          setLanguageFocus(generatedData.languageFocusItems.map((item, index) => ({
+            typeId: Math.max(...languageFocusTypes.map(t => t.id), 0) + 1 + index,
+            content: item.content
+          })));
         }
 
         // Populate preparations
@@ -672,20 +672,18 @@ export default function App() {
             };
           });
           setPreparationTemplates([...preparationTemplates, ...aiPreps]);
-          setSelectedPreparations([
-            ...selectedPreparations,
-            ...aiPreps.map(p => ({ id: p.id, name: p.name, materials: p.description }))
-          ]);
+          setSelectedPreparations(aiPreps.map(p => ({ id: p.id, name: p.name, materials: p.description })));
         }
 
         // Populate activity stages
         if (generatedData.activityStages && generatedData.activityStages.length > 0) {
+          const aiActivities = [];
           // Calculate starting IDs once to avoid duplicates
           let activityIdCounter = Math.max(...activityTemplates.map(p => p.id), 0) + 1;
           let interactionIdCounter = Math.max(...interactionPatterns.map(p => p.id), 0) + 1;
 
           generatedData.activityStages.forEach((stage, stageIndex) => {
-            const aiActivities = {
+            const aiActivity = {
               stageName: stage.stageName,
               subActivities: []
             };
@@ -698,21 +696,23 @@ export default function App() {
               }
               setActivityTemplates(prev => [...prev, aiActivityTemplate]);
 
-              const aiInteractionPatterns = {
+              const aiInteractionPattern = {
                 id: interactionIdCounter++,
                 name: item.interactionPatternName.trim(),
                 shortCode: item.interactionPatternShortCode.trim()
               };
-              setInteractionPatterns(prev => [...prev, aiInteractionPatterns]);
+              setInteractionPatterns(prev => [...prev, aiInteractionPattern]);
 
-              aiActivities.subActivities.push({
+              aiActivity.subActivities.push({
                 timeInMinutes: item.timeInMinutes,
                 activityTemplateId: aiActivityTemplate.id,
-                interactionPatternId: aiInteractionPatterns.id
+                interactionPatternId: aiInteractionPattern.id
               });
             });
-            setActivities(activities => [...activities, aiActivities]);
+            aiActivities.push(aiActivity);
           });
+
+          setActivities(aiActivities);
         }
 
         // Update coin balance
