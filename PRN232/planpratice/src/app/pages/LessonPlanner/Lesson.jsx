@@ -720,6 +720,8 @@ export default function App() {
         setMessage(`✅ ${result.message} (${result.coinsDeducted} coins deducted. New balance: ${result.newBalance})`);
         setShowAIModal(false);
         setCurrentStep(1); // Start from step 1 to review
+
+        generateLessonContent(); // Refresh lesson content preview
       } else {
         throw new Error('Invalid response from AI generation');
       }
