@@ -7,7 +7,7 @@ using System.Security.Claims;
 
 namespace PRN232.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/student/quiz")]
     [ApiController]
     [Authorize]
     public class StudentQuizController : ControllerBase
@@ -18,125 +18,6 @@ namespace PRN232.Controllers
         {
             _studentQuizService = studentQuizService;
         }
-
-        /// <summary>
-        /// Lấy danh sách quiz có thể làm
-        /// </summary>
-        /// <returns>Danh sách quiz</returns>
-        [HttpGet("available")]
-        [ProducesResponseType(typeof(IEnumerable<QuizInfoDto>), StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> GetAvailableQuizzes()
-        {
-            try
-            {
-                var userId = GetCurrentUserId();
-                var quizzes = await _studentQuizService.GetAvailableQuizzesAsync(userId);
-
-                return Ok(new
-                {
-                    success = true,
-                    data = quizzes,
-                    count = quizzes.Count(),
-                    message = "quiz list"
-                });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new
-                {
-                    success = false,
-                    message = "Error occurred while getting available quizzes",
-                    error = ex.Message
-                });
-            }
-        }
-
-        /// <summary>
-        /// Lấy chi tiết quiz để làm bài
-        /// </summary>
-        /// <param name="quizId">ID của quiz</param>
-        /// <returns>Chi tiết quiz với câu hỏi và đáp án</returns>
-        [HttpGet("{quizId}")]
-        [ProducesResponseType(typeof(QuizDetailDto), StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> GetQuizForTaking(int quizId)
-        {
-            try
-            {
-                var userId = GetCurrentUserId();
-                var quiz = await _studentQuizService.GetQuizForTakingAsync(quizId, userId);
-
-                if (quiz == null)
-                {
-                    return NotFound(new
-                    {
-                        success = false,
-                        message = $"not found quiz with id: {quizId}"
-                    });
-                }
-
-                return Ok(new
-                {
-                    success = true,
-                    data = quiz,
-                    message = "Get quiz successfully"
-                });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new
-                {
-                    success = false,
-                    message = "Error occurred while getting quiz",
-                    error = ex.Message
-                });
-            }
-        }
-
-        /// <summary>
-        /// Kiểm tra học sinh đã làm quiz chưa
-        /// </summary>
-        /// <param name="quizId">ID của quiz</param>
-        /// <returns>True nếu đã làm, False nếu chưa</returns>
-        [HttpGet("{quizId}/check-attempt")]
-        [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> CheckQuizAttempt(int quizId)
-        {
-            try
-            {
-                var userId = GetCurrentUserId();
-                var hasAttempted = await _studentQuizService.HasUserAttemptedQuizAsync(userId, quizId);
-
-                return Ok(new
-                {
-                    success = true,
-                    data = new
-                    {
-                        quizId = quizId,
-                        hasAttempted = hasAttempted
-                    },
-                    message = hasAttempted
-                        ? "You have already taken this quiz"
-                        : "You have not taken this quiz yet"
-                });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new
-                {
-                    success = false,
-                    message = "Error occurred while checking quiz attempt for quiz",
-                    error = ex.Message
-                });
-            }
-        }
-
 
         [HttpPost("submit")]
         [ProducesResponseType(typeof(QuizResultDto), StatusCodes.Status200OK)]

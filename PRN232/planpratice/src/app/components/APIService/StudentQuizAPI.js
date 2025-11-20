@@ -41,88 +41,9 @@ class QuizAPI {
     }
 
     // ===== STUDENT METHODS =====
-    
-    static async getAvailableQuizzes() {
-        const response = await fetch(`${API_BASE_URL}/StudentQuiz/available`, {
-            method: 'GET',
-            headers: this.getAuthHeaders()
-        });
-
-        if (!response.ok) {
-            if (response.status === 401) {
-                this.handleUnauthorized();
-            }
-            const text = await response.text();
-            let errorMessage;
-            try {
-                const result = JSON.parse(text);
-                errorMessage = result.message;
-            } catch (e) {
-                errorMessage = text || 'Failed to fetch available quizzes';
-            }
-            throw new Error(errorMessage);
-        }
-
-        return await this.parseResponse(response);
-    }
-
-    static async getQuizForTaking(quizId) {
-        const response = await fetch(`${API_BASE_URL}/StudentQuiz/${quizId}`, {
-            method: 'GET',
-            headers: this.getAuthHeaders()
-        });
-
-        if (!response.ok) {
-            if (response.status === 401) {
-                this.handleUnauthorized();
-            }
-            if (response.status === 404) {
-                throw new Error('Quiz not found');
-            }
-            const result = await this.parseResponse(response);
-            throw new Error(result.message || 'Failed to fetch quiz details');
-        }
-
-        return await this.parseResponse(response);
-    }
 
     static async submitQuiz(quizData) {
-        const response = await fetch(`${API_BASE_URL}/StudentQuiz/submit`, {
-            method: 'POST',
-            headers: this.getAuthHeaders(),
-            body: JSON.stringify(quizData)
-        });
-
-        if (!response.ok) {
-            if (response.status === 401) {
-                this.handleUnauthorized();
-            }
-            const result = await this.parseResponse(response);
-            throw new Error(result.message || 'Failed to submit quiz');
-        }
-
-        return await this.parseResponse(response);
-    }
-
-    static async checkQuizAttempt(quizId) {
-        const response = await fetch(`${API_BASE_URL}/StudentQuiz/${quizId}/check-attempt`, {
-            method: 'GET',
-            headers: this.getAuthHeaders()
-        });
-
-        if (!response.ok) {
-            if (response.status === 401) {
-                this.handleUnauthorized();
-            }
-            const result = await this.parseResponse(response);
-            throw new Error(result.message || 'Failed to check quiz attempt');
-        }
-
-        return await this.parseResponse(response);
-    }
-
-    static async submitQuiz(quizData) {
-        const response = await fetch(`${API_BASE_URL}/StudentQuiz/submit`, {
+        const response = await fetch(`${API_BASE_URL}/student/quiz/submit`, {
             method: 'POST',
             headers: this.getAuthHeaders(),
             body: JSON.stringify(quizData)
@@ -144,7 +65,7 @@ class QuizAPI {
     }
 
     static async getQuizResult(resultId) {
-        const response = await fetch(`${API_BASE_URL}/StudentQuiz/result/${resultId}`, {
+        const response = await fetch(`${API_BASE_URL}/student/quiz/result/${resultId}`, {
             method: 'GET',
             headers: this.getAuthHeaders()
         });
@@ -164,7 +85,7 @@ class QuizAPI {
     }
 
     static async getQuizHistory() {
-        const response = await fetch(`${API_BASE_URL}/StudentQuiz/history`, {
+        const response = await fetch(`${API_BASE_URL}/student/quiz/history`, {
             method: 'GET',
             headers: this.getAuthHeaders()
         });
@@ -181,7 +102,7 @@ class QuizAPI {
     }
 
     static async getQuizStatistics(quizId) {
-        const response = await fetch(`${API_BASE_URL}/StudentQuiz/${quizId}/statistics`, {
+        const response = await fetch(`${API_BASE_URL}/student/quiz/${quizId}/statistics`, {
             method: 'GET',
             headers: this.getAuthHeaders()
         });
