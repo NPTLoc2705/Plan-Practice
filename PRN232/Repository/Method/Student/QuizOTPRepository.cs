@@ -65,7 +65,7 @@ namespace Repository.Method.Student
 
         public Task<QuizOTP> UpdateAsync(QuizOTP quizOTP) => _quizOTPDAO.UpdateAsync(quizOTP);
 
-        public async Task DeleteExpiredOtpsAsync() => _quizOTPDAO.DeleteExpiredOtpAsynce();
+        public async Task DeleteExpiredOtpsAsync() => _quizOTPDAO.DeleteExpiredOtpAsync();
         
 
 

@@ -131,13 +131,18 @@ namespace DAL.Student
             return await _context.SaveChangesAsync();
         }
 
-        public async Task DeleteExpiredOtpAsynce()
+        public async Task DeleteExpiredOtpAsync()
         {
-            var now = DateTime.UtcNow;
-            var expire = _context.QuizOTPs.Where(q => q.ExpiresAt <= now);
+            var expired = await _context.QuizOTPs
+        .IgnoreQueryFilters()
+        .Where(q => q.ExpiresAt <= DateTime.UtcNow)
+        .ToListAsync();
 
-            _context.QuizOTPs.RemoveRange(expire);
-            await _context.SaveChangesAsync();
+            if (expired.Any())
+            {
+                _context.QuizOTPs.RemoveRange(expired);
+                await _context.SaveChangesAsync();
+            }
         }
     }
 }

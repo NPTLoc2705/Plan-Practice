@@ -14,7 +14,7 @@ namespace Service.QuizzMethod
 
     {
         private readonly IServiceProvider _provider;
-        private readonly TimeSpan _interval = TimeSpan.FromMinutes(5);
+        private readonly TimeSpan _interval = TimeSpan.FromMinutes(1);
 
         public QuizOtpCleanupService(IServiceProvider provider)
         {
@@ -24,10 +24,20 @@ namespace Service.QuizzMethod
         {
             while (!stoppingToken.IsCancellationRequested)
             {
-                using (var scope = _provider.CreateScope())
+                await using var scope = _provider.CreateAsyncScope();
+                var otpService = scope.ServiceProvider.GetRequiredService<IQuizOTPService>();
+
+                try
                 {
-                    var otpService = scope.ServiceProvider.GetRequiredService<IQuizOTPService>();
                     await otpService.CleanupExpiredOtpsAsync();
+                }
+                catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+                {
+                    return;
+                }
+                catch (Exception ex)
+                {
+                    
                 }
 
                 await Task.Delay(_interval, stoppingToken);
