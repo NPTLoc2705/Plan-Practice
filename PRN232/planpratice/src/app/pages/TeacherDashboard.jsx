@@ -40,11 +40,11 @@ const TeacherDashboard = () => {
   };
 
   const handleCreateQuiz = () => {
-    navigate('/teacher/quiz/create');
+    navigate('/teacher/quiz');
   };
 
   const handleViewQuiz = (quizId) => {
-    navigate(`/teacher/quiz/${quizId}`);
+    navigate(`/teacher/quiz/edit/${quizId}`);
   };
 
   if (loading) return (
