@@ -1,10 +1,7 @@
 import { Route, Navigate } from 'react-router-dom';
 import { AuthAPI } from '../components/APIService/AuthAPI';
-import QuizList from '../pages/QuizList';
-import TakeQuiz from '../pages/TakeQuiz';
 import QuizResult from '../pages/QuizResult';
 import QuizHistory from '../pages/QuizHistory';
-
 import TakeQuizWithOTP from "../pages/TakeQuizWithOTP";
 
 // Protected Route Component for students
@@ -28,22 +25,8 @@ export const StudentRoutes = function () {
         <Route path="/student">
 
             {/* Quiz Student Routes */}
-            <Route
-                path="quizzes"
-                element={
-                    <StudentProtectedRoute>
-                        <QuizList />
-                    </StudentProtectedRoute>
-                }
-            />
-            <Route
-                path="quiz/:id"
-                element={
-                    <StudentProtectedRoute>
-                        <TakeQuiz />
-                    </StudentProtectedRoute>
-                }
-            />
+            
+            
             <Route
                 path="result/:id"
                 element={

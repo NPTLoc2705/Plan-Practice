@@ -1,11 +1,12 @@
 const API_BASE_URL = `${import.meta.env.VITE_API_BASE_URL}`;
 
 class QuizOTPAPI {
+    // ===================== AUTH & RESPONSE =====================
     static getAuthHeaders() {
         const token = localStorage.getItem('token');
         return {
             'Content-Type': 'application/json',
-            ...(token && { 'Authorization': `Bearer ${token}` })
+            ...(token && { Authorization: `Bearer ${token}` })
         };
     }
 
@@ -13,7 +14,7 @@ class QuizOTPAPI {
         try {
             const text = await response.text();
             if (!text) {
-                return { success: false, data: null, message: 'Empty response received' };
+                return { success: false, data: null, message: 'Empty response' };
             }
             return JSON.parse(text);
         } catch (e) {
@@ -30,19 +31,18 @@ class QuizOTPAPI {
         }
     }
 
-    // ===== TEACHER METHODS =====
+    // ===================== TEACHER METHODS =====================
 
+    /** Tạo OTP mới cho quiz */
     static async generateOTP(otpData) {
-        const response = await fetch(`${API_BASE_URL}/QuizOTP/generate`, {
+        const response = await fetch(`${API_BASE_URL}/quiz-otps`, {
             method: 'POST',
             headers: this.getAuthHeaders(),
             body: JSON.stringify(otpData)
         });
 
         if (!response.ok) {
-            if (response.status === 401) {
-                this.handleUnauthorized();
-            }
+            if (response.status === 401) this.handleUnauthorized();
             const result = await this.parseResponse(response);
             throw new Error(result.message || 'Failed to generate OTP');
         }
@@ -50,53 +50,32 @@ class QuizOTPAPI {
         return await this.parseResponse(response);
     }
 
+    /** Lấy danh sách OTP của giáo viên hiện tại */
     static async getMyOTPs() {
-        const response = await fetch(`${API_BASE_URL}/QuizOTP/my-otps`, {
+        const response = await fetch(`${API_BASE_URL}/quiz-otps/my`, {
             method: 'GET',
             headers: this.getAuthHeaders()
         });
 
         if (!response.ok) {
-            if (response.status === 401) {
-                this.handleUnauthorized();
-            }
+            if (response.status === 401) this.handleUnauthorized();
             const result = await this.parseResponse(response);
-            throw new Error(result.message || 'Failed to fetch OTPs');
+            throw new Error(result.message || 'Failed to fetch your OTPs');
         }
 
         return await this.parseResponse(response);
     }
 
-    // static async getQuizOTPs(quizId) {
-    //     const response = await fetch(`${API_BASE_URL}/QuizOTP/quiz/${quizId}`, {
-    //         method: 'GET',
-    //         headers: this.getAuthHeaders()
-    //     });
-
-    //     if (!response.ok) {
-    //         if (response.status === 401) {
-    //             this.handleUnauthorized();
-    //         }
-    //         const result = await this.parseResponse(response);
-    //         throw new Error(result.message || 'Failed to fetch quiz OTPs');
-    //     }
-
-    //     return await this.parseResponse(response);
-    // }
-
+    /** Thu hồi (deactivate) OTP */
     static async revokeOTP(otpId) {
-        const response = await fetch(`${API_BASE_URL}/QuizOTP/${otpId}`, {
+        const response = await fetch(`${API_BASE_URL}/quiz-otps/${otpId}`, {
             method: 'DELETE',
             headers: this.getAuthHeaders()
         });
 
         if (!response.ok) {
-            if (response.status === 401) {
-                this.handleUnauthorized();
-            }
-            if (response.status === 404) {
-                throw new Error('OTP not found');
-            }
+            if (response.status === 401) this.handleUnauthorized();
+            if (response.status === 404) throw new Error('OTP not found');
             const result = await this.parseResponse(response);
             throw new Error(result.message || 'Failed to revoke OTP');
         }
@@ -104,17 +83,16 @@ class QuizOTPAPI {
         return await this.parseResponse(response);
     }
 
+    /** Gia hạn thời gian OTP (PATCH partial update) */
     static async extendOTP(otpId, additionalMinutes) {
-        const response = await fetch(`${API_BASE_URL}/QuizOTP/${otpId}/extend`, {
+        const response = await fetch(`${API_BASE_URL}/quiz-otps/${otpId}/extend`, {
             method: 'PATCH',
             headers: this.getAuthHeaders(),
-            body: JSON.stringify({ additionalMinutes })
+            body: JSON.stringify({ additionalMinutes: parseInt(additionalMinutes) })
         });
 
         if (!response.ok) {
-            if (response.status === 401) {
-                this.handleUnauthorized();
-            }
+            if (response.status === 401) this.handleUnauthorized();
             const result = await this.parseResponse(response);
             throw new Error(result.message || 'Failed to extend OTP');
         }
@@ -122,46 +100,45 @@ class QuizOTPAPI {
         return await this.parseResponse(response);
     }
 
+    /** Tái tạo mã OTP mới (giữ nguyên các thiết lập) */
     static async regenerateOTP(otpId) {
-    const response = await fetch(`${API_BASE_URL}/QuizOTP/${otpId}/regenerate`, {
-        method: 'POST',
-        headers: this.getAuthHeaders()
-    });
+        const response = await fetch(`${API_BASE_URL}/quiz-otps/${otpId}/regenerate`, {
+            method: 'POST',
+            headers: this.getAuthHeaders()
+        });
 
-    if (!response.ok) {
-        if (response.status === 401) {
-            this.handleUnauthorized();
+        if (!response.ok) {
+            if (response.status === 401) this.handleUnauthorized();
+            const result = await this.parseResponse(response);
+            throw new Error(result.message || 'Failed to regenerate OTP');
         }
+
         const result = await this.parseResponse(response);
-        throw new Error(result.message || 'Failed to regenerate OTP');
+
+        // Normalize field names (vì backend .NET có thể trả về PascalCase)
+        if (result.success && result.data) {
+            result.data = {
+                ...result.data,
+                otpCode: result.data.otpCode || result.data.OTPCode,
+                quizTitle: result.data.quizTitle || result.data.QuizTitle,
+                expiresAt: result.data.expiresAt || result.data.ExpiresAt,
+                maxUsage: result.data.maxUsage ?? result.data.MaxUsage,
+                usageCount: result.data.usageCount ?? result.data.UsageCount
+            };
+        }
+
+        return result;
     }
 
-    const result = await this.parseResponse(response);
-    
-    // Normalize the response data
-    if (result.success && result.data) {
-        result.data = {
-            ...result.data,
-            otpCode: result.data.otpCode || result.data.OTPCode,
-            quizTitle: result.data.quizTitle || result.data.QuizTitle,
-            expiresAt: result.data.expiresAt || result.data.ExpiresAt,
-            maxUsage: result.data.maxUsage || result.data.MaxUsage
-        };
-    }
-    
-    return result;
-}
-
+    /** Xem log truy cập OTP */
     static async getOTPAccessLogs(otpId) {
-        const response = await fetch(`${API_BASE_URL}/QuizOTP/${otpId}/logs`, {
+        const response = await fetch(`${API_BASE_URL}/quiz-otps/${otpId}/logs`, {
             method: 'GET',
             headers: this.getAuthHeaders()
         });
 
         if (!response.ok) {
-            if (response.status === 401) {
-                this.handleUnauthorized();
-            }
+            if (response.status === 401) this.handleUnauthorized();
             const result = await this.parseResponse(response);
             throw new Error(result.message || 'Failed to fetch access logs');
         }
@@ -169,36 +146,35 @@ class QuizOTPAPI {
         return await this.parseResponse(response);
     }
 
-    // ===== STUDENT METHODS =====
+    // ===================== STUDENT METHODS =====================
 
+    /** Kiểm tra OTP hợp lệ và lấy thông tin quiz */
     static async validateOTP(otpCode) {
-        const response = await fetch(`${API_BASE_URL}/QuizOTP/validate`, {
+        const response = await fetch(`${API_BASE_URL}/quiz-otps/validate`, {
             method: 'POST',
             headers: this.getAuthHeaders(),
-            body: JSON.stringify({ otpCode })
+            body: JSON.stringify({ otpCode: otpCode.trim() })
         });
 
         if (!response.ok) {
-            if (response.status === 401) {
-                this.handleUnauthorized();
-            }
+            if (response.status === 401) this.handleUnauthorized();
             const result = await this.parseResponse(response);
-            throw new Error(result.message || 'Invalid OTP code');
+            throw new Error(result.message || 'Invalid or expired OTP');
         }
 
         return await this.parseResponse(response);
     }
 
+    /** Lấy thông tin quiz để làm bằng OTP code */
     static async getQuizByOTP(otpCode) {
-        const response = await fetch(`${API_BASE_URL}/QuizOTP/take/${otpCode}`, {
+        const response = await fetch(`${API_BASE_URL}/quiz-otps/${otpCode.trim()}/quiz`, {
             method: 'GET',
             headers: this.getAuthHeaders()
         });
 
         if (!response.ok) {
-            if (response.status === 401) {
-                this.handleUnauthorized();
-            }
+            if (response.status === 401) this.handleUnauthorized();
+            if (response.status === 404) throw new Error('OTP not found or expired');
             const result = await this.parseResponse(response);
             throw new Error(result.message || 'Failed to retrieve quiz');
         }
@@ -206,8 +182,7 @@ class QuizOTPAPI {
         return await this.parseResponse(response);
     }
 
-    // ===== HELPER METHODS =====
-
+    // ===================== HELPER METHODS =====================
     static formatOTPData(quizId, expiryMinutes, maxUsage, allowMultipleAttempts) {
         return {
             quizId: parseInt(quizId),
@@ -226,8 +201,7 @@ class QuizOTPAPI {
     }
 
     static formatDate(dateString) {
-        const date = new Date(dateString);
-        return date.toLocaleDateString('en-US', {
+        return new Date(dateString).toLocaleDateString('en-US', {
             year: 'numeric',
             month: 'short',
             day: 'numeric',
@@ -237,10 +211,7 @@ class QuizOTPAPI {
     }
 
     static getTimeRemaining(expiresAt) {
-        const now = new Date();
-        const expiry = new Date(expiresAt);
-        const diff = expiry - now;
-
+        const diff = new Date(expiresAt) - new Date();
         if (diff <= 0) return 'Expired';
 
         const hours = Math.floor(diff / (1000 * 60 * 60));
@@ -248,24 +219,15 @@ class QuizOTPAPI {
 
         if (hours > 24) {
             const days = Math.floor(hours / 24);
-            return `${days}d ${hours % 24}h remaining`;
-        } else if (hours > 0) {
-            return `${hours}h ${minutes}m remaining`;
-        } else {
-            return `${minutes}m remaining`;
+            return `${days}d ${hours % 24}h left`;
         }
+        return hours > 0 ? `${hours}h ${minutes}m left` : `${minutes}m left`;
     }
 
     static getOTPStatus(otp) {
-        if (!otp.isActive) {
-            return { text: 'Revoked', class: 'badgeInactive' };
-        }
-        if (this.isOTPExpired(otp.expiresAt)) {
-            return { text: 'Expired', class: 'badgeExpired' };
-        }
-        if (otp.maxUsage && otp.usageCount >= otp.maxUsage) {
-            return { text: 'Limit Reached', class: 'badgeExpired' };
-        }
+        if (!otp.isActive) return { text: 'Revoked', class: 'badgeInactive' };
+        if (this.isOTPExpired(otp.expiresAt)) return { text: 'Expired', class: 'badgeExpired' };
+        if (otp.maxUsage && otp.usageCount >= otp.maxUsage) return { text: 'Limit Reached', class: 'badgeExpired' };
         return { text: 'Active', class: 'badgeActive' };
     }
 
@@ -273,14 +235,14 @@ class QuizOTPAPI {
         try {
             await navigator.clipboard.writeText(text);
             return true;
-        } catch (error) {
-            console.error('Failed to copy:', error);
+        } catch (err) {
+            console.error('Copy failed:', err);
             return false;
         }
     }
 
     static formatUsage(usageCount, maxUsage) {
-        return `${usageCount} / ${maxUsage || '∞'}`;
+        return `${usageCount} / ${maxUsage ?? '∞'}`;
     }
 }
 
