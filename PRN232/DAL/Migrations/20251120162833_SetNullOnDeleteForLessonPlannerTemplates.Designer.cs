@@ -3,6 +3,7 @@ using System;
 using DAL;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DAL.Migrations
 {
     [DbContext(typeof(PlantPraticeDbContext))]
-    partial class PlantPraticeDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251120162833_SetNullOnDeleteForLessonPlannerTemplates")]
+    partial class SetNullOnDeleteForLessonPlannerTemplates
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1327,7 +1330,7 @@ namespace DAL.Migrations
                     b.HasOne("BusinessObject.Lesson.Template.MethodTemplate", "MethodTemplate")
                         .WithMany()
                         .HasForeignKey("MethodTemplateId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("BusinessObject.Lesson.Unit", "Unit")
                         .WithMany("LessonPlanners")
@@ -1336,7 +1339,7 @@ namespace DAL.Migrations
                     b.HasOne("BusinessObject.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.SetNull)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Class");
@@ -1571,7 +1574,7 @@ namespace DAL.Migrations
                     b.HasOne("BusinessObject.Lesson.LessonPlanner", "LessonPlanner")
                         .WithMany("Quizzes")
                         .HasForeignKey("LessonPlannerId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("LessonPlanner");

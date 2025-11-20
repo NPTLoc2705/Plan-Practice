@@ -106,13 +106,13 @@ namespace DAL
                 entity.HasOne(e => e.User)
                     .WithMany()
                     .HasForeignKey(e => e.UserId)
-                    .OnDelete(DeleteBehavior.Restrict);
+                    .OnDelete(DeleteBehavior.SetNull);
                     
                 // Optional relationships
                 entity.HasOne(e => e.MethodTemplate)
                     .WithMany()
                     .HasForeignKey(e => e.MethodTemplateId)
-                    .OnDelete(DeleteBehavior.Restrict);
+                    .OnDelete(DeleteBehavior.SetNull);
 
                 // Quiz relationship - One LessonPlanner can have many Quizzes (Required)
                 entity.HasMany(e => e.Quizzes)
@@ -244,7 +244,7 @@ namespace DAL
                 entity.HasOne(q => q.LessonPlanner)
                     .WithMany(lp => lp.Quizzes)
                     .HasForeignKey(q => q.LessonPlannerId)
-                    .OnDelete(DeleteBehavior.Restrict)  // Changed from SetNull to Restrict
+                    .OnDelete(DeleteBehavior.Cascade)  // Changed from SetNull to Restrict
                     .IsRequired();  // Added to make it required
             });
 
@@ -283,6 +283,135 @@ namespace DAL
                 .WithMany()
                 .HasForeignKey(ua => ua.AnswerId);
 
+            // ============================================
+            // LESSON PLANNER STEP COMPONENTS CONFIGURATION
+            // ============================================
+
+            // LessonObjective - Set null on template delete
+            modelBuilder.Entity<LessonObjective>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Id).ValueGeneratedOnAdd();
+
+                entity.HasOne(e => e.LessonPlanner)
+                    .WithMany(lp => lp.Objectives)
+                    .HasForeignKey(e => e.LessonPlannerId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(e => e.ObjectiveTemplate)
+                    .WithMany()
+                    .HasForeignKey(e => e.ObjectiveTemplateId)
+                    .OnDelete(DeleteBehavior.SetNull)
+                    .IsRequired(false);
+            });
+
+            // LessonSkill - Set null on template delete
+            modelBuilder.Entity<LessonSkill>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Id).ValueGeneratedOnAdd();
+
+                entity.HasOne(e => e.LessonPlanner)
+                    .WithMany(lp => lp.Skills)
+                    .HasForeignKey(e => e.LessonPlannerId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(e => e.SkillTemplate)
+                    .WithMany()
+                    .HasForeignKey(e => e.SkillTemplateId)
+                    .OnDelete(DeleteBehavior.SetNull)
+                    .IsRequired(false);
+            });
+
+            // LessonAttitude - Set null on template delete
+            modelBuilder.Entity<LessonAttitude>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Id).ValueGeneratedOnAdd();
+
+                entity.HasOne(e => e.LessonPlanner)
+                    .WithMany(lp => lp.Attitudes)
+                    .HasForeignKey(e => e.LessonPlannerId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(e => e.AttitudeTemplate)
+                    .WithMany()
+                    .HasForeignKey(e => e.AttitudeTemplateId)
+                    .OnDelete(DeleteBehavior.SetNull)
+                    .IsRequired(false);
+            });
+
+            // LessonLanguageFocus - Set null on template delete
+            modelBuilder.Entity<LessonLanguageFocus>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Id).ValueGeneratedOnAdd();
+
+                entity.HasOne(e => e.LessonPlanner)
+                    .WithMany(lp => lp.LanguageFocusItems)
+                    .HasForeignKey(e => e.LessonPlannerId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(e => e.LanguageFocusType)
+                    .WithMany()
+                    .HasForeignKey(e => e.LanguageFocusTypeId)
+                    .OnDelete(DeleteBehavior.SetNull)
+                    .IsRequired(false);
+            });
+
+            // LessonPreparation - Set null on template delete
+            modelBuilder.Entity<LessonPreparation>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Id).ValueGeneratedOnAdd();
+
+                entity.HasOne(e => e.LessonPlanner)
+                    .WithMany(lp => lp.Preparations)
+                    .HasForeignKey(e => e.LessonPlannerId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(e => e.PreparationType)
+                    .WithMany()
+                    .HasForeignKey(e => e.PreparationTypeId)
+                    .OnDelete(DeleteBehavior.SetNull)
+                    .IsRequired(false);
+            });
+
+            // LessonActivityStage
+            modelBuilder.Entity<LessonActivityStage>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Id).ValueGeneratedOnAdd();
+
+                entity.HasOne(e => e.LessonPlanner)
+                    .WithMany(lp => lp.ActivityStages)
+                    .HasForeignKey(e => e.LessonPlannerId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            // LessonActivityItem - Set null on template delete
+            modelBuilder.Entity<LessonActivityItem>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Id).ValueGeneratedOnAdd();
+
+                entity.HasOne(e => e.LessonActivityStage)
+                    .WithMany(stage => stage.ActivityItems)
+                    .HasForeignKey(e => e.LessonActivityStageId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(e => e.InteractionPattern)
+                    .WithMany()
+                    .HasForeignKey(e => e.InteractionPatternId)
+                    .OnDelete(DeleteBehavior.SetNull)
+                    .IsRequired(false);
+
+                entity.HasOne(e => e.ActivityTemplate)
+                    .WithMany()
+                    .HasForeignKey(e => e.ActivityTemplateId)
+                    .OnDelete(DeleteBehavior.SetNull)
+                    .IsRequired(false);
+            });
 
             //Payment entity configuration
             modelBuilder.Entity<Payment>(entity =>
