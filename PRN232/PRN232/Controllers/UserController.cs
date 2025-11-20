@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Service.Interface;
+using Service.Method;
 using System.Security.Claims;
 
 namespace PRN232.Controllers
@@ -11,10 +12,23 @@ namespace PRN232.Controllers
     public class UserController : Controller
     {
         private readonly IUserService _userService;
-        public UserController(IUserService userService)
+        private readonly ICoinService _coinService;
+        public UserController(IUserService userService, ICoinService coinService)
         {
             _userService = userService;
+            _coinService = coinService;
         }
+
+        private int GetCurrentUserId()
+        {
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (!int.TryParse(userIdClaim, out var userId))
+            {
+                throw new UnauthorizedAccessException("Invalid user ID in token.");
+            }
+            return userId;
+        }
+
         [HttpGet("profile")]
         [Authorize]
         public IActionResult GetProfile()
@@ -101,6 +115,27 @@ namespace PRN232.Controllers
             catch (Exception ex)
             {
                 return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        [HttpGet("coin/balance")]
+        [Authorize]
+        public async Task<IActionResult> GetCoinBalance()
+        {
+            try
+            {
+                var userId = GetCurrentUserId();
+                var balance = await _coinService.GetUserCoinBalance(userId);
+
+                return Ok(new
+                {
+                    success = true,
+                    coinBalance = balance
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { success = false, message = "Error getting coin balance" });
             }
         }
     }

@@ -79,6 +79,26 @@ class UserAPI {
     return await response.json();
   }
 
+  // NEW METHOD: Get coin balance
+  static async getCoinBalance() {
+    const token = this.getToken();
+    if (!token) {
+      throw new Error('No authentication token found');
+    }
+
+    const response = await fetch(`${API_BASE_URL}/coin/balance`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.message || 'Failed to fetch coin balance');
+
+    return result.coinBalance;
+  }
+
   // Helper method to get token from localStorage
   static getToken() {
     return localStorage.getItem('token');
