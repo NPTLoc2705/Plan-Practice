@@ -24,7 +24,7 @@ namespace PRN232.Controllers
         /// <summary>
         /// Create a VIP payment link (200,000 VND)
         /// </summary>
-        [HttpPost("create-coin-payment")]
+        [HttpPost]
         [Authorize]
         public async Task<ActionResult<CreatePaymentResponse>> CreateCoinPayment([FromBody] CreatePaymentRequest request)
         {
@@ -99,126 +99,7 @@ namespace PRN232.Controllers
             }
         }
 
-        /// <summary>
-        /// Sync and check all pending payments for current user (will auto-upgrade to VIP if payment is successful)
-        /// </summary>
-        [HttpPost("sync-pending")]
-        [Authorize]
-        public async Task<ActionResult> SyncPendingPayments()
-        {
-            try
-            {
-                var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
-                if (string.IsNullOrEmpty(userIdClaim))
-                {
-                    return Unauthorized(new { message = "User not authenticated" });
-                }
 
-                int userId = int.Parse(userIdClaim);
-                var payments = await _paymentService.GetUserPaymentHistory(userId);
-
-                int upgraded = 0;
-                foreach (var payment in payments.Where(p => p.Status == "PENDING"))
-                {
-                    try
-                    {
-                        // Check status from PayOS and auto-upgrade if PAID
-                        var updated = await _paymentService.GetPaymentStatus(payment.OrderCode);
-                        if (updated.Status == "PAID")
-                        {
-                            upgraded++;
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger.LogWarning(ex, "Could not sync payment {OrderCode}", payment.OrderCode);
-                    }
-                }
-
-                return Ok(new
-                {
-                    message = $"Synced pending payments. {upgraded} payment(s) confirmed.",
-                    upgraded = upgraded
-                });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error syncing pending payments");
-                return StatusCode(500, new { message = ex.Message });
-            }
-        }
-
-        /// <summary>
-        /// Manually upgrade to VIP if user has a valid PAID payment within last 30 days
-        /// </summary>
-        [HttpPost("upgrade-to-vip")]
-        [Authorize]
-        public async Task<ActionResult> UpgradeToVip()
-        {
-            try
-            {
-                var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
-                if (string.IsNullOrEmpty(userIdClaim))
-                {
-                    return Unauthorized(new { message = "User not authenticated" });
-                }
-
-                int userId = int.Parse(userIdClaim);
-
-                bool success = await _paymentService.UpgradeUserIfPaymentExists(userId);
-
-                if (success)
-                {
-                    return Ok(new
-                    {
-                        message = "Successfully upgraded to VIP!",
-                        success = true
-                    });
-                }
-                else
-                {
-                    return BadRequest(new
-                    {
-                        message = "No valid payment found. Please complete a payment first.",
-                        success = false
-                    });
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error upgrading user to VIP");
-                return StatusCode(500, new { message = ex.Message });
-            }
-        }
-
-        /// <summary>
-        /// Webhook endpoint for PayOS payment notifications
-        /// </summary>
-        [HttpPost("webhook")]
-        [AllowAnonymous]
-        public async Task<IActionResult> PaymentWebhook([FromBody] WebhookType webhookBody)
-        {
-            try
-            {
-                _logger.LogInformation("Received webhook from PayOS");
-
-                bool success = await _paymentService.HandlePaymentWebhook(webhookBody);
-
-                if (success)
-                {
-                    return Ok(new { message = "Webhook processed successfully" });
-                }
-                else
-                {
-                    return BadRequest(new { message = "Invalid webhook data" });
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error processing webhook");
-                return StatusCode(500, new { message = "Internal server error" });
-            }
-        }
 
         /// <summary>
         /// Payment success page redirect handler
@@ -232,7 +113,7 @@ namespace PRN232.Controllers
             // You can redirect to your frontend success page
             return Ok(new
             {
-                message = "Payment successful! You have been upgraded to VIP.",
+                message = "You have been purchased successfully.",
                 orderCode = orderCode,
                 status = status
             });

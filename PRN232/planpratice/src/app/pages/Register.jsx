@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Eye, EyeOff, Mail, Lock, User, UserPlus, Loader2, AlertCircle, CheckCircle, ArrowLeft, GraduationCap, BookOpen } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { AuthAPI } from '../components/APIService/AuthAPI';
+import { UserAPI } from '../components/APIService/UserAPI';
 import GoogleSignIn from '../components/Google/GoogleSignIn';
 
 const Register = () => {
@@ -95,7 +96,7 @@ const Register = () => {
 
     try {
       if (selectedRole === 'teacher') {
-        await AuthAPI.updateTeacherRole(formData.email);
+        await UserAPI.updateTeacherRole(formData.email);
         setSuccess('Role updated to Teacher successfully! Redirecting to login...');
       } else {
         setSuccess('Registration completed successfully! Redirecting to login...');

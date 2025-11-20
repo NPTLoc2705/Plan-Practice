@@ -686,9 +686,8 @@ const PackageManagement = () => {
   );
 };
 
-// Keep the modal components the same as before
+// Updated PackageModal with proper validation for negative numbers
 const PackageModal = ({ packageData, onClose, onSave }) => {
-  // ... same implementation as before
   const [formData, setFormData] = useState({
     name: packageData?.name || '',
     price: packageData?.price || '',
@@ -703,10 +702,89 @@ const PackageModal = ({ packageData, onClose, onSave }) => {
   const validateForm = () => {
     const newErrors = {};
     if (!formData.name.trim()) newErrors.name = 'Package name is required';
-    if (!formData.price || formData.price <= 0) newErrors.price = 'Valid price is required';
-    if (!formData.duration || formData.duration <= 0) newErrors.duration = 'Valid duration is required';
+    
+    // Enhanced price validation
+    if (formData.price === '' || formData.price === null || formData.price === undefined) {
+      newErrors.price = 'Price is required';
+    } else if (parseFloat(formData.price) < 0) {
+      newErrors.price = 'Price cannot be negative';
+    } else if (parseFloat(formData.price) === 0) {
+      // Optional: warn if price is 0
+      // newErrors.price = 'Price should be greater than 0';
+    }
+    
+    // Enhanced duration validation
+    if (!formData.duration || parseInt(formData.duration) < 1) {
+      newErrors.duration = 'Duration must be at least 1 day';
+    }
+    
+    // Enhanced coin amount validation
+    if (formData.coinAmount < 0) {
+      newErrors.coinAmount = 'Coin amount cannot be negative';
+    }
+    
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
+  };
+
+  // Handler for price input with validation
+  const handlePriceChange = (e) => {
+    const value = e.target.value;
+    
+    // Allow empty string for clearing the field
+    if (value === '') {
+      setFormData({...formData, price: ''});
+      return;
+    }
+    
+    // Parse the value and ensure it's not negative
+    const numValue = parseFloat(value);
+    if (!isNaN(numValue) && numValue >= 0) {
+      setFormData({...formData, price: value});
+    } else if (numValue < 0) {
+      // Set to 0 if negative value is entered
+      setFormData({...formData, price: '0'});
+    }
+  };
+
+  // Handler for coin amount input with validation
+  const handleCoinAmountChange = (e) => {
+    const value = e.target.value;
+    
+    // Allow empty string for clearing the field
+    if (value === '') {
+      setFormData({...formData, coinAmount: 0});
+      return;
+    }
+    
+    // Parse the value and ensure it's not negative
+    const numValue = parseInt(value);
+    if (!isNaN(numValue) && numValue >= 0) {
+      setFormData({...formData, coinAmount: value});
+    } else if (numValue < 0) {
+      // Set to 0 if negative value is entered
+      setFormData({...formData, coinAmount: 0});
+    }
+  };
+
+  // Handler for duration input with validation
+  const handleDurationChange = (e) => {
+    const value = e.target.value;
+    
+    // Allow empty string for clearing the field
+    if (value === '') {
+      setFormData({...formData, duration: ''});
+      return;
+    }
+    
+    // Parse the value and ensure it's at least 1
+    const numValue = parseInt(value);
+    if (!isNaN(numValue) && numValue >= 1) {
+      setFormData({...formData, duration: value});
+    } else if (numValue < 1) {
+      // Set to 1 if value less than 1 is entered
+      setFormData({...formData, duration: 1});
+    }
   };
 
   const handleSubmit = (e) => {
@@ -714,8 +792,8 @@ const PackageModal = ({ packageData, onClose, onSave }) => {
     if (validateForm()) {
       onSave({
         ...formData,
-        price: parseFloat(formData.price),
-        duration: parseInt(formData.duration),
+        price: parseFloat(formData.price) || 0,
+        duration: parseInt(formData.duration) || 1,
         coinAmount: parseInt(formData.coinAmount) || 0
       });
     }
@@ -748,6 +826,7 @@ const PackageModal = ({ packageData, onClose, onSave }) => {
                     errors.name ? 'border-red-500' : 'border-gray-300'
                   }`}
                   placeholder="e.g., Premium Package"
+                  maxLength={100}
                 />
                 {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
               </div>
@@ -756,17 +835,30 @@ const PackageModal = ({ packageData, onClose, onSave }) => {
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Price (VND) <span className="text-red-500">*</span>
                 </label>
-                <input
-                  type="number"
-                  step="1000"
-                  value={formData.price}
-                  onChange={(e) => setFormData({...formData, price: e.target.value})}
-                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 ${
-                    errors.price ? 'border-red-500' : 'border-gray-300'
-                  }`}
-                  placeholder="100000"
-                />
+                <div className="relative">
+                  <input
+                    type="number"
+                    step="1000"
+                    min="0"
+                    value={formData.price}
+                    onChange={handlePriceChange}
+                    onKeyDown={(e) => {
+                      // Prevent minus sign from being entered
+                      if (e.key === '-' || e.key === 'e') {
+                        e.preventDefault();
+                      }
+                    }}
+                    className={`w-full px-3 py-2 pr-16 border rounded-lg focus:ring-2 focus:ring-purple-500 ${
+                      errors.price ? 'border-red-500' : 'border-gray-300'
+                    }`}
+                    placeholder="100000"
+                  />
+                  <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm">
+                    VND
+                  </span>
+                </div>
                 {errors.price && <p className="text-red-500 text-xs mt-1">{errors.price}</p>}
+                <p className="text-gray-500 text-xs mt-1">Minimum: 0 VND</p>
               </div>
               
               <div>
@@ -775,14 +867,22 @@ const PackageModal = ({ packageData, onClose, onSave }) => {
                 </label>
                 <input
                   type="number"
+                  min="1"
                   value={formData.duration}
-                  onChange={(e) => setFormData({...formData, duration: e.target.value})}
+                  onChange={handleDurationChange}
+                  onKeyDown={(e) => {
+                    // Prevent minus sign from being entered
+                    if (e.key === '-' || e.key === 'e' || e.key === '.') {
+                      e.preventDefault();
+                    }
+                  }}
                   className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 ${
                     errors.duration ? 'border-red-500' : 'border-gray-300'
                   }`}
                   placeholder="30"
                 />
                 {errors.duration && <p className="text-red-500 text-xs mt-1">{errors.duration}</p>}
+                <p className="text-gray-500 text-xs mt-1">Minimum: 1 day</p>
               </div>
 
               <div>
@@ -793,12 +893,33 @@ const PackageModal = ({ packageData, onClose, onSave }) => {
                   <Coins className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                   <input
                     type="number"
+                    min="0"
                     value={formData.coinAmount}
-                    onChange={(e) => setFormData({...formData, coinAmount: e.target.value})}
-                    className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                    onChange={handleCoinAmountChange}
+                    onKeyDown={(e) => {
+                      // Prevent minus sign and decimal points from being entered
+                      if (e.key === '-' || e.key === 'e' || e.key === '.') {
+                        e.preventDefault();
+                      }
+                    }}
+                    onPaste={(e) => {
+                      // Prevent pasting negative numbers
+                      const paste = e.clipboardData.getData('text');
+                      if (paste.includes('-') || parseFloat(paste) < 0) {
+                        e.preventDefault();
+                      }
+                    }}
+                    className={`w-full pl-10 pr-16 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 ${
+                      errors.coinAmount ? 'border-red-500' : 'border-gray-300'
+                    }`}
                     placeholder="100"
                   />
+                  <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm">
+                    coins
+                  </span>
                 </div>
+                {errors.coinAmount && <p className="text-red-500 text-xs mt-1">{errors.coinAmount}</p>}
+                <p className="text-gray-500 text-xs mt-1">Minimum: 0 coins</p>
               </div>
             </div>
 
@@ -812,7 +933,11 @@ const PackageModal = ({ packageData, onClose, onSave }) => {
                 rows="4"
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
                 placeholder="Describe what this package offers..."
+                maxLength={500}
               />
+              <p className="text-gray-500 text-xs mt-1">
+                {formData.description.length}/500 characters
+              </p>
             </div>
 
             <div className="mb-6">
@@ -827,6 +952,36 @@ const PackageModal = ({ packageData, onClose, onSave }) => {
                   Package is active
                 </span>
               </label>
+            </div>
+
+            {/* Form Summary */}
+            <div className="bg-gray-50 rounded-lg p-4 mb-6">
+              <h4 className="text-sm font-semibold text-gray-700 mb-2">Package Summary:</h4>
+              <div className="grid grid-cols-2 gap-2 text-sm">
+                <div>
+                  <span className="text-gray-600">Price:</span>
+                  <span className="ml-2 font-medium">
+                    {formData.price ? new Intl.NumberFormat('vi-VN', {
+                      style: 'currency',
+                      currency: 'VND'
+                    }).format(formData.price) : '0 ₫'}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-gray-600">Duration:</span>
+                  <span className="ml-2 font-medium">{formData.duration || 0} days</span>
+                </div>
+                <div>
+                  <span className="text-gray-600">Coins:</span>
+                  <span className="ml-2 font-medium">{formData.coinAmount || 0} coins</span>
+                </div>
+                <div>
+                  <span className="text-gray-600">Status:</span>
+                  <span className={`ml-2 font-medium ${formData.isActive ? 'text-green-600' : 'text-red-600'}`}>
+                    {formData.isActive ? 'Active' : 'Inactive'}
+                  </span>
+                </div>
+              </div>
             </div>
             
             <div className="flex justify-end gap-3">
@@ -905,10 +1060,7 @@ const PackageDetailModal = ({ packageData, onClose }) => {
                 <p className="text-sm text-gray-600 mb-1">Price</p>
                 <p className="font-semibold text-gray-900">{formatCurrency(packageData.price)}</p>
               </div>
-              <div>
-                <p className="text-sm text-gray-600 mb-1">Duration</p>
-                <p className="font-semibold text-gray-900">{packageData.duration} days</p>
-              </div>
+              
               {packageData.coinAmount > 0 && (
                 <div>
                   <p className="text-sm text-gray-600 mb-1">Coin Amount</p>
@@ -918,12 +1070,7 @@ const PackageDetailModal = ({ packageData, onClose }) => {
                   </p>
                 </div>
               )}
-              <div>
-                <p className="text-sm text-gray-600 mb-1">Created Date</p>
-                <p className="font-semibold text-gray-900">
-                  {packageData.createdDate ? new Date(packageData.createdDate).toLocaleDateString() : 'N/A'}
-                </p>
-              </div>
+              
             </div>
 
             {/* Description */}

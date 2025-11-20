@@ -73,7 +73,6 @@ const RevenueManagement = () => {
   const tabs = [
     { id: 'overview', label: 'Revenue Overview', icon: BarChart3 },
     { id: 'transactions', label: 'Transaction History', icon: Receipt },
-    { id: 'analytics', label: 'Analytics', icon: Activity }
   ];
 
   // Lifecycle
@@ -753,17 +752,7 @@ const RevenueManagement = () => {
           )}
 
           {/* Analytics Tab */}
-          {activeTab === 'analytics' && (
-            <div className="space-y-6">
-              <div className="bg-white rounded-xl shadow-lg p-12 text-center">
-                <Activity className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-xl font-bold text-gray-900 mb-2">Advanced Analytics</h3>
-                <p className="text-gray-600 max-w-md mx-auto">
-                  Detailed analytics and insights will be available here. Track conversion rates, user behavior, and more.
-                </p>
-              </div>
-            </div>
-          )}
+          
         </>
       )}
 

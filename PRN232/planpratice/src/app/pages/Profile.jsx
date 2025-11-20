@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { AuthAPI } from '../components/APIService/AuthAPI';
+import { UserAPI } from '../components/APIService/UserAPI';
 import PaymentAPI from '../components/APIService/PaymentAPI';
 
 const Profile = () => {
@@ -78,7 +79,7 @@ const Profile = () => {
         return;
       }
 
-      const result = await AuthAPI.updateProfile(updateData);
+      const result = await UserAPI.updateProfile(updateData);
       setMessage(result.message || 'Profile updated successfully');
       const updatedUser = AuthAPI.getUser();
       setUser(updatedUser);
@@ -186,7 +187,6 @@ const Profile = () => {
               <span className="ml-1 text-gray-900">{user?.email || 'N/A'}</span>
             </div>
 
-
             <div className="bg-green-50 rounded-lg p-4">
               <span className="font-semibold text-gray-700">Role:</span>{' '}
               <span className="ml-1 text-gray-900 capitalize">{getRoleDisplay(user?.role)}</span>
@@ -258,13 +258,13 @@ const Profile = () => {
                           <td className="p-3 text-sm text-gray-900">
                             {formatDate(payment.createdAt || payment.paymentDate)}
                           </td>
-                         <td className="py-2 px-4 text-right">
-  {new Intl.NumberFormat('vi-VN', { 
-    style: 'currency', 
-    currency: 'VND', 
-    maximumFractionDigits: 0 
-  }).format(payment.amount || 0)}
-</td>
+                          <td className="py-2 px-4 text-right">
+                            {new Intl.NumberFormat('vi-VN', {
+                              style: 'currency',
+                              currency: 'VND',
+                              maximumFractionDigits: 0
+                            }).format(payment.amount || 0)}
+                          </td>
                           <td className="p-3">
                             <span className={getStatusBadge(payment.status)}>
                               {payment.status || 'Unknown'}

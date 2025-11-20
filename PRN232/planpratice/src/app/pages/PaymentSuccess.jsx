@@ -29,8 +29,7 @@ export default function PaymentSuccess() {
       try {
         setLoading(true);
         
-        // Option 1: Sync pending payments first (this will update all pending payments)
-        await PaymentAPI.syncPendingPayments();
+     
         
         // Option 2: Get payment history and find the matching payment
         const history = await PaymentAPI.getPaymentHistory();

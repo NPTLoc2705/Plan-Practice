@@ -18,7 +18,7 @@ class PaymentAPI {
       throw new Error('User not authenticated');
     }
 
-    const response = await fetch(`${API_BASE_URL}/create-coin-payment`, {
+    const response = await fetch(`${API_BASE_URL}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -125,61 +125,7 @@ class PaymentAPI {
     return result;
   }
 
-  /**
-   * Sync pending payments and auto-upgrade if successful
-   * @returns {Promise<object>} Sync result with upgrade count
-   */
-  static async syncPendingPayments() {
-    const token = localStorage.getItem('token');
-    
-    if (!token) {
-      throw new Error('User not authenticated');
-    }
-
-    const response = await fetch(`${API_BASE_URL}/sync-pending`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-      },
-    });
-
-    const result = await response.json();
-    
-    if (!response.ok) {
-      throw new Error(result.message || 'Failed to sync payments');
-    }
-    
-    return result;
-  }
-
-  /**
-   * Manually upgrade to VIP if payment exists
-   * @returns {Promise<object>} Upgrade result
-   */
-  static async upgradeToVip() {
-    const token = localStorage.getItem('token');
-    
-    if (!token) {
-      throw new Error('User not authenticated');
-    }
-
-    const response = await fetch(`${API_BASE_URL}/upgrade-to-vip`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-      },
-    });
-
-    const result = await response.json();
-    
-    if (!response.ok) {
-      throw new Error(result.message || 'Failed to upgrade to VIP');
-    }
-    
-    return result;
-  }
+ 
 }
 
 export default PaymentAPI;
