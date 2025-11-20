@@ -32,11 +32,11 @@ const TeacherDashboard = () => {
   };
 
   const handleUpdateLesson = (lessonId) => {
-    navigate(`LessonPlanner/edit/${lessonId}`);
+    navigate(`Lesson/planner/edit/${lessonId}`);
   };
 
   const handleViewLesson = (lessonId) => {
-    navigate(`LessonPlanner/${lessonId}/view`);
+    navigate(`Lesson/planner/${lessonId}/view`);
   };
 
   const handleCreateQuiz = () => {

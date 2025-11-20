@@ -46,7 +46,7 @@ import {
 // =================================================================
 // API CONFIGURATION
 // =================================================================
-const API_BASE_URL = 'https://localhost:7025/api';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 // =================================================================
 // API HELPER FUNCTIONS
@@ -571,7 +571,7 @@ export default function EditLesson() {
 
     try {
       const token = getAuthToken();
-      const result = await putToApi(`/LessonPlanner/${lessonId}`, updateRequest, token);
+      const result = await putToApi(`/Lesson/planner/${lessonId}`, updateRequest, token);
 
       if (result.success) {
         setMessage(`✅ Lesson updated successfully! Saving document version...`);

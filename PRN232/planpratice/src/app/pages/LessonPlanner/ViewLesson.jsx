@@ -39,7 +39,7 @@ const ViewLesson = () => {
         throw new Error('Authentication required. Please log in.');
       }
 
-      const response = await fetch(`${API_BASE_URL}/LessonPlanner/${id}`, {
+      const response = await fetch(`${API_BASE_URL}/Lesson/planner/${id}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
@@ -151,7 +151,7 @@ const ViewLesson = () => {
   };
 
   const handleEdit = () => {
-    navigate(`/teacher/LessonPlanner/edit/${id}`);
+    navigate(`/teacher/Lesson/planner/edit/${id}`);
   };
 
   const handleBack = () => {

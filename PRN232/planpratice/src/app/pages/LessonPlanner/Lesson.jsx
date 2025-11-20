@@ -572,7 +572,7 @@ export default function App() {
       };
 
       // Use postToApi which already handles the response
-      const result = await postToApi('/LessonPlanner/generate-ai', requestBody, token);
+      const result = await postToApi('/Lesson/planner/generate-ai', requestBody, token);
 
       if (result.success && result.data) {
         const generatedData = result.data;
