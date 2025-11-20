@@ -246,13 +246,7 @@ const UserManagement = () => {
             Refresh
           </button>
 
-          <button
-            onClick={() => setShowAddModal(true)}
-            className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg hover:from-green-600 hover:to-green-700 transition-all shadow-lg"
-          >
-            <UserPlus className="h-5 w-5" />
-            Add User
-          </button>
+         
         </div>
       </div>
 
@@ -639,10 +633,13 @@ const UserEditModal = ({ user, onClose, onUpdate }) => {
     const newErrors = {};
     
     // Username validation
-    if (!formData.username.trim()) {
+      if (!formData.username.trim()) {
       newErrors.username = 'Username is required';
     } else if (formData.username.trim().length < 3) {
       newErrors.username = 'Username must be at least 3 characters';
+    
+    } else if (formData.username.length > 50) {
+      newErrors.username = 'Username cannot exceed 50 characters';
     }
     
     // Phone validation (optional but if provided, must be valid)
@@ -681,7 +678,13 @@ const UserEditModal = ({ user, onClose, onUpdate }) => {
 
   const handleSubmit = () => {
     if (validateForm()) {
-      onUpdate(formData);
+      const payload = {
+        Username: formData.username,
+        Phone: formData.phone || null, 
+        Role: formData.role
+      };
+      
+      onUpdate(payload);
     }
   };
 

@@ -293,7 +293,7 @@ const DashboardOverview = () => {
       </div>
 
       {/* Welcome Banner */}
-      <div className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 rounded-2xl p-8 text-white mb-8 relative overflow-hidden">
+     <div className="bg-gradient-to-r from-green-500 to-cyan-600 rounded-2xl p-8 text-white mb-8 relative overflow-hidden">
         <div className="absolute top-0 right-0 -mt-10 -mr-10 h-40 w-40 rounded-full bg-white opacity-10"></div>
         <div className="absolute bottom-0 left-0 -mb-10 -ml-10 h-32 w-32 rounded-full bg-white opacity-10"></div>
         <div className="relative z-10">

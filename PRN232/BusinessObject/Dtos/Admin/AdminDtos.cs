@@ -36,7 +36,6 @@ namespace BusinessObject.Dtos.Admin
     {
         [MinLength(3, ErrorMessage = "Username must be at least 3 characters long")]
         [MaxLength(50, ErrorMessage = "Username cannot exceed 50 characters")]
-        [RegularExpression(@"^[a-zA-Z0-9_]+$", ErrorMessage = "Username can only contain letters, numbers, and underscores")]
         public string? Username { get; set; }
 
         [MaxLength(15, ErrorMessage = "Phone number cannot exceed 15 digits")]

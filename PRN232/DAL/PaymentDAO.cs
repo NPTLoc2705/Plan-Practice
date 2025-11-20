@@ -84,7 +84,8 @@ namespace DAL
         {
             return await _context.Payments
                 .Include(p => p.Package)
-                .Where(p => p.UserId == userId)
+                .Where(p => p.UserId == userId &&
+                            (p.Status.ToUpper() == "PAID" || p.Status.ToUpper() == "CANCELLED"))
                 .OrderByDescending(p => p.CreatedAt)
                 .ToListAsync();
         }

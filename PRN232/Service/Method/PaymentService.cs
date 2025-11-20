@@ -63,10 +63,17 @@ namespace Service.Method
                     shortDescription = shortDescription.Substring(0, 25);
                 }
                 // Generate unique order code (timestamp based)
-                long orderCode = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+                int timestamp = (int)DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+                int random = new Random().Next(100, 999);
+                long orderCode = long.Parse($"{timestamp}{random}");
 
-                // Create payment record in database first
-                var payment = await _paymentRepo.CreatePayment(
+                if (orderCode > int.MaxValue)
+                {
+                    orderCode = timestamp;
+                }
+
+                    // Create payment record in database first
+                    var payment = await _paymentRepo.CreatePayment(
                     userId: userId,
                     packageId: packageId,
                     orderCode: orderCode,
