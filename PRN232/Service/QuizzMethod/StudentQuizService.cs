@@ -57,7 +57,6 @@ namespace Service.QuizzMethod
             _statisticsStudentRepository = statisticsStudentRepository;
         }
 
-        // 1. Lấy danh sách quiz có thể làm
         public async Task<IEnumerable<QuizInfoDto>> GetAvailableQuizzesAsync(int userId)
         {
             var result = new List<QuizInfoDto>();
@@ -104,16 +103,14 @@ namespace Service.QuizzMethod
             catch (Exception ex)
             {
                 Console.WriteLine($"Error in GetAvailableQuizzesAsync: {ex}");
-                throw; // giữ nguyên để controller bắt và trả lỗi
+                throw; 
             }
 
             return result;
         }
 
-        // 2. Lấy quiz để làm bài
         public async Task<QuizDetailDto> GetQuizForTakingAsync(int quizId, int userId)
         {
-            // Sử dụng student repository
             var quiz = await _quizStudentRepository.GetQuizWithQuestionsAndAnswersAsync(quizId);
             if (quiz == null)
                 return null;
@@ -123,7 +120,6 @@ namespace Service.QuizzMethod
             var questionDtos = new List<QuestionDto>();
             foreach (var question in quiz.Questions)
             {
-                // Sử dụng student repository
                 var answers = await _answerStudentRepository.GetAnswersByQuestionIdAsync(question.Id);
                 questionDtos.Add(new QuestionDto
                 {
@@ -146,8 +142,6 @@ namespace Service.QuizzMethod
                 CurrentQuizResultId = inProgressResult?.Id
             };
         }
-
-        // 3. Submit quiz và tính điểm
         public async Task<QuizResultDto> SubmitQuizAsync(int userId, SubmitQuizDto dto)
         {
             var quiz = await _quizStudentRepository.GetQuizWithQuestionsAndAnswersAsync(dto.QuizId);
@@ -232,10 +226,6 @@ namespace Service.QuizzMethod
                 Details = details
             };
         }
-
-
-
-        // 5. Xem kết quả chi tiết
         public async Task<QuizResultDto> GetQuizResultAsync(int resultId, int userId)
         {
             var result = await _quizResultStudentRepository.GetQuizResultWithDetailsAsync(resultId);
@@ -324,13 +314,10 @@ namespace Service.QuizzMethod
             };
         }
 
-        // 8. Kiểm tra đã làm quiz chưa
         public async Task<bool> HasUserAttemptedQuizAsync(int userId, int quizId)
         {
             return await _quizResultStudentRepository.HasUserAttemptedQuizAsync(userId, quizId);
         }
-
-
 
         private decimal CalculatePercentage(int score, int total)
         {

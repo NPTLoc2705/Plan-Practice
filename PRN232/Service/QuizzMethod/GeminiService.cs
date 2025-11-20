@@ -52,52 +52,70 @@ namespace Service.QuizzMethod
 
         private string BuildPrompt(string lessonContent, int numberOfQuestions)
         {
-            return $@"
-Based on the following lesson content, especially focusing on section 'D. Procedures – Part 2: New Lesson',
-generate {numberOfQuestions} multiple-choice questions (MCQs) in ENGLISH.
+            return $$"""
+You are an expert English teacher creating a post-lesson quiz for students who have just finished this exact lesson.
+Your quiz MUST test the LANGUAGE and SKILLS that the students actually learnt and practised today — never test the lesson plan document itself.
 
-Lesson Content:
-{lessonContent}
+LESSON THAT THE STUDENTS JUST STUDIED:
+{{lessonContent}}
 
-Requirements:
-- Questions must be written entirely in English.
-- Focus mainly on the 'D. Procedures – Part 2: New Lesson' section and its related concepts or activities.
-- Each question must test understanding of the lesson content, grammar, vocabulary, or communicative context.
-- Each question should have **4 answer options** (A, B, C, D).
-- **Only ONE** correct answer per question.
-- Randomize the order of answers — the correct answer should not always be the first one.
-- Mix difficulty levels (easy, medium, difficult).
-- Do NOT include any explanations, comments, or markdown (no ```json, no text before/after).
-- Return ONLY the following pure JSON structure:
+STRICT RULES — BREAK ANY OF THESE → REFUSE AND RETURN ONLY THE ERROR JSON:
 
-{{
-  ""questions"": [
-    {{
-      ""content"": ""Question text in English?"",
-      ""answers"": [
-        {{
-          ""content"": ""Answer 1"",
-          ""isCorrect"": true
-        }},
-        {{
-          ""content"": ""Answer 2"",
-          ""isCorrect"": false
-        }},
-        {{
-          ""content"": ""Answer 3"",
-          ""isCorrect"": false
-        }},
-        {{
-          ""content"": ""Answer 4"",
-          ""isCorrect"": false
-        }}
+1. First silently check: the text above must be a real English lesson with real teaching content (vocabulary, grammar, skills practice, dialogues, texts, etc.).  
+   If it is too short (< 120 words), harmful, spam, or clearly not a real lesson → return ONLY:
+   {
+     "error": "CONTENT_INVALID",
+     "message": "Unable to generate quiz: The provided content is either insufficient, inappropriate, or not educational in nature."
+   }
+
+2. YOU ARE STRICTLY FORBIDDEN to create any question about:
+   • the structure or names of activities (Activity 1, Activity 2, Warm-up, Consolidation…)
+   • time allocation (how many minutes…)
+   • interaction patterns (T → Ss, pair work, individual…)
+   • teacher instructions or procedure steps
+   • the title of the unit or lesson
+   • anything that is ONLY in the lesson plan document but NOT actually taught to students as language
+
+   → If you catch yourself thinking of such a question like “What is the topic of Unit 6?” or “What does the teacher do in Activity 3?” → delete it immediately.
+
+3. ONLY create questions that test real student knowledge and ability to USE the language from today’s lesson, for example:
+   ✓ Meaning, spelling, pronunciation or use of new vocabulary/phrases
+   ✓ Correct grammar forms (Present Perfect Continuous, Future Perfect, etc.)
+   ✓ Choosing the correct expression in a real situation
+   ✓ Completing dialogues or sentences students practised
+   ✓ Understanding the listening/reading text they studied
+   ✓ Producing correct sentences with target structures
+
+4. Requirements:
+   • Generate maximum {{numberOfQuestions}} questions (or fewer if the lesson does not support that many strong application questions)
+   • Every question and every option 100% in English
+   • Exactly 4 choices (A, B, C, D) — exactly ONE is correct
+   • Correct answer in random position
+   • Difficulty mix: 30% easy, 50% medium, 20% difficult
+   • Distractors must be very plausible (common student mistakes or similar items from the same lesson)
+
+5. Output MUST be ONLY clean JSON (no markdown, no ```, no extra text whatsoever):
+
+{
+  "questions": [
+    {
+      "content": "Real question that tests what students actually learnt and can apply?",
+      "answers": [
+        { "content": "Option A", "isCorrect": false },
+        { "content": "Option B", "isCorrect": true },
+        { "content": "Option C", "isCorrect": false },
+        { "content": "Option D", "isCorrect": false }
       ]
-    }}
+    }
+    // ... more questions
   ]
-}}";
+}
+
+Now generate {{numberOfQuestions}} (or fewer) REAL application questions based ONLY on the language content, vocabulary, grammar, and skills that the students actually studied and practised in the lesson above.
+""";
         }
 
-        // ========== BỔ SUNG: PARSE VÀ VALIDATE AI RESPONSE ==========
+        // ========== PARSE RESPONSE ==========//
         private QuizGenerationResult ParseAndValidateQuizResponse(string text, int expectedQuestionCount)
         {
             if (string.IsNullOrEmpty(text))
@@ -105,6 +123,15 @@ Requirements:
 
             // Clean markdown code blocks
             text = CleanMarkdownCodeBlocks(text);
+
+            // Check for error response first
+            if (text.Contains("\"error\"") && text.Contains("\"CONTENT_INVALID\""))
+            {
+                throw new InvalidOperationException(
+                    "The provided lesson content is insufficient, inappropriate, or not educational. " +
+                    "Please provide valid educational content with sufficient detail to generate quiz questions."
+                );
+            }
 
             // Parse JSON
             QuizGenerationResult result;
@@ -125,7 +152,7 @@ Requirements:
                 );
             }
 
-            // Validate parsed result
+            // Validate parsed result - relaxed for content-based generation
             ValidateQuizGenerationResult(result, expectedQuestionCount);
 
             return result;
@@ -159,46 +186,52 @@ Requirements:
 
         private void ValidateQuizGenerationResult(QuizGenerationResult result, int expectedQuestionCount)
         {
-            // VALIDATION 1: Check null result
             if (result == null)
                 throw new InvalidOperationException("AI returned null result");
 
-            // VALIDATION 2: Check questions list exists
             if (result.Questions == null)
                 throw new InvalidOperationException("AI response does not contain 'questions' array");
 
-            // VALIDATION 3: Check questions list not empty
             if (!result.Questions.Any())
-                throw new InvalidOperationException("AI returned empty questions list");
+                throw new InvalidOperationException("AI returned empty questions list. The lesson content may be insufficient for quiz generation.");
 
-            // VALIDATION 4: Check questions count
+            // VALIDATION: Check questions count (more flexible for content-based generation)
             var actualCount = result.Questions.Count;
-            if (actualCount < expectedQuestionCount - 1) // Allow -1 tolerance
+
+            // Allow AI to generate fewer questions if content is limited
+            if (actualCount == 0)
             {
                 throw new InvalidOperationException(
-                    $"AI generated insufficient questions. Expected: {expectedQuestionCount}, Got: {actualCount}"
+                    "Could not generate any questions from the provided content. Please ensure the lesson contains sufficient educational material."
                 );
             }
-            if (actualCount > expectedQuestionCount)
+
+            // Warning instead of error if fewer questions generated
+            if (actualCount < expectedQuestionCount)
+            {
+              
+                // This allows the system to work with limited content
+                Console.WriteLine($"Warning: Generated {actualCount} questions instead of {expectedQuestionCount} due to content limitations.");
+            }
+
+            if (actualCount > expectedQuestionCount + 2) // Allow slight over-generation
             {
                 throw new InvalidOperationException(
                     $"AI generated too many questions. Expected: {expectedQuestionCount}, Got: {actualCount}"
                 );
             }
 
-            // VALIDATION 5: Validate each question
             for (int i = 0; i < result.Questions.Count; i++)
             {
                 ValidateQuestion(result.Questions[i], i + 1);
             }
 
-            // VALIDATION 6: Check for duplicate questions
             ValidateNoDuplicateQuestions(result.Questions);
         }
 
         private void ValidateQuestion(GeneratedQuestion question, int questionNumber)
         {
-            // Validate question content
+            // Validate content
             if (string.IsNullOrWhiteSpace(question.Content))
             {
                 throw new InvalidOperationException(

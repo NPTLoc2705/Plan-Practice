@@ -24,19 +24,25 @@ const TakeQuizWithOTP = () => {
   const [savedProgress, setSavedProgress] = useState(null);
 
   // Load saved progress on mount
-  useEffect(() => {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) {
-      try {
-        const data = JSON.parse(saved);
-        setSavedProgress(data);
-        setShowResumeDialog(true);
-      } catch (error) {
-        console.error('Error loading saved progress:', error);
+ useEffect(() => {
+  const saved = localStorage.getItem(STORAGE_KEY);
+  if (saved) {
+    try {
+      const data = JSON.parse(saved);
+
+      if (data.isSubmitted) {
         localStorage.removeItem(STORAGE_KEY);
+        return;
       }
+
+      setSavedProgress(data);
+      setShowResumeDialog(true);
+    } catch (error) {
+      console.error('Error loading saved progress:', error);
+      localStorage.removeItem(STORAGE_KEY);
     }
-  }, []);
+  }
+}, []);
 
   // Auto-save progress
   const saveProgress = useCallback(() => {
@@ -47,9 +53,10 @@ const TakeQuizWithOTP = () => {
         currentQuestionIndex,
         answers,
         timeSpent,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
+        isSubmitted: false
       };
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(progressData));
+localStorage.setItem(STORAGE_KEY, JSON.stringify(progressData));
       setLastSaved(new Date());
       setHasUnsavedChanges(false);
     }
@@ -172,41 +179,52 @@ const TakeQuizWithOTP = () => {
   };
 
   const handleSubmitQuiz = async () => {
-    const unansweredQuestions = quiz.questions.filter(q => !answers[q.id]);
+  const unansweredQuestions = quiz.questions.filter(q => !answers[q.id]);
 
-    if (unansweredQuestions.length > 0) {
-      if (!window.confirm(
-        `You have ${unansweredQuestions.length} unanswered question(s). Do you want to submit anyway?`
-      )) {
-        return;
-      }
+  if (unansweredQuestions.length > 0) {
+    if (!window.confirm(
+      `You have ${unansweredQuestions.length} unanswered question(s). Do you want to submit anyway?`
+    )) {
+      return;
     }
+  }
 
-    setIsSubmitting(true);
+  setIsSubmitting(true);
 
-    try {
-      const formattedAnswers = Object.entries(answers).map(([questionId, answerId]) => ({
-        questionId: parseInt(questionId),
-        answerId: parseInt(answerId)
-      }));
+  try {
+    const formattedAnswers = Object.entries(answers).map(([questionId, answerId]) => ({
+      questionId: parseInt(questionId),
+      answerId: parseInt(answerId)
+    }));
 
-      const quizData = QuizAPI.formatQuizData(quiz.id, formattedAnswers);
-      const response = await QuizAPI.submitQuiz(quizData);
+    const quizData = QuizAPI.formatQuizData(quiz.id, formattedAnswers);
+    const response = await QuizAPI.submitQuiz(quizData);
 
-      if (response.success) {
-        localStorage.removeItem(STORAGE_KEY);
-        alert('Quiz submitted successfully!');
-        setQuiz(null);
-        setOtpCode('');
-        setAnswers({});
-        setTimeSpent(0);
-      }
-    } catch (error) {
-      alert(error.message);
-    } finally {
-      setIsSubmitting(false);
+    if (response.success) {
+      // 1. XÓA SẠCH localStorage TRƯỚC KHI HIỆN ALERT
+      localStorage.removeItem(STORAGE_KEY);
+
+      // 2. Reset toàn bộ state về ban đầu
+      setQuiz(null);
+      setOtpCode('');
+      setAnswers({});
+      setCurrentQuestionIndex(0);
+      setTimeSpent(0);
+      setLastSaved(null);
+      setHasUnsavedChanges(false);
+
+      // 3. Dùng setTimeout để đảm bảo UI đã cập nhật xong mới alert
+      setTimeout(() => {
+        alert('Quiz submitted successfully! 🎉\nYou can now close this tab.');
+      }, 100);
     }
-  };
+  } catch (error) {
+    console.error('Submit error:', error);
+    alert('Submission failed: ' + error.message);
+  } finally {
+    setIsSubmitting(false);
+  }
+};
 
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60);

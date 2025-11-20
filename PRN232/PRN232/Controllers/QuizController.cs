@@ -151,6 +151,8 @@ namespace PRN232.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Teacher")]
+
         public async Task<ActionResult> DeleteQuiz(int id)
         {
             try
@@ -234,7 +236,7 @@ namespace PRN232.Controllers
 
         //============================================AI============================================//
 
-        [Authorize]
+        [Authorize(Roles = "Teacher")]
         [HttpPost("generate-with-ai")]
         public async Task<IActionResult> CreateQuizWithAI([FromBody] GenerateQuizDto dto)
         {
@@ -350,6 +352,15 @@ namespace PRN232.Controllers
                 catch (Exception ex)
                 {
                     await _coinService.RefundCoins(userId, AIGenerationCoinCost);
+                    if (ex.Message.Contains("UNAVAILABLE") || ex.Message.Contains("503"))
+                    {
+                        return StatusCode(503, new
+                        {
+                            success = false,
+                            message = "Quiz generation is temporarily unavailable. Please try again in a few minutes.",
+                            error = ex.Message
+                        });
+                    }
                     return StatusCode(500, new
                     {
                         success = false,

@@ -118,34 +118,34 @@ namespace PRN232.Controllers
         /// <summary>
         /// Get OTPs for a specific quiz
         /// </summary>
-        [HttpGet("quiz/{quizId}")]
-        [Authorize(Roles = "Teacher")]
-        [ProducesResponseType(typeof(IEnumerable<QuizOTPDto>), StatusCodes.Status200OK)]
-        public async Task<IActionResult> GetQuizOTPs(int quizId)
-        {
-            try
-            {
-                var teacherId = GetCurrentUserId();
-                var otps = await _otpService.GetQuizOTPsAsync(quizId, teacherId);
+        //[HttpGet("quiz/{quizId}")]
+        //[Authorize(Roles = "Teacher")]
+        //[ProducesResponseType(typeof(IEnumerable<QuizOTPDto>), StatusCodes.Status200OK)]
+        //public async Task<IActionResult> GetQuizOTPs(int quizId)
+        //{
+        //    try
+        //    {
+        //        var teacherId = GetCurrentUserId();
+        //        var otps = await _otpService.GetQuizOTPsAsync(quizId, teacherId);
 
-                return Ok(new
-                {
-                    success = true,
-                    data = otps,
-                    count = otps.Count(),
-                    message = $"OTPs for quiz {quizId} retrieved successfully"
-                });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"Error retrieving OTPs for quiz {quizId}");
-                return StatusCode(500, new
-                {
-                    success = false,
-                    message = "An error occurred while retrieving quiz OTPs"
-                });
-            }
-        }
+        //        return Ok(new
+        //        {
+        //            success = true,
+        //            data = otps,
+        //            count = otps.Count(),
+        //            message = $"OTPs for quiz {quizId} retrieved successfully"
+        //        });
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        _logger.LogError(ex, $"Error retrieving OTPs for quiz {quizId}");
+        //        return StatusCode(500, new
+        //        {
+        //            success = false,
+        //            message = "An error occurred while retrieving quiz OTPs"
+        //        });
+        //    }
+        //}
 
         /// <summary>
         /// Revoke/Deactivate an OTP
@@ -369,37 +369,7 @@ namespace PRN232.Controllers
             }
         }
 
-        // ===== ADMIN ENDPOINTS (Optional) =====
-
-        /// <summary>
-        /// Cleanup expired OTPs (Admin/System job)
-        /// </summary>
-        [HttpPost("cleanup")]
-        [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> CleanupExpiredOTPs()
-        {
-            try
-            {
-                var count = await _otpService.CleanupExpiredOTPsAsync();
-
-                _logger.LogInformation($"Cleaned up {count} expired OTPs");
-
-                return Ok(new
-                {
-                    success = true,
-                    message = $"Cleaned up {count} expired OTPs"
-                });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error cleaning up expired OTPs");
-                return StatusCode(500, new
-                {
-                    success = false,
-                    message = "An error occurred during cleanup"
-                });
-            }
-        }
+        
 
         // Helper method
         private int GetCurrentUserId()

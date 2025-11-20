@@ -54,37 +54,38 @@ export class QuizAPI {
 
     // 🟢 Lấy danh sách quiz của teacher hiện tại
     static async getTeacherQuizzes() {
-        try {
-            const response = await fetch(`${API_BASE_URL}/quiz/teacher/me`, {
-                method: 'GET',
-                headers: headers(),
-            });
+    try {
+        const response = await fetch(`${API_BASE_URL}/quiz/teacher/me`, {
+            method: 'GET',
+            headers: headers(),
+        });
 
-            if (!response.ok) {
-                const error = await response.json().catch(() => ({}));
-                throw new Error(error.message || 'Failed to fetch quizzes');
-            }
-
-            const result = await response.json();
-
-            // Transform the quiz data to match the component's expectations
-            if (result.success && Array.isArray(result.data)) {
-                return {
-                    success: true,
-                    data: result.data.map(quiz => ({
-                        ...quiz,
-                        totalQuestions: quiz.totalQuestion || 0 // Map from backend's totalQuestion to frontend's totalQuestions
-                    })),
-                    message: result.message
-                };
-            }
-
-            return result;
-        } catch (error) {
-            console.error('Error in getTeacherQuizzes:', error);
-            throw new Error('Failed to fetch quizzes');
+        if (!response.ok) {
+            const error = await response.json().catch(() => ({}));
+            throw new Error(error.message || 'Failed to fetch quizzes');
         }
+
+        const result = await response.json();
+
+        // Transform the quiz data to match the component's expectations
+        if (result.success && Array.isArray(result.data)) {
+            return {
+                success: true,
+                data: result.data.map(quiz => ({
+                    ...quiz,
+                    // Fix: Use capital T to match backend response
+                    totalQuestions: quiz.TotalQuestion || quiz.totalQuestion || 0
+                })),
+                message: result.message
+            };
+        }
+
+        return result;
+    } catch (error) {
+        console.error('Error in getTeacherQuizzes:', error);
+        throw new Error('Failed to fetch quizzes');
     }
+}
 
     // 🟢 Tạo quiz mới
     static async createQuiz(data) {

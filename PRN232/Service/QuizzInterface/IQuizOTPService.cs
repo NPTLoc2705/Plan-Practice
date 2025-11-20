@@ -24,5 +24,7 @@ namespace Service.QuizzInterface
         Task<int> CleanupExpiredOTPsAsync();
         Task<bool> ExtendOTPExpiryAsync(int otpId, int teacherId, int additionalMinutes);
         Task<QuizOTPDto> RegenerateOTPAsync(int otpId, int teacherId);
+        Task CleanupExpiredOtpsAsync();
+
     }
 }

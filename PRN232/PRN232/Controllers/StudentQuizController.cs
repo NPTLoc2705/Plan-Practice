@@ -137,11 +137,7 @@ namespace PRN232.Controllers
             }
         }
 
-        /// <summary>
-        /// Nộp bài làm quiz
-        /// </summary>
-        /// <param name="dto">Thông tin bài làm</param>
-        /// <returns>Kết quả làm quiz</returns>
+
         [HttpPost("submit")]
         [ProducesResponseType(typeof(QuizResultDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -195,11 +191,6 @@ namespace PRN232.Controllers
             }
         }
 
-        /// <summary>
-        /// Xem chi tiết kết quả làm quiz
-        /// </summary>
-        /// <param name="resultId">ID của kết quả</param>
-        /// <returns>Chi tiết kết quả</returns>
         [HttpGet("result/{resultId}")]
         [ProducesResponseType(typeof(QuizResultDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -240,10 +231,7 @@ namespace PRN232.Controllers
             }
         }
 
-        /// <summary>
-        /// Lấy lịch sử làm quiz của học sinh
-        /// </summary>
-        /// <returns>Danh sách lịch sử làm quiz</returns>
+
         [HttpGet("history")]
         [ProducesResponseType(typeof(IEnumerable<QuizHistoryDto>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -274,11 +262,6 @@ namespace PRN232.Controllers
             }
         }
 
-        /// <summary>
-        /// Lấy thống kê quiz của học sinh
-        /// </summary>
-        /// <param name="quizId">ID của quiz</param>
-        /// <returns>Thống kê quiz</returns>
         [HttpGet("{quizId}/statistics")]
         [ProducesResponseType(typeof(QuizStatisticsDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -319,10 +302,7 @@ namespace PRN232.Controllers
             }
         }
 
-        /// <summary>
-        /// Helper method để lấy UserId từ JWT token
-        /// </summary>
-        /// <returns>User ID</returns>
+
         private int GetCurrentUserId()
         {
             try

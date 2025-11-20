@@ -67,22 +67,22 @@ class QuizOTPAPI {
         return await this.parseResponse(response);
     }
 
-    static async getQuizOTPs(quizId) {
-        const response = await fetch(`${API_BASE_URL}/QuizOTP/quiz/${quizId}`, {
-            method: 'GET',
-            headers: this.getAuthHeaders()
-        });
+    // static async getQuizOTPs(quizId) {
+    //     const response = await fetch(`${API_BASE_URL}/QuizOTP/quiz/${quizId}`, {
+    //         method: 'GET',
+    //         headers: this.getAuthHeaders()
+    //     });
 
-        if (!response.ok) {
-            if (response.status === 401) {
-                this.handleUnauthorized();
-            }
-            const result = await this.parseResponse(response);
-            throw new Error(result.message || 'Failed to fetch quiz OTPs');
-        }
+    //     if (!response.ok) {
+    //         if (response.status === 401) {
+    //             this.handleUnauthorized();
+    //         }
+    //         const result = await this.parseResponse(response);
+    //         throw new Error(result.message || 'Failed to fetch quiz OTPs');
+    //     }
 
-        return await this.parseResponse(response);
-    }
+    //     return await this.parseResponse(response);
+    // }
 
     static async revokeOTP(otpId) {
         const response = await fetch(`${API_BASE_URL}/QuizOTP/${otpId}`, {
@@ -123,21 +123,34 @@ class QuizOTPAPI {
     }
 
     static async regenerateOTP(otpId) {
-        const response = await fetch(`${API_BASE_URL}/QuizOTP/${otpId}/regenerate`, {
-            method: 'POST',
-            headers: this.getAuthHeaders()
-        });
+    const response = await fetch(`${API_BASE_URL}/QuizOTP/${otpId}/regenerate`, {
+        method: 'POST',
+        headers: this.getAuthHeaders()
+    });
 
-        if (!response.ok) {
-            if (response.status === 401) {
-                this.handleUnauthorized();
-            }
-            const result = await this.parseResponse(response);
-            throw new Error(result.message || 'Failed to regenerate OTP');
+    if (!response.ok) {
+        if (response.status === 401) {
+            this.handleUnauthorized();
         }
-
-        return await this.parseResponse(response);
+        const result = await this.parseResponse(response);
+        throw new Error(result.message || 'Failed to regenerate OTP');
     }
+
+    const result = await this.parseResponse(response);
+    
+    // Normalize the response data
+    if (result.success && result.data) {
+        result.data = {
+            ...result.data,
+            otpCode: result.data.otpCode || result.data.OTPCode,
+            quizTitle: result.data.quizTitle || result.data.QuizTitle,
+            expiresAt: result.data.expiresAt || result.data.ExpiresAt,
+            maxUsage: result.data.maxUsage || result.data.MaxUsage
+        };
+    }
+    
+    return result;
+}
 
     static async getOTPAccessLogs(otpId) {
         const response = await fetch(`${API_BASE_URL}/QuizOTP/${otpId}/logs`, {

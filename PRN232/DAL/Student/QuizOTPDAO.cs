@@ -130,6 +130,15 @@ namespace DAL.Student
             }
             return await _context.SaveChangesAsync();
         }
+
+        public async Task DeleteExpiredOtpAsynce()
+        {
+            var now = DateTime.UtcNow;
+            var expire = _context.QuizOTPs.Where(q => q.ExpiresAt <= now);
+
+            _context.QuizOTPs.RemoveRange(expire);
+            await _context.SaveChangesAsync();
+        }
     }
 }
 

@@ -133,6 +133,8 @@ namespace PRN232
             builder.Services.AddScoped<UserAnswerStudentDAO>();
             //Quiz otp
             builder.Services.AddScoped<QuizOTPDAO>();
+            builder.Services.AddHostedService<QuizOtpCleanupService>();
+
 
             //Payment and Package
             builder.Services.AddScoped<PaymentDAO>();
