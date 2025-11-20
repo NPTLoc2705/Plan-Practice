@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 namespace API.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/Lesson/planner")]
     [Authorize]
     public class LessonPlannerController : ControllerBase
     {

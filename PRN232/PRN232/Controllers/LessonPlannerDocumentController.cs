@@ -12,7 +12,7 @@ using Service.Interface;
 namespace API.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/Lesson/document")]
     [Authorize]
     public class LessonPlannerDocumentController : ControllerBase
     {

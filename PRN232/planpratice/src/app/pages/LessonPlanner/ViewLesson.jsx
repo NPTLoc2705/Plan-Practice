@@ -71,7 +71,7 @@ const ViewLesson = () => {
       const token = localStorage.getItem('token');
       if (!token) return;
 
-      const response = await fetch(`${API_BASE_URL}/LessonPlannerDocument/lesson/${id}`, {
+      const response = await fetch(`${API_BASE_URL}/Lesson/document/lesson/${id}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
@@ -108,7 +108,7 @@ const ViewLesson = () => {
 
       console.log('Downloading document:', documentId, fileName);
 
-      const response = await fetch(`${API_BASE_URL}/LessonPlannerDocument/download/${documentId}`, {
+      const response = await fetch(`${API_BASE_URL}/Lesson/document/download/${documentId}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
         },

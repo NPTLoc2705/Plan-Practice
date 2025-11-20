@@ -8,7 +8,7 @@ using System.Security.Claims;
 namespace PRN232.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/Skill/template")]
     [Authorize]
     public class SkillTemplateController : ControllerBase
     {

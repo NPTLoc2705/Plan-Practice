@@ -8,7 +8,7 @@ using System.Security.Claims;
 namespace PRN232.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/Interaction/pattern")]
     [Authorize]
     public class InteractionPatternController : ControllerBase
     {

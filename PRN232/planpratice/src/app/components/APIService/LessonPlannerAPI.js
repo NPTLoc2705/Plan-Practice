@@ -10,7 +10,7 @@ export class LessonPlannerAPI {
     // Get lesson planners for the current user
     static async getMyLessonPlanners() {
         try {
-            const response = await fetch(`${API_BASE_URL}/lessonplanner/my-planners`, {
+            const response = await fetch(`${API_BASE_URL}/lesson/planner/my-planners`, {
                 method: 'GET',
                 headers: headers(),
             });
@@ -31,7 +31,7 @@ export class LessonPlannerAPI {
     // Get lesson planner by ID
     static async getLessonPlannerById(id) {
         try {
-            const response = await fetch(`${API_BASE_URL}/lessonplanner/${id}`, {
+            const response = await fetch(`${API_BASE_URL}/lesson/planner/${id}`, {
                 method: 'GET',
                 headers: headers(),
             });

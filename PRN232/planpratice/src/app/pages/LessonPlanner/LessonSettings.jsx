@@ -21,23 +21,9 @@ import {
   Loader2
 } from 'lucide-react';
 
-// =================================================================
-// LESSON SETTINGS MANAGEMENT PAGE
-// =================================================================
-// This page provides a unified interface to manage all lesson planner settings:
-// - Grade Levels (GET/POST/PUT/DELETE: /api/GradeLevel)
-// - Classes (GET/POST/PUT/DELETE: /api/Class)
-// - Objective Templates (GET/POST/PUT/DELETE: /api/ObjectiveTemplate)
-// - Skill Templates (GET/POST/PUT/DELETE: /api/SkillTemplate)
-// - Attitude Templates (GET/POST/PUT/DELETE: /api/AttitudeTemplate)
-// - Preparation Types (GET/POST/PUT/DELETE: /api/PreparationType)
-// - Language Focus Types (GET/POST/PUT/DELETE: /api/LanguageFocusType)
-// - Method Templates (GET/POST/PUT/DELETE: /api/MethodTemplate)
-// - Activity Templates (GET/POST/PUT/DELETE: /api/ActivityTemplate)
-// - Interaction Patterns (GET/POST/PUT/DELETE: /api/InteractionPattern)
-// =================================================================
 
-const API_BASE_URL = 'https://localhost:7025/api';
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 // API Helper Functions
 const getAuthToken = () => {
@@ -114,8 +100,8 @@ const SETTINGS_CONFIG = [
     key: 'gradeLevel',
     title: 'Grade Levels',
     icon: Layers,
-    endpoint: '/GradeLevel',
-    myEndpoint: '/GradeLevel/my-grade-levels',
+    endpoint: '/Grade',
+    myEndpoint: '/Grade/my-grade-levels',
     color: 'blue',
     fields: [
       { name: 'name', label: 'Grade Name', type: 'text', required: true, placeholder: 'e.g., Grade 6' },
@@ -139,8 +125,8 @@ const SETTINGS_CONFIG = [
     key: 'objective',
     title: 'Learning Objectives',
     icon: Target,
-    endpoint: '/ObjectiveTemplate',
-    myEndpoint: '/ObjectiveTemplate/my-templates',
+    endpoint: '/Objective/template',
+    myEndpoint: '/Objective/template/my-templates',
     color: 'red',
     fields: [
       { name: 'name', label: 'Objective Name', type: 'text', required: true, placeholder: 'e.g., Knowledge' },
@@ -151,8 +137,8 @@ const SETTINGS_CONFIG = [
     key: 'skill',
     title: 'Skills',
     icon: Brain,
-    endpoint: '/SkillTemplate',
-    myEndpoint: '/SkillTemplate/my-templates',
+    endpoint: '/Skill/template',
+    myEndpoint: '/Skill/template/my-templates',
     color: 'purple',
     fields: [
       { name: 'name', label: 'Skill Name', type: 'text', required: true, placeholder: 'e.g., Reading' },
@@ -163,8 +149,8 @@ const SETTINGS_CONFIG = [
     key: 'attitude',
     title: 'Attitudes',
     icon: Heart,
-    endpoint: '/AttitudeTemplate',
-    myEndpoint: '/AttitudeTemplate/my-templates',
+    endpoint: '/Attitude/template',
+    myEndpoint: '/Attitude/template/my-templates',
     color: 'pink',
     fields: [
       { name: 'name', label: 'Attitude Name', type: 'text', required: true, placeholder: 'e.g., Respect' },
@@ -175,8 +161,8 @@ const SETTINGS_CONFIG = [
     key: 'preparation',
     title: 'Preparation Types',
     icon: Book,
-    endpoint: '/PreparationType',
-    myEndpoint: '/PreparationType/my-types',
+    endpoint: '/Preparation',
+    myEndpoint: '/Preparation/my-types',
     color: 'yellow',
     fields: [
       { name: 'name', label: 'Type Name', type: 'text', required: true, placeholder: 'e.g., Materials' },
@@ -187,8 +173,8 @@ const SETTINGS_CONFIG = [
     key: 'languageFocus',
     title: 'Language Focus Types',
     icon: MessageSquare,
-    endpoint: '/LanguageFocusType',
-    myEndpoint: '/LanguageFocusType/my-types',
+    endpoint: '/Language',
+    myEndpoint: '/Language/my-types',
     color: 'indigo',
     fields: [
       { name: 'name', label: 'Type Name', type: 'text', required: true, placeholder: 'e.g., Vocabulary, Grammar' },
@@ -199,8 +185,8 @@ const SETTINGS_CONFIG = [
     key: 'method',
     title: 'Teaching Methods',
     icon: Lightbulb,
-    endpoint: '/MethodTemplate',
-    myEndpoint: '/MethodTemplate/my-templates',
+    endpoint: '/Method/template',
+    myEndpoint: '/Method/template/my-templates',
     color: 'orange',
     fields: [
       { name: 'name', label: 'Method Name', type: 'text', required: true, placeholder: 'e.g., Task-based learning' },
@@ -211,8 +197,8 @@ const SETTINGS_CONFIG = [
     key: 'activity',
     title: 'Activity Templates',
     icon: Activity,
-    endpoint: '/ActivityTemplate',
-    myEndpoint: '/ActivityTemplate/my-templates',
+    endpoint: '/Activity/template',
+    myEndpoint: '/Activity/template/my-templates',
     color: 'teal',
     fields: [
       { name: 'name', label: 'Activity Name', type: 'text', required: true, placeholder: 'e.g., Group Discussion' },
@@ -223,8 +209,8 @@ const SETTINGS_CONFIG = [
     key: 'interaction',
     title: 'Interaction Patterns',
     icon: Users,
-    endpoint: '/InteractionPattern',
-    myEndpoint: '/InteractionPattern/my-patterns',
+    endpoint: '/Interaction/pattern',
+    myEndpoint: '/Interaction/pattern/my-patterns',
     color: 'cyan',
     fields: [
       { name: 'name', label: 'Pattern Name', type: 'text', required: true, placeholder: 'e.g., Teacher to Students' },
@@ -259,7 +245,7 @@ export default function LessonSettings() {
     const loadGradeLevels = async () => {
       try {
         const token = getAuthToken();
-        const grades = await fetchFromApi('/GradeLevel/my-grade-levels', token);
+        const grades = await fetchFromApi('/Grade/my-grade-levels', token);
         setGradeLevels(grades);
       } catch (error) {
         console.error('Failed to load grade levels:', error);
@@ -329,7 +315,7 @@ export default function LessonSettings() {
 
       // If we just deleted a grade level, refresh grade levels for class dropdown
       if (activeTab === 'gradeLevel') {
-        const grades = await fetchFromApi('/GradeLevel/my-grade-levels', token);
+        const grades = await fetchFromApi('/Grade/my-grade-levels', token);
         setGradeLevels(grades);
       }
 
@@ -368,7 +354,7 @@ export default function LessonSettings() {
 
       // If we just created/updated a grade level, refresh grade levels for class dropdown
       if (activeTab === 'gradeLevel') {
-        const grades = await fetchFromApi('/GradeLevel/my-grade-levels', token);
+        const grades = await fetchFromApi('/Grade/my-grade-levels', token);
         setGradeLevels(grades);
       }
 

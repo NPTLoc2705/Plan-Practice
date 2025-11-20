@@ -161,17 +161,17 @@ export default function EditLesson() {
           activityTempsData,
           lessonToEdit
         ] = await Promise.all([
-          fetchFromApi('/GradeLevel/my-grade-levels', token),
-          fetchFromApi('/InteractionPattern/my-patterns', token),
-          fetchFromApi('/AttitudeTemplate/my-templates', token),
-          fetchFromApi('/ObjectiveTemplate/my-templates', token),
-          fetchFromApi('/PreparationType/my-types', token),
-          fetchFromApi('/SkillTemplate/my-templates', token),
-          fetchFromApi('/LanguageFocusType/my-types', token),
+          fetchFromApi('/Grade/my-grade-levels', token),
+          fetchFromApi('/Interaction/pattern/my-patterns', token),
+          fetchFromApi('/Attitude/template/my-templates', token),
+          fetchFromApi('/Objective/template/my-templates', token),
+          fetchFromApi('/Preparation/my-types', token),
+          fetchFromApi('/Skill/template/my-templates', token),
+          fetchFromApi('/Language/my-types', token),
           fetchFromApi('/Class/my-classes', token),
-          fetchFromApi('/MethodTemplate/my-templates', token),
-          fetchFromApi('/ActivityTemplate/my-templates', token),
-          fetchFromApi(`/LessonPlanner/${lessonId}`, token)
+          fetchFromApi('/Method/template/my-templates', token),
+          fetchFromApi('/Activity/template/my-templates', token),
+          fetchFromApi(`/Lesson/planner/${lessonId}`, token)
         ]);
 
         // 1. Set all template states
@@ -602,7 +602,7 @@ export default function EditLesson() {
       formData.append('file', blob, filename);
       formData.append('lessonPlannerId', lessonId);
 
-      const uploadResponse = await fetch(`${API_BASE_URL}/LessonPlanner/upload-document`, {
+      const uploadResponse = await fetch(`${API_BASE_URL}/Lesson/planner/upload-document`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -656,7 +656,7 @@ export default function EditLesson() {
       formData.append('lessonPlannerId', lessonId);
 
       const token = getAuthToken();
-      const uploadResponse = await fetch(`${API_BASE_URL}/LessonPlanner/upload-document`, {
+      const uploadResponse = await fetch(`${API_BASE_URL}/Lesson/planner/upload-document`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

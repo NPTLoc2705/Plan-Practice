@@ -41,26 +41,11 @@ import {
   CheckCircle2,
   Layers,
 } from 'lucide-react';// =================================================================
-// LESSON PLANNER WITH FULL API INTEGRATION
-// =================================================================
-// This component integrates with the following backend APIs:
-// - GET /api/GradeLevel/my-grade-levels
-// - GET /api/Class/my-classes
-// - GET /api/InteractionPattern/my-patterns
-// - GET /api/AttitudeTemplate/my-templates
-// - GET /api/ObjectiveTemplate/my-templates
-// - GET /api/PreparationType/my-types
-// - GET /api/SkillTemplate/my-templates
-// - GET /api/LanguageFocusType/my-types
-// - GET /api/LessonPlanner/my-planners
-// - GET /api/MethodTemplate/my-templates
-// - GET /api/ActivityTemplate/my-templates
-// - POST /api/LessonPlanner (create new lesson plan)
-// =================================================================
+
 
 // =================================================================
 // API CONFIGURATION
-const API_BASE_URL = 'https://localhost:7025/api';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 // =================================================================
 
 // =================================================================
@@ -742,7 +727,7 @@ export default function App() {
     const fetchCoinBalance = async () => {
       try {
         const token = getAuthToken();
-        const response = await fetch(`${API_BASE_URL}/LessonPlanner/coin-balance`, {
+        const response = await fetch(`${API_BASE_URL}/Lesson/planner/coin-balance`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         const result = await response.json();
@@ -776,16 +761,16 @@ export default function App() {
           methods,
           activityTemps
         ] = await Promise.all([
-          fetchFromApi('/GradeLevel/my-grade-levels', token),
-          fetchFromApi('/InteractionPattern/my-patterns', token),
-          fetchFromApi('/AttitudeTemplate/my-templates', token),
-          fetchFromApi('/ObjectiveTemplate/my-templates', token),
-          fetchFromApi('/PreparationType/my-types', token),
-          fetchFromApi('/SkillTemplate/my-templates', token),
-          fetchFromApi('/LanguageFocusType/my-types', token),
+          fetchFromApi('/Grade/my-grade-levels', token),
+          fetchFromApi('/Interaction/pattern/my-patterns', token),
+          fetchFromApi('/Attitude/template/my-templates', token),
+          fetchFromApi('/Objective/template/my-templates', token),
+          fetchFromApi('/Preparation/my-types', token),
+          fetchFromApi('/Skill/template/my-templates', token),
+          fetchFromApi('/Language/my-types', token),
           fetchFromApi('/Class/my-classes', token),
-          fetchFromApi('/MethodTemplate/my-templates', token),
-          fetchFromApi('/ActivityTemplate/my-templates', token)
+          fetchFromApi('/Method/template/my-templates', token),
+          fetchFromApi('/Activity/template/my-templates', token)
         ]);
 
         // Update all states with live data
@@ -1146,7 +1131,7 @@ export default function App() {
         formData.append('lessonPlannerId', savedLessonId);
 
         const token = getAuthToken();
-        const uploadResponse = await fetch(`${API_BASE_URL}/LessonPlanner/upload-document`, {
+        const uploadResponse = await fetch(`${API_BASE_URL}/Lesson/planner/upload-document`, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${token}`,

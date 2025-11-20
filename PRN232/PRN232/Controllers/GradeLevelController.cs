@@ -7,7 +7,7 @@ using System.Security.Claims;
 namespace PRN232.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/Grade")]
     [Authorize]
     public class GradeLevelController : ControllerBase
     {
