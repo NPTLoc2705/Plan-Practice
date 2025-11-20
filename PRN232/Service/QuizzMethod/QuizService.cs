@@ -201,12 +201,14 @@ namespace Service.QuizzMethod
             }
             catch (Exception ex)
             {
+
                 // Handle other AI errors
                 throw new Exception(
                     $"Failed to generate quiz using AI: {ex.Message}",
                     ex
                 );
             }
+            
 
             // ========== PHASE 2: BUILD QUIZ ENTITY ==========
 

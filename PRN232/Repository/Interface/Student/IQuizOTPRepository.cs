@@ -24,5 +24,7 @@ namespace Repository.Interface.Student
         Task<QuizOTP> GetActiveOTPByCodeAsync(string otpCode);
         Task<IEnumerable<QuizOTP>> GetExpiredOTPsAsync();
         Task<int> DeactivateExpiredOTPsAsync();
+        Task DeleteExpiredOtpsAsync();
+
     }
 }

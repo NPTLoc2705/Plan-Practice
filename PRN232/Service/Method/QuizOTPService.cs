@@ -270,6 +270,11 @@ namespace Service.Method
             return await GenerateOTPAsync(oldOTP.QuizId, teacherId, dto);
         }
 
+        public async Task CleanupExpiredOtpsAsync()
+        {
+            await _otpRepository.DeleteExpiredOtpsAsync();
+        }
+
         private string GenerateRandomOTP()
         {
             const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";

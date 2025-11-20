@@ -17,6 +17,7 @@ const TeacherOTPManager = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [generateSuccess, setGenerateSuccess] = useState(null);
   const [generateError, setGenerateError] = useState('');
+const [showRegeneratedOTP, setShowRegeneratedOTP] = useState(null);
 
   // Manage OTP states
   const [myOTPs, setMyOTPs] = useState([]);
@@ -128,21 +129,56 @@ const TeacherOTPManager = () => {
     }
   };
 
-  const handleRegenerateOTP = async (otpId) => {
+  // Update the handleRegenerateOTP function to properly show the new OTP
+const handleRegenerateOTP = async (otpId) => {
     if (!window.confirm('Generate a new OTP with the same settings?')) {
-      return;
+        return;
     }
 
     try {
-      const response = await QuizOTPAPI.regenerateOTP(otpId);
-      if (response.success) {
-        alert(`New OTP generated: ${response.data.otpCode}`);
-        fetchMyOTPs();
-      }
+        const response = await QuizOTPAPI.regenerateOTP(otpId);
+        if (response.success) {
+            // Show the new OTP in a modal
+            setShowRegeneratedOTP(response.data);
+            
+            // Copy to clipboard automatically
+            await QuizOTPAPI.copyToClipboard(response.data.otpCode || response.data.OTPCode);
+            
+            // Refresh the list
+            fetchMyOTPs();
+        }
     } catch (error) {
-      alert(error.message);
+        alert(error.message);
     }
-  };
+};
+
+// Alternative: If you want to keep it in the manage tab, update the state differently
+const handleRegenerateOTPAlternative = async (otpId) => {
+    if (!window.confirm('Generate a new OTP with the same settings?')) {
+        return;
+    }
+
+    try {
+        const response = await QuizOTPAPI.regenerateOTP(otpId);
+        if (response.success) {
+            // Create a modal or a better UI to show the new OTP
+            const newOTPCode = response.data.otpCode || response.data.OTPCode;
+            
+            // Show in a more user-friendly way
+            const message = `New OTP Generated!\n\nOTP Code: ${newOTPCode}\n\nThe OTP has been copied to your clipboard.`;
+            
+            // Copy to clipboard
+            await QuizOTPAPI.copyToClipboard(newOTPCode);
+            
+            alert(message);
+            
+            // Refresh the list to show the new OTP
+            await fetchMyOTPs();
+        }
+    } catch (error) {
+        alert(error.message);
+    }
+};
 
   const handleViewLogs = async (otpId) => {
     try {
@@ -305,12 +341,7 @@ const TeacherOTPManager = () => {
                     <p><strong>Max Usage:</strong> {generateSuccess.maxUsage}</p>
                   )}
                 </div>
-                <button
-                  onClick={() => setGenerateSuccess(null)}
-                  className={styles.btnSecondary}
-                >
-                  Generate Another
-                </button>
+                
               </div>
             )}
           </div>
@@ -458,6 +489,47 @@ const TeacherOTPManager = () => {
           </div>
         </div>
       )}
+
+      {showRegeneratedOTP && (
+    <div className={styles.modal} onClick={() => setShowRegeneratedOTP(null)}>
+        <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.modalHeader}>
+                <h2>New OTP Generated</h2>
+                <button
+                    onClick={() => setShowRegeneratedOTP(null)}
+                    className={styles.btnClose}
+                >
+                    ✕
+                </button>
+            </div>
+            <div className={styles.modalBody}>
+                <div className={styles.successCard}>
+                    <div className={styles.otpDisplay}>
+                        <span className={styles.otpCode}>
+                            {showRegeneratedOTP.otpCode || showRegeneratedOTP.OTPCode}
+                        </span>
+                        <button
+                            onClick={() => copyToClipboard(showRegeneratedOTP.otpCode || showRegeneratedOTP.OTPCode)}
+                            className={styles.btnCopy}
+                        >
+                            Copy
+                        </button>
+                    </div>
+                    <p className={styles.successMessage}>
+                        ✓ OTP has been copied to clipboard
+                    </p>
+                    <div className={styles.otpDetails}>
+                        <p><strong>Quiz:</strong> {showRegeneratedOTP.quizTitle || showRegeneratedOTP.QuizTitle}</p>
+                        <p><strong>Expires:</strong> {formatDate(showRegeneratedOTP.expiresAt || showRegeneratedOTP.ExpiresAt)}</p>
+                        {(showRegeneratedOTP.maxUsage || showRegeneratedOTP.MaxUsage) && (
+                            <p><strong>Max Usage:</strong> {showRegeneratedOTP.maxUsage || showRegeneratedOTP.MaxUsage}</p>
+                        )}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+)}
     </div>
   );
 };
