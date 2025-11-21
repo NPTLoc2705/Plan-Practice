@@ -167,7 +167,7 @@ const Register = () => {
               {step === 3 ? 'Choose Your Role' : 'Create Account'}
             </h2>
             <p className="text-gray-500 text-sm">
-              {step === 1 && 'Join our IELTS learning platform'}
+              {step === 1 && 'Join our platform'}
               {step === 2 && 'Verify your email address'}
               {step === 3 && 'Select how you\'d like to use our platform'}
             </p>

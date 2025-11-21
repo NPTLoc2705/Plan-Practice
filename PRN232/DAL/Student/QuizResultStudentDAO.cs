@@ -58,7 +58,7 @@ namespace DAL.Student
         {
             return await _context.QuizResults
                 .Include(r => r.Quiz)
-                .Where(r => r.UserId == userId && r.Score > 0)
+                .Where(r => r.UserId == userId && r.Score != null)
                 .OrderByDescending(r => r.CompletedAt)
                 .ToListAsync();
         }

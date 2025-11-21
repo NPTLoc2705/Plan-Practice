@@ -313,13 +313,7 @@ const DashboardOverview = () => {
               <p className="text-white/80 text-sm mb-1">Today's Revenue</p>
               <p className="text-2xl font-bold">{formatCurrency(stats.todayRevenue)}</p>
             </div>
-            <div className="bg-white/20 backdrop-blur-sm rounded-xl p-4">
-              <p className="text-white/80 text-sm mb-1">Growth Rate</p>
-              <p className="text-2xl font-bold flex items-center gap-2">
-                <TrendingUp className="h-5 w-5" />
-                {stats.growthRate}%
-              </p>
-            </div>
+           
           </div>
         </div>
       </div>

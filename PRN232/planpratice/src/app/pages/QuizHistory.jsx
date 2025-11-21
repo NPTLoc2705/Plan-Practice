@@ -55,9 +55,7 @@ if (error) return <div className={styles.error}>{error}</div>
       {history.length === 0 ? (
         <div className={styles.noHistory}>
           <p>You haven't taken any quizzes yet.</p>
-          <button onClick={() => navigate('/quizzes')} className={styles.btnPrimary}>
-            Browse Quizzes
-          </button>
+            
         </div>
       ) : (
         <>

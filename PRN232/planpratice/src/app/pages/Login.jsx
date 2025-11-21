@@ -51,7 +51,6 @@ const Login = () => {
               <LogIn className="w-8 h-8 text-blue-600" />
             </div>
             <h2 className="text-2xl font-bold text-gray-900">Welcome Back</h2>
-            <p className="text-gray-500 text-sm">Sign in to your IELTS learning platform</p>
           </div>
 
           {error && (

@@ -180,17 +180,17 @@ const handleRegenerateOTPAlternative = async (otpId) => {
     }
 };
 
-  const handleViewLogs = async (otpId) => {
-    try {
-      const response = await QuizOTPAPI.getOTPAccessLogs(otpId);
-      if (response.success) {
-        setAccessLogs(response.data);
-        setShowLogsModal(true);
-      }
-    } catch (error) {
-      alert(error.message);
-    }
-  };
+  // const handleViewLogs = async (otpId) => {
+  //   try {
+  //     const response = await QuizOTPAPI.getOTPAccessLogs(otpId);
+  //     if (response.success) {
+  //       setAccessLogs(response.data);
+  //       setShowLogsModal(true);
+  //     }
+  //   } catch (error) {
+  //     alert(error.message);
+  //   }
+  // };
 
   const copyToClipboard = async (text) => {
     const success = await QuizOTPAPI.copyToClipboard(text);
@@ -248,7 +248,7 @@ const handleRegenerateOTPAlternative = async (otpId) => {
                   <option value="">Choose a quiz...</option>
                   {quizzes.map((quiz) => (
     <option key={quiz.id} value={quiz.id}>
-        {quiz.title} ({quiz.totalQuestions} questions)
+        {quiz.title}
     </option>
 ))}
                 </select>
@@ -409,13 +409,13 @@ const handleRegenerateOTPAlternative = async (otpId) => {
                   </div>
 
                   <div className={styles.otpActions}>
-                    <button
+                    {/* <button
                       onClick={() => handleViewLogs(otp.id)}
                       className={styles.btnAction}
                       title="View Access Logs"
                     >
                       📊 Logs
-                    </button>
+                    </button> */}
                     {otp.isActive && !isExpired(otp.expiresAt) && (
                       <>
                         <button
@@ -462,7 +462,7 @@ const handleRegenerateOTPAlternative = async (otpId) => {
                 ✕
               </button>
             </div>
-            <div className={styles.modalBody}>
+            {/* <div className={styles.modalBody}>
               {accessLogs.length === 0 ? (
                 <p className={styles.emptyLogs}>No access logs yet</p>
               ) : (
@@ -485,7 +485,7 @@ const handleRegenerateOTPAlternative = async (otpId) => {
                   </table>
                 </div>
               )}
-            </div>
+            </div> */}
           </div>
         </div>
       )}

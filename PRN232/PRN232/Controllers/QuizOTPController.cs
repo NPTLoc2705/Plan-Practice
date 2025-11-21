@@ -7,7 +7,7 @@ using System.Security.Claims;
 
 namespace PRN232.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/quiz-otps")]
     [ApiController]
     [Authorize]
     public class QuizOTPController : ControllerBase
@@ -26,7 +26,7 @@ namespace PRN232.Controllers
         /// <summary>
         /// Generate OTP for a quiz (Teacher only)
         /// </summary>
-        [HttpPost("generate")]
+        [HttpPost]
         [Authorize(Roles = "Teacher")]
         [ProducesResponseType(typeof(QuizOTPDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -86,7 +86,7 @@ namespace PRN232.Controllers
         /// <summary>
         /// Get all OTPs created by the teacher
         /// </summary>
-        [HttpGet("my-otps")]
+        [HttpGet("my")]
         [Authorize(Roles = "Teacher")]
         [ProducesResponseType(typeof(IEnumerable<QuizOTPDto>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetMyOTPs()
@@ -332,7 +332,7 @@ namespace PRN232.Controllers
         /// <summary>
         /// Get quiz by OTP for taking (Student only)
         /// </summary>
-        [HttpGet("take/{otpCode}")]
+        [HttpGet("{otpCode}/quiz")]
        // [Authorize(Roles = "Student")]
         [ProducesResponseType(typeof(QuizDetailDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
