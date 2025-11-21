@@ -18,24 +18,35 @@ const HeaderBar = () => {
   const [loadingCoins, setLoadingCoins] = useState(true);
   const dropdownRef = useRef(null);
 
+  const fetchCoinBalance = async () => {
+    if (isAuthenticated) {
+      try {
+        setLoadingCoins(true);
+        const balance = await UserAPI.getCoinBalance();
+        setCoinBalance(balance);
+      } catch (error) {
+        console.error('Failed to fetch coin balance:', error);
+        setCoinBalance(0);
+      } finally {
+        setLoadingCoins(false);
+      }
+    }
+  };
+
   // Fetch coin balance when component mounts (only for authenticated users)
   useEffect(() => {
-    const fetchCoinBalance = async () => {
-      if (isAuthenticated) {
-        try {
-          setLoadingCoins(true);
-          const balance = await UserAPI.getCoinBalance();
-          setCoinBalance(balance);
-        } catch (error) {
-          console.error('Failed to fetch coin balance:', error);
-          setCoinBalance(0);
-        } finally {
-          setLoadingCoins(false);
-        }
-      }
+    fetchCoinBalance();
+
+    // Listen for coin balance update events
+    const handleBalanceUpdate = () => {
+      fetchCoinBalance();
     };
 
-    fetchCoinBalance();
+    window.addEventListener('refreshCoinBalance', handleBalanceUpdate);
+
+    return () => {
+      window.removeEventListener('refreshCoinBalance', handleBalanceUpdate);
+    };
   }, [isAuthenticated]);
 
   const handleProfileClick = (e) => {
@@ -72,8 +83,8 @@ const HeaderBar = () => {
     if (isTeacher) {
       links.push(
         { path: '/teacher', label: 'Dashboard', roles: ['teacher'] },
-        { path: '/teacher/LessonPlanner', label: 'Lesson Planner', roles: ['teacher'] },
-        { path: '/teacher/LessonPlanner/settings', label: 'Settings', roles: ['teacher'] },
+        { path: '/teacher/Lesson/planner', label: 'Lesson Planner', roles: ['teacher'] },
+        { path: '/teacher/Lesson/planner/settings', label: 'Settings', roles: ['teacher'] },
         { path: '/teacher/quiz', label: 'Quiz Management', roles: ['teacher'] },
         { path: '/teacher/otp-manager', label: 'OTP Manager', roles: ['teacher'] },
       );

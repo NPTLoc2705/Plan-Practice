@@ -238,7 +238,6 @@ const TeacherDashboard = () => {
               <div className="lg:col-span-2 bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
                 <div className="flex items-center justify-between mb-6">
                   <h3 className="text-lg font-semibold text-gray-900">Recent Activity</h3>
-                  <button className="text-sm text-indigo-600 hover:text-indigo-700 font-medium">View all</button>
                 </div>
                 <div className="space-y-4">
                   {dashboardData.recentLessons?.slice(0, 3).map((lesson) => (

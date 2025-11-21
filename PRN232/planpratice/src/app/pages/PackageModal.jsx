@@ -1,4 +1,5 @@
 // src/components/PackageModal.jsx
+import { Coins } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import PackageAPI from '../components/APIService/PackageAPI';
 import PaymentAPI from '../components/APIService/PaymentAPI';
@@ -204,12 +205,12 @@ export default function PackageModal({ isOpen, onClose }) {
                 </div>
 
                 {/* Coin Amount */}
-                <div className="inline-flex items-center gap-2 bg-white rounded-full px-4 py-2 mb-4">
-                  <span className="text-2xl">💰</span>
-                  <span className="font-semibold text-gray-900">
-                    {selectedPackage.coinAmount?.toLocaleString() || 0} Coins
-                  </span>
-                </div>
+<div className="inline-flex items-center gap-2 bg-white rounded-full px-4 py-2 mb-4">
+  <Coins className="h-6 w-6 text-yellow-500" />
+  <span className="font-semibold text-gray-900">
+    {selectedPackage.coinAmount?.toLocaleString() || 0} Coins
+  </span>
+</div>
 
                 {/* Description */}
                 {selectedPackage.description && (

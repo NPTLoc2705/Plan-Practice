@@ -39,7 +39,7 @@ export const TeacherRoutes = function () {
                 }
             />
             <Route
-                path="LessonPlanner"
+                path="Lesson/planner"
                 element={
                     <TeacherProtectedRoute>
                         <LessonPlanGenerator />
@@ -47,7 +47,7 @@ export const TeacherRoutes = function () {
                 }
             />
             <Route
-                path="LessonPlanner/edit/:id"
+                path="Lesson/planner/edit/:id"
                 element={
                     <TeacherProtectedRoute>
                         <EditLesson />
@@ -55,7 +55,7 @@ export const TeacherRoutes = function () {
                 }
             />
             <Route
-                path="LessonPlanner/:id/view"
+                path="Lesson/planner/:id/view"
                 element={
                     <TeacherProtectedRoute>
                         <ViewLesson />
@@ -63,7 +63,7 @@ export const TeacherRoutes = function () {
                 }
             />
             <Route
-                path="LessonPlanner/settings"
+                path="Lesson/planner/settings"
                 element={
                     <TeacherProtectedRoute>
                         <LessonSettings />

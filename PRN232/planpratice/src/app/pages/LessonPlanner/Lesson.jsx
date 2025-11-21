@@ -1072,7 +1072,7 @@ export default function App() {
         }))
       };
 
-      const result = await postToApi('/LessonPlanner', saveRequest, token);
+      const result = await postToApi('/Lesson/planner', saveRequest, token);
 
       if (result.success) {
         setSavedLessonId(result.data.id);

@@ -106,6 +106,9 @@ const QuizManagement = () => {
             if (response.success && response.data) {
                 setDeleteSuccess(`✨ Successfully generated quiz with ${response.data.questionsCount || aiQuestionCount} questions!`);
                 
+                // Dispatch event to refresh coin balance in header
+                window.dispatchEvent(new Event('refreshCoinBalance'));
+
                 const updatedQuizzes = await QuizAPI.getQuizzesByLessonPlannerId(selectedLessonPlanner.id);
                 setQuizzes(updatedQuizzes);
 
@@ -397,22 +400,6 @@ const QuizManagement = () => {
                                 </div>
                                 <p className="text-2xl font-bold text-gray-900">{stats.total}</p>
                                 <p className="text-xs text-gray-500 mt-1">All time</p>
-                            </div>
-                            <div className="bg-white rounded-xl border border-gray-200 p-4">
-                                <div className="flex items-center justify-between mb-2">
-                                    <span className="text-gray-600 text-sm">Total Questions</span>
-                                    <BarChart3 className="w-5 h-5 text-green-600" />
-                                </div>
-                                <p className="text-2xl font-bold text-gray-900">{stats.totalQuestions}</p>
-                                <p className="text-xs text-gray-500 mt-1">Across all quizzes</p>
-                            </div>
-                            <div className="bg-white rounded-xl border border-gray-200 p-4">
-                                <div className="flex items-center justify-between mb-2">
-                                    <span className="text-gray-600 text-sm">Average Questions</span>
-                                    <Trophy className="w-5 h-5 text-yellow-600" />
-                                </div>
-                                <p className="text-2xl font-bold text-gray-900">{stats.avgQuestions}</p>
-                                <p className="text-xs text-gray-500 mt-1">Per quiz</p>
                             </div>
                             <div className="bg-white rounded-xl border border-gray-200 p-4">
                                 <div className="flex items-center justify-between mb-2">
