@@ -339,23 +339,26 @@ const QuizManagement = () => {
                             </div>
 
                             {/* Action Buttons */}
-                            <button
-                                onClick={() => setShowAIModal(true)}
-                                disabled={!selectedLessonPlanner || aiLoading}
-                                className="px-5 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-lg hover:from-purple-700 hover:to-indigo-700 transition-all flex items-center gap-2 font-medium shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                                {aiLoading ? (
-                                    <>
-                                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                                        Generating...
-                                    </>
-                                ) : (
-                                    <>
-                                        <Sparkles className="w-4 h-4" />
-                                        AI Generate
-                                    </>
-                                )}
-                            </button>
+                           <button
+    onClick={() => setShowAIModal(true)}
+    disabled={!selectedLessonPlanner || aiLoading}
+    className="px-5 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-lg hover:from-purple-700 hover:to-indigo-700 transition-all flex items-center gap-2 font-medium shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+>
+    {aiLoading ? (
+        <>
+            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+            Generating...
+        </>
+    ) : (
+        <>
+            <Sparkles className="w-4 h-4" />
+            AI Generate
+            <span className="ml-1 px-2 py-0.5 bg-white/20 rounded text-xs font-semibold">
+                50 coins
+            </span>
+        </>
+    )}
+</button>
                             <button
                                 onClick={handleCreate}
                                 disabled={!selectedLessonPlanner}
